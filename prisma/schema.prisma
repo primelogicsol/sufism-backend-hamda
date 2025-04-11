@@ -1,0 +1,30 @@
+generator client {
+  provider        = "prisma-client-js"
+  // previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model RateLimiterFlexible {
+  key    String    @id @default(cuid())
+  points Int
+  expire DateTime?
+}
+
+model User {
+  id         String         @id @default(cuid())
+  fullName       String
+  email          String        @unique
+  password       String?
+  avatar         String?        @default("https://via.placeholder.com/70x70")
+  OTP            String?        @unique
+  OTP_EXPIRES_IN DateTime?
+  isVerified     Boolean        @default(false)
+  tokenVersion   Int            @default(0)
+  createdAt      DateTime       @default(now())
+
+  @@map("users")
+}

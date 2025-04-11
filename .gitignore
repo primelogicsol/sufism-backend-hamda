@@ -1,0 +1,9 @@
+.env
+node_modules/
+node_modules/*
+pnpm-error.log
+dist/
+logs/*
+logs
+prisma/sufism.db
+types/
