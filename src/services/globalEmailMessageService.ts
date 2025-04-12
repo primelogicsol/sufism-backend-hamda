@@ -8,7 +8,7 @@ import logger from "../utils/loggerUtils.js";
 import { replaceAllPlaceholders } from "../utils/replaceAllPlaceholders.js";
 import { generateRandomStrings } from "../utils/slugStringGeneratorUtils.js";
 const transporter = nodemailer.createTransport({
-  host:SMTP_HOST,
+  host: SMTP_HOST,
   port: SMTP_PORT,
   secure: true,
   auth: {

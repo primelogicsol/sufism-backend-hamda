@@ -1,6 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { ENV } from "../configs/config.js";
+import type { NextFunction, Request, Response } from "express";
 interface CustomError extends Error {
   success?: boolean;
   status?: number;
@@ -12,7 +11,7 @@ export const notFoundHandler = (req: Request, __: Response, next: NextFunction) 
   next(error);
 };
 
-export const errorHandler = (error: CustomError, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (error: CustomError, _req: Request, res: Response, next: NextFunction) => {
   const errObject = {
     success: false,
     statusCode: error.status || 500,
@@ -21,12 +20,12 @@ export const errorHandler = (error: CustomError, req: Request, res: Response, ne
         ? "something went wrong while working with prisma!!"
         : error.message + "!!" || "internal server error!!",
     data: null,
-    requestInfo: {
-      url: req.originalUrl,
-      method: req.method,
-      ...(ENV !== "production" && { ip: req?.ip }) // Only add `ip` if not in production
-    },
-    ...(ENV !== "production" && { stack: error.stack ? error.stack : "No stack has been sent" }) // Only add `ip` if not in production
+    // requestInfo: {
+    //   url: req.originalUrl,
+    //   method: req.method,
+    //   ...(ENV !== "production" && { ip: req?.ip }) // Only add `ip` if not in production
+    // },
+    //...(ENV !== "production" && { stack: error.stack ? error.stack : "No stack has been sent" }) // Only add `ip` if not in production
   };
   res
     .status(error.status || 500)

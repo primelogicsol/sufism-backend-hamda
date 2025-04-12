@@ -42,17 +42,21 @@ export const userLoginSchema = z.object({
     .max(100, { message: "password can be at most 100 characters long." })
 });
 
+// ** Google login
+export const verifyGoogleLoginSchema = z.object({
+  email: z
+    .string({ message: "Email is required!!" })
+    .min(1, { message: "Email is required!!" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
+  fullName: z.string({ message: "fullName is required!!" }).min(1, { message: "fullName is required!!" })
+});
+
 // ** verify user schema
 export const verifyUserSchema = z.object({
   email: z
     .string({ message: "Email is required!!" })
     .min(1, { message: "Email is required!!" })
     .email({ message: "Invalid email format. e.g: john.doe@example.com" })
-  // OTP: z
-  //   .string({ message: "OTP is required!!" })
-  //   .min(1, { message: "OTP is required!!" })
-  //   .min(6, { message: "OTP must be at least 6 characters long." })
-  //   .max(6, { message: "OTP can be at most 6 characters long." })
 });
 
 export const sendOTPSchema = z.object({
@@ -148,7 +152,6 @@ export const sendMessagaeToUserSchema = z.object({
   message: z.string({ message: "message is required!!" }).min(1, { message: "message is required!!" })
 });
 
-
 // **** forgot password schema
 export const forgotPasswordRequestFromUserSchema = z.object({
   email: z
@@ -175,8 +178,6 @@ export const updateForgotPasswordSchema = z.object({
     .min(6, { message: "newPassword must be at least 6 characters long." })
     .max(50, { message: "newPassword can be at most 50 characters long." })
 });
-
-
 
 // ** Blog post schema
 

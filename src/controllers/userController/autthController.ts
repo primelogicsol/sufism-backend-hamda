@@ -1,7 +1,7 @@
 import reshttp from "reshttp";
 import constant from "../../constants/constant.js";
 
-import type { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { FRONTEND_APP_URL } from "../../configs/config.js";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -44,8 +44,7 @@ export default {
     }
 
     httpResponse(req, res, reshttp.createdCode, reshttp.createdMessage, {
-      email: body.email,
-      message: "Please check your email for account verification"
+      email: body.email
     });
   }),
 
@@ -73,7 +72,7 @@ export default {
       data: { isVerified: true, OTP: null, OTP_EXPIRES_IN: null, tokenVersion: { increment: 1 } }
     });
     const { accessToken, refreshToken } = setTokensAndCookies(verifiedUser, res, true);
-    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { message: "Account Verified Successfully", accessToken, refreshToken });
+    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { accessToken, refreshToken });
   }),
   // ** login user through password after the verification of his/her account
   login: asyncHandler(async (req, res) => {
@@ -81,7 +80,7 @@ export default {
 
     const user = await db.user.findUnique({ where: { email: body.email } });
     if (!user) {
-      httpResponse(req, res, 404, "User not found");
+      httpResponse(req, res, reshttp.notFoundCode, "User not found");
     }
 
     const isPasswordValid = await verifyPassword(body.password!, user!.password || "", res);
@@ -99,7 +98,7 @@ export default {
       httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
     }
     const { accessToken, refreshToken } = setTokensAndCookies(user!, res, true);
-    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { message: "login was successfull", accessToken, refreshToken });
+    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { accessToken, refreshToken });
   }),
   // ** RefreshAccessToken
   refreshAccessToken: asyncHandler(async (req: _Request, res) => {
@@ -157,7 +156,7 @@ export default {
       "Account Verification request",
       `Hi, ${user.fullName}`
     );
-    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { message: "Please verify your account using the link sent to your email" });
+    httpResponse(req, res, reshttp.okCode, "Please verify your account using the link sent to your email");
   }),
   // ** Logout user and clear cookie
   logout: asyncHandler(async (req: _Request, res) => {
@@ -166,8 +165,47 @@ export default {
       .clearCookie("refreshToken", constant.COOKIEOPTIONS.REFRESHTOKENCOOKIEOPTIONS)
       .clearCookie("accessToken", constant.COOKIEOPTIONS.ACESSTOKENCOOKIEOPTIONS);
     await db.user.update({ where: { id: userID }, data: { tokenVersion: { increment: 1 } } });
-    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { message: "Logout was successfull" });
+    httpResponse(req, res, reshttp.okCode, reshttp.okMessage);
   }),
 
-  
+  // social login
+  googleAuth: asyncHandler(async (req, res) => {
+    const body = req.body as User;
+
+    let user = await db.user.findUnique({ where: { email: body.email } });
+
+    if (!user) {
+      user = await db.user.create({
+        data: {
+          fullName: body.fullName,
+          email: body.email,
+          isVerified: true,
+          authProvider: "google",
+          password: null
+        }
+      });
+
+      logger.info(`New user created via Google Auth: ${body.email}`);
+    } else {
+      if (user.authProvider === "credentials" && !user.isVerified) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, "Email verification required");
+      }
+
+      if (user.isVerified && user.authProvider !== "google") {
+        user = await db.user.update({
+          where: { email: body.email },
+          data: {
+            authProvider: "google"
+          }
+        });
+      }
+    }
+
+    const { accessToken, refreshToken } = setTokensAndCookies(user, res, true);
+
+    httpResponse(req, res, reshttp.okCode, "Google login successful", {
+      accessToken,
+      refreshToken
+    });
+  })
 };
