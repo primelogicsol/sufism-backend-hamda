@@ -45,7 +45,6 @@ export default {
     }
 
     req.userFromToken = decoded;
-
     return next();
   })
 };

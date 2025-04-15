@@ -188,6 +188,7 @@ export default {
       logger.info(`New user created via Google Auth: ${body.email}`);
     } else {
       if (user.authProvider === "credentials" && !user.isVerified) {
+        // email send
         return httpResponse(req, res, reshttp.unauthorizedCode, "Email verification required");
       }
 
@@ -202,7 +203,7 @@ export default {
     }
 
     const { accessToken, refreshToken } = setTokensAndCookies(user, res, true);
-
+    logger.info("Google login successful");
     httpResponse(req, res, reshttp.okCode, "Google login successful", {
       accessToken,
       refreshToken

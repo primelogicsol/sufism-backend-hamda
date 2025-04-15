@@ -66,6 +66,12 @@ export const sendOTPSchema = z.object({
     .email({ message: "Invalid email format. e.g: john.doe@example.com" })
 });
 
+export const membershipSchema = z.object({
+  country: z.string({ message: "Country is required" }),
+  roles: z.string({ message: "Membership role is required" }),
+  agreedToPrinciples: z.boolean({ message: "Agreed to principle is required" })
+});
+
 export const userUpdateSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
   fullName: z
@@ -120,7 +126,7 @@ export const getSingleUserSChema = z.object({
       message: "Username can only contain lowercase letters, numbers, underscores, and periods. e.g: user123"
     })
 });
-/*                                                       Contact US Schema                                                               */
+/*   Contact US Schema                                                               */
 
 export const contactUsSchema = z.object({
   firstName: z
