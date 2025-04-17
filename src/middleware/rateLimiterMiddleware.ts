@@ -18,7 +18,7 @@ export class RateLimiterMiddleware {
 
   public async handle(req: Request, res: Response, next: NextFunction, consumptionPoints = 1, message?: string, totalPoints?: number, duration = 60) {
     try {
-      if (ENV === "development") return next(); // TODO: replace ! with = for production
+      if (ENV === "development") return next();
 
       // **  Initialize or reinitialize rate limiter only if totalPoints or duration have changed
       if (!this.rateLimiter || this.currentTotalPoints !== totalPoints || this.currentDuration !== duration) {

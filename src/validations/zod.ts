@@ -67,6 +67,8 @@ export const sendOTPSchema = z.object({
 });
 
 export const membershipSchema = z.object({
+  fullname: z.string({ message: "FullName is required" }),
+  email: z.string({ message: "Email is required" }),
   country: z.string({ message: "Country is required" }),
   roles: z.string({ message: "Membership role is required" }),
   agreedToPrinciples: z.boolean({ message: "Agreed to principle is required" })
