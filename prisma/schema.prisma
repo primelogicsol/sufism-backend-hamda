@@ -46,7 +46,7 @@ model Member {
   phone     String?
   country   String
 
-  roles     String[]
+  role    String[]//todo: add role 
   
   volunteerSupport String[] @default([""])
   previousVolunteerExp String?

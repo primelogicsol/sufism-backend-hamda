@@ -9,4 +9,4 @@ export const userRouter: Router = Router();
 userRouter.route("/membership").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), userController.membership);
 userRouter.route("/membership").patch(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), userController.membershipUpdate);
 userRouter.route("/membership").delete(authMiddleware.checkToken, userController.membershipDelete);
-userRouter.route("/membership").get(authMiddleware.checkToken,userController.viewMembership);
+userRouter.route("/membership").get(authMiddleware.checkToken, userController.viewMembership);

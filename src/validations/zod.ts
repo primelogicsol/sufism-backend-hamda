@@ -51,7 +51,7 @@ export const verifyGoogleLoginSchema = z.object({
   fullName: z.string({ message: "fullName is required!!" }).min(1, { message: "fullName is required!!" })
 });
 
-// ** verify user schema
+// ** verify resend schema
 export const verifyUserSchema = z.object({
   email: z
     .string({ message: "Email is required!!" })
@@ -59,19 +59,55 @@ export const verifyUserSchema = z.object({
     .email({ message: "Invalid email format. e.g: john.doe@example.com" })
 });
 
-export const sendOTPSchema = z.object({
+export const verifyOTPSchema = z.object({
   email: z
     .string({ message: "Email is required!!" })
     .min(1, { message: "Email is required!!" })
-    .email({ message: "Invalid email format. e.g: john.doe@example.com" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
+    OTP:z.string({message:"OTP is required"})
 });
 
+
 export const membershipSchema = z.object({
-  fullname: z.string({ message: "FullName is required" }),
-  email: z.string({ message: "Email is required" }),
+  phone: z.string({ message: "Phone number is required" })
+         .min(5, { message: "Phone number must be at least 5 characters" }),
+  
   country: z.string({ message: "Country is required" }),
-  roles: z.string({ message: "Membership role is required" }),
-  agreedToPrinciples: z.boolean({ message: "Agreed to principle is required" })
+  
+  agreedToPrinciples: z.boolean({ 
+    message: "You must agree to the principles" 
+  }),
+  
+  // Array validation for roles
+  role: z.array(
+    z.enum(["volunteer", "donor", "collaborator"], {
+      message: "Invalid role type"
+    })
+  ).nonempty({
+    message: "At least one role is required"
+  }),
+  
+  // Optional array fields with proper validation
+  collaboratorIntent: z.array(
+    z.enum(["institutional", "cultural", "interfaithDialogue", "programCorrelation"])
+  ).optional(),
+  
+  donorType: z.array(
+    z.enum(["onetime", "monthly", "sponsor", "tools", "remainAnonymous", "receiveUpdates"])
+  ).optional(),
+  
+  volunteerSupport: z.array(
+    z.enum(["spiritualProgram", "communityOutreach", "culturalPreservation", "digitalMedia", "craftsmanship"])
+  ).optional(),
+  
+  // Other fields
+  consentedToUpdates: z.boolean().optional().default(false),
+  additionalInfo: z.string().optional(),
+  intentCreation: z.string().optional(),
+  monthlyTime: z.string().optional(),
+  organization: z.string().optional(),
+  previousVolunteerExp: z.string().optional(),
+  volunteerMode: z.string().optional()
 });
 
 export const userUpdateSchema = z.object({
@@ -172,14 +208,23 @@ export const forgotPasswordRequestFromUserSchema = z.object({
       message: "Invalid email format. e.g: john.doe@example.com"
     })
 });
-export const verifyForgotPasswordRequestSchema = z.object({
-  OTP: z
-    .string({ message: "OTP is required!!" })
-    .min(1, { message: "OTP is required!!" })
-    .min(6, { message: "OTP must be at least 6 characters long." })
-    .max(6, { message: "OTP can be at most 6 characters long." })
-});
+// export const verifyForgotPasswordRequestSchema = z.object({
+//   OTP: z
+//     .string({ message: "OTP is required!!" })
+//     .min(1, { message: "OTP is required!!" })
+//     .min(6, { message: "OTP must be at least 6 characters long." })
+//     .max(6, { message: "OTP can be at most 6 characters long." })
+// });
 export const updateForgotPasswordSchema = z.object({
+  email: z
+  .string({ message: "email is required!!" })
+  .min(1, { message: "email is required!!" })
+  .min(3, { message: "email must be at least 3 characters long." })
+  .max(150, { message: "email can be at most 150 characters long." })
+  .email({ message: "Invalid email format. e.g: john.doe@example.com" })
+  .regex(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, {
+    message: "Invalid email format. e.g: john.doe@example.com"
+  }),
   newPassword: z
     .string({ message: "newPassword is required!!" })
     .min(1, { message: "newPassword is required!!" })

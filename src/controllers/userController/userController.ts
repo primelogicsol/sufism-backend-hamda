@@ -1,14 +1,14 @@
-import type { Member } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
+import type { TMEMBERSHIP } from "../../types/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
 
 export default {
   membership: asyncHandler(async (req: _Request, res) => {
-    const data = req.body as Member;
+    const data = req.body as TMEMBERSHIP;
 
     const user = await db.user.findFirst({
       where: {
@@ -46,12 +46,12 @@ export default {
         monthlyTime: data.monthlyTime,
         organization: data.organization,
         previousVolunteerExp: data.previousVolunteerExp,
-        roles: data.roles,
+        role: data.role,
         volunteerMode: data.volunteerMode,
         volunteerSupport: data.volunteerSupport
       }
     });
-
+    logger.info("Membership created");
     return httpResponse(req, res, reshttp.createdCode, "Membership created", member);
   }),
   viewMembership: asyncHandler(async (req: _Request, res) => {
@@ -77,7 +77,7 @@ export default {
     return httpResponse(req, res, reshttp.acceptedCode, "Membership fetched", member);
   }),
   membershipUpdate: asyncHandler(async (req: _Request, res) => {
-    const data = req.body as Partial<Member>;
+    const data = req.body as Partial<TMEMBERSHIP>;
 
     const user = await db.user.findFirst({
       where: {
@@ -115,7 +115,7 @@ export default {
         monthlyTime: data.monthlyTime ?? existingMember.monthlyTime,
         organization: data.organization ?? existingMember.organization,
         previousVolunteerExp: data.previousVolunteerExp ?? existingMember.previousVolunteerExp,
-        roles: data.roles ?? existingMember.roles,
+        role: data.role ?? existingMember.role,
         volunteerMode: data.volunteerMode ?? existingMember.volunteerMode,
         volunteerSupport: data.volunteerSupport ?? existingMember.volunteerSupport
       }
