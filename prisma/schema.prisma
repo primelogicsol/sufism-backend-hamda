@@ -31,9 +31,12 @@ model User {
   tokenVersion   Int            @default(0)
   authProvider   AuthProvider @default(credentials)
   member     Member?  
+  donation Donation?
   createdAt      DateTime       @default(now())
 
   @@map("users")
+   Review Review[]
+  Product Product[]
 }
 
 
@@ -51,7 +54,7 @@ model Member {
   volunteerSupport String[] @default([""])
   previousVolunteerExp String?
   monthlyTime String?
-  volunteerMode   VolunteeringMode @default(IN_PERSON)
+  volunteerMode VolunteeringMode @default(IN_PERSON)
 
   donorType   String[] @default([""])
 
@@ -65,11 +68,75 @@ model Member {
   createdAt DateTime @default(now())
   @@map("members")
 }
-
+model Donation {
+  id        Int   @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  amount String
+  pool   TPOOL[] @default([SUFI_SCIENCE_CENTER])
+  donorType   DONATIONTYPE @default(ONE_TIME)
+  createdAt DateTime @default(now())
+  @@map("donations")
+}
 
 
 enum VolunteeringMode {
   IN_PERSON
   REMOTE
   HYBRID
+}
+enum DONATIONTYPE {
+  ONE_TIME
+  MONTHLY
+  GENERAL_DONATIONS
+  SPONSORSHIP_DONATIONS
+  PATRON_MEMBERSHIP_CONTRIBUTIONS
+  EDUCATIONAL_SCHOLARSHIP_DONATIONS
+  LEGACY_PLANNED_GIVING
+  RECURRING
+}
+// enum CATEGORY{
+//   JWELERY_&_ACCESSPORIES
+//   ART_WALL_CONTROL\
+//   HOME&WALLDECOR
+//   FASION&UPRAISEL
+  
+
+// }
+enum TPOOL {
+  SUFI_SCIENCE_CENTER
+  SPONSOR_SCHOLAR
+  PRESERVE_ART_AND_CRAFT
+  SPONSOR_EVENTS
+
+}
+model Product {
+  id          Int      @id @default(autoincrement())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  
+  title       String   @default("")
+  description String   @default("")
+  price       Float
+  stock       Int      @default(0)
+  category    DONATIONTYPE @default(ONE_TIME)
+  image      String
+  sku         String   @unique
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reviews     Review[]
+  @@map("products")
+}
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String
+  productId Int
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  @@map("reviews")
 }

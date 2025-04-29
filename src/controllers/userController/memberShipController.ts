@@ -9,7 +9,8 @@ import logger from "../../utils/loggerUtils.js";
 export default {
   membership: asyncHandler(async (req: _Request, res) => {
     const data = req.body as TMEMBERSHIP;
-
+    logger.info(data.collaboratorIntent);
+    logger.info("*****************************")
     const user = await db.user.findFirst({
       where: {
         id: req.userFromToken?.id
@@ -21,7 +22,7 @@ export default {
     }
     const existingMember = await db.member.findFirst({
       where: {
-        userId: user.id // Assuming `userId` is the foreign key in your member table
+        userId: user.id
       }
     });
     if (existingMember) {
@@ -33,8 +34,6 @@ export default {
         user: {
           connect: { id: user.id }
         },
-        // email:data.email,
-        // fullName:data.fullName,
         phone: data.phone,
         country: data.country,
         agreedToPrinciples: data.agreedToPrinciples,
@@ -69,14 +68,14 @@ export default {
       }
     });
     if (!member) {
-      logger.info("Membership not fount");
+      logger.info("Membership not found");
       return httpResponse(req, res, reshttp.notFoundCode, "Membership not found");
     }
     logger.info("Membership fetched");
     logger.info(member);
     return httpResponse(req, res, reshttp.acceptedCode, "Membership fetched", member);
   }),
-  membershipUpdate: asyncHandler(async (req: _Request, res) => {
+  updateMembership: asyncHandler(async (req: _Request, res) => {
     const data = req.body as Partial<TMEMBERSHIP>;
 
     const user = await db.user.findFirst({
@@ -123,7 +122,7 @@ export default {
 
     return httpResponse(req, res, reshttp.okCode, "Membership updated", updatedMember);
   }),
-  membershipDelete: asyncHandler(async (req: _Request, res) => {
+  deleteMembership: asyncHandler(async (req: _Request, res) => {
     const user = await db.user.findFirst({
       where: {
         id: req.userFromToken?.id
