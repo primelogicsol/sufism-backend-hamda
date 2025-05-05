@@ -49,12 +49,10 @@ export default {
   // ** Verify User Account through OTP
   verifyAccount: asyncHandler(async (req, res) => {
     const { email, OTP } = req.body as User;
-    
-    // Find user
-    const user = await db.user.findUnique({ 
-        where: { email } 
+    const user = await db.user.findUnique({
+      where: { email }
     });
-    
+
     if (!user) {
         logger.warn(`OTP verification attempt for non-existent email: ${email}`);
         return httpResponse(req, res, reshttp.notFoundCode, "User not found");
@@ -183,8 +181,8 @@ export default {
       "Account Verification request",
       `Hi, ${user.fullName}`
     );
-    
-    httpResponse(req, res, reshttp.okCode, "Please verify your account using the link sent to your email");
+
+    httpResponse(req, res, reshttp.okCode, "OTP sent to your email");
   }),
   // ** Logout user and clear cookie
   logout: asyncHandler(async (req: _Request, res) => {

@@ -28,6 +28,6 @@ export default tseslint.config({
     "prefer-const": ["error", { ignoreReadBeforeAssign: true }],
     "@typescript-eslint/only-throw-error": "off",
     "prefer-arrow-callback": ["error"],
-    camelcase: ["error", { properties: "always" }]
+    camelcase: ["error", { properties: "always", allow: ["required_error", "invalid_type_error"] }]
   }
 });

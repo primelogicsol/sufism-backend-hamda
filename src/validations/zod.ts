@@ -105,15 +105,60 @@ export const membershipSchema = z.object({
 
 export const donationSchema = z.object({
   // Array validation for roles
-  amount: z.string().nonempty({
+  amount: z.string({
     message: "Must provide valid amount"
   }),
-  type: z.string().nonempty({
+  type: z.string({
     message: "Must provide Donation Type"
   }),
   pool: z.array(z.string({ message: "Must provide valid pool type" }))
 });
 
+export const productSchema = z.object({
+  // images: z.string()
+  //   .refine((val) => val.length > 0, { message: "Image is required" }),
+  title: z.string({
+    message: "Title must be string"
+  }),
+  description: z.string({
+    message: "Description is required"
+  }),
+  price: z.string({
+    message: "Price is required"
+  }),
+  discount: z.string().optional(),
+  stock: z.string({
+    message: "Stock is required"
+  }),
+  deliveryTime: z.string().optional(),
+  note: z.string().optional(),
+  returnPolicy: z.string().optional(), // "30-day return for unused items"
+  category: z.enum(
+    ["JWELERY_ACCESSPORIES", "ART_WALL_CONTROL", "HOME_WALLDECOR", "FASION_UPRAISEL", "WELLNESS_MEDITAION", "DIGITAL_BOOKS", "AUDIO_SPECTRUM"],
+    {
+      message: "Category is required"
+    }
+  ),
+  tags: z.array(z.string()).optional(),
+  sku: z.string({ message: "SKU is required" }),
+  isAvailable: z.boolean().optional()
+});
+export const reviewSchema = z.object({
+  review: z.string({
+    message: "Review must be string"
+  }),
+  productId: z.number({ message: "Product id is required" }),
+  rating: z
+    .number({
+      message: "Rating must be a number"
+    })
+    .min(0, "Rating cannot be negative")
+    .max(5, "Rating cannot exceed 100")
+    .optional()
+});
+export const cartSchema = z.object({
+  quantity: z.number().min(1, { message: "Quantity must be at least 1" }).optional() // optional, defaults to 1 in DB
+});
 export const userUpdateSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
   fullName: z
