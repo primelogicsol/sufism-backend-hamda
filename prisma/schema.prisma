@@ -34,6 +34,7 @@ model User {
   donation Donation?
   Review Review[]
   carts Cart[]
+  wishlists Wishlist[]
   createdAt      DateTime       @default(now())
   @@map("users")
 }
@@ -124,6 +125,7 @@ model Product {
   sku            String        @unique 
   reviews        Review[]
   carts Cart[]
+  wishlists Wishlist[]
   isAvailable    Boolean       @default(true)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -156,8 +158,20 @@ model Cart {
   user       User     @relation(fields: [userId], references: [id])
   product    Product  @relation(fields: [productId], references: [id])
 
-  quantity   Int      @default(1)
+  qty   Int      @default(1)
   createdAt  DateTime @default(now())
 
-  @@map("cart")
+  @@map("carts")
 }
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId]) 
+  @@map("wishlists")
+}
+

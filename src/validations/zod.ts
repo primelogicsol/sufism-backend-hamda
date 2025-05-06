@@ -157,7 +157,11 @@ export const reviewSchema = z.object({
     .optional()
 });
 export const cartSchema = z.object({
-  quantity: z.number().min(1, { message: "Quantity must be at least 1" }).optional() // optional, defaults to 1 in DB
+  productId: z.number({ message: "Product Id is required" }),
+  qty: z.number().min(1, { message: "Quantity must be at least 1" }).optional() // optional, defaults to 1 in DB
+});
+export const wishlistSchema = z.object({
+  productId: z.number({ message: "Product Id is required" }),
 });
 export const userUpdateSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),

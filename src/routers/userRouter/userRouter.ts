@@ -1,11 +1,13 @@
 import { Router } from "express";
+import cartController from "../../controllers/userController/cartController.js";
 import donationController from "../../controllers/userController/donationController.js";
 import memberShipController from "../../controllers/userController/memberShipController.js";
 import productController from "../../controllers/userController/productController.js";
+import wishlistController from "../../controllers/userController/wishlistController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
 import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
-import { donationSchema, membershipSchema, productSchema, reviewSchema } from "../../validations/zod.js";
+import { cartSchema, donationSchema, membershipSchema, productSchema, reviewSchema, wishlistSchema } from "../../validations/zod.js";
 
 export const userRouter: Router = Router();
 
@@ -23,6 +25,15 @@ userRouter.route("/product").post(fileUploader, validateDataMiddleware(productSc
 userRouter.route("/product").get(productController.viewAllProduct);
 userRouter.route("/product/:id").get(productController.viewProduct);
 
-userRouter.route("/review").post(authMiddleware.checkToken,validateDataMiddleware(reviewSchema), productController.review);
-userRouter.route("/review/:id").get(authMiddleware.checkToken,productController.viewReview);
+userRouter.route("/review").post(authMiddleware.checkToken, validateDataMiddleware(reviewSchema), productController.review);
+userRouter.route("/review/:id").get(authMiddleware.checkToken, productController.viewReview);
 
+userRouter.route("/cart").post(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.addToCart);
+userRouter.route("/cart/:id").delete(authMiddleware.checkToken, cartController.deleteCartItem);
+userRouter.route("/cart").delete(authMiddleware.checkToken, cartController.clearCart);
+userRouter.route("/cart").get(authMiddleware.checkToken, cartController.viewCart);
+
+userRouter.route("/wishlist").post(authMiddleware.checkToken, validateDataMiddleware(wishlistSchema), wishlistController.addToWishlist);
+userRouter.route("/wishlist/:id").delete(authMiddleware.checkToken, wishlistController.deleteWishlistItem);
+userRouter.route("/wishlist").delete(authMiddleware.checkToken, wishlistController.clearWishlist);
+userRouter.route("/wishlist").get(authMiddleware.checkToken, wishlistController.viewWishlist);
