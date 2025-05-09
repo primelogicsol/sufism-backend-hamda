@@ -10,7 +10,7 @@ export type _Request = Request & {
   userFromToken?: TPAYLOAD;
 };
 export default {
-  checkToken: asyncHandler(async (req: _Request, _: Response, next: NextFunction) => {
+    checkToken: asyncHandler(async (req: _Request, _: Response, next: NextFunction) => {
     const accessToken = req.header("Authorization");
     if (!accessToken) {
       logger.error("No access token found", "authMiddleware.ts:13");
@@ -45,7 +45,6 @@ export default {
     }
 
     req.userFromToken = decoded;
-
     return next();
   })
 };

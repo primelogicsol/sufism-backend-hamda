@@ -19,7 +19,7 @@ export const errorHandler = (error: CustomError, _req: Request, res: Response, n
       error instanceof PrismaClientKnownRequestError
         ? "something went wrong while working with prisma!!"
         : error.message + "!!" || "internal server error!!",
-    data: null,
+    data: null
     // requestInfo: {
     //   url: req.originalUrl,
     //   method: req.method,

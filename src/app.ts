@@ -5,6 +5,7 @@ import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { defaultRouter } from "./routers/defaultRouter.js";
+import path from "path";
 export const app: Application = express();
 
 //  * Default Middlewares
@@ -14,7 +15,8 @@ app.disable("x-powered-by");
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("../public"));
+app.use(express.static(path.resolve(__dirname, "../public")));
+
 // * Custom Middlewares
 app.use(endPoints.DEFAULT_ENDPOINT, defaultRouter);
 // * Error handling Middleware

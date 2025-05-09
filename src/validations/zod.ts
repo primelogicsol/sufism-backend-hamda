@@ -51,7 +51,7 @@ export const verifyGoogleLoginSchema = z.object({
   fullName: z.string({ message: "fullName is required!!" }).min(1, { message: "fullName is required!!" })
 });
 
-// ** verify user schema
+// ** verify resend schema
 export const verifyUserSchema = z.object({
   email: z
     .string({ message: "Email is required!!" })
@@ -59,13 +59,110 @@ export const verifyUserSchema = z.object({
     .email({ message: "Invalid email format. e.g: john.doe@example.com" })
 });
 
-export const sendOTPSchema = z.object({
+export const verifyOTPSchema = z.object({
   email: z
     .string({ message: "Email is required!!" })
     .min(1, { message: "Email is required!!" })
-    .email({ message: "Invalid email format. e.g: john.doe@example.com" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
+  OTP: z.string({ message: "OTP is required" })
 });
 
+export const membershipSchema = z.object({
+  phone: z.string({ message: "Phone number is required" }).min(5, { message: "Phone number must be at least 5 characters" }),
+
+  country: z.string({ message: "Country is required" }),
+
+  agreedToPrinciples: z.boolean({
+    message: "You must agree to the principles"
+  }),
+
+  // Array validation for roles
+  role: z
+    .array(
+      z.enum(["volunteer", "donor", "collaborator"], {
+        message: "Invalid role type"
+      })
+    )
+    .nonempty({
+      message: "At least one role is required"
+    }),
+
+  collaboratorIntent: z.array(z.enum(["institutional", "cultural", "interfaithDialogue", "programCorrelation"])).optional(),
+
+  donorType: z.array(z.enum(["onetime", "monthly", "sponsor", "tools", "remainAnonymous", "receiveUpdates"])).optional(),
+
+  volunteerSupport: z.array(z.enum(["spiritualProgram", "communityOutreach", "culturalPreservation", "digitalMedia", "craftsmanship"])).optional(),
+
+  // Other fields
+  consentedToUpdates: z.boolean().optional().default(false),
+  additionalInfo: z.string().optional(),
+  intentCreation: z.string().optional(),
+  monthlyTime: z.string().optional(),
+  organization: z.string().optional(),
+  previousVolunteerExp: z.string().optional(),
+  volunteerMode: z.enum(["IN_PERSON", "HYBRID", "REMOTE"]).optional()
+});
+
+export const donationSchema = z.object({
+  // Array validation for roles
+  amount: z.string({
+    message: "Must provide valid amount"
+  }),
+  type: z.string({
+    message: "Must provide Donation Type"
+  }),
+  pool: z.array(z.string({ message: "Must provide valid pool type" }))
+});
+
+export const productSchema = z.object({
+  // images: z.string()
+  //   .refine((val) => val.length > 0, { message: "Image is required" }),
+  title: z.string({
+    message: "Title must be string"
+  }),
+  description: z.string({
+    message: "Description is required"
+  }),
+  price: z.string({
+    message: "Price is required"
+  }),
+  discount: z.string().optional(),
+  stock: z.string({
+    message: "Stock is required"
+  }),
+  deliveryTime: z.string().optional(),
+  note: z.string().optional(),
+  returnPolicy: z.string().optional(), // "30-day return for unused items"
+  category: z.enum(
+    ["JWELERY_ACCESSPORIES", "ART_WALL_CONTROL", "HOME_WALLDECOR", "FASION_UPRAISEL", "WELLNESS_MEDITAION", "DIGITAL_BOOKS", "AUDIO_SPECTRUM"],
+    {
+      message: "Category is required"
+    }
+  ),
+  tags: z.array(z.string()).optional(),
+  sku: z.string({ message: "SKU is required" }),
+  isAvailable: z.boolean().optional()
+});
+export const reviewSchema = z.object({
+  review: z.string({
+    message: "Review must be string"
+  }),
+  productId: z.number({ message: "Product id is required" }),
+  rating: z
+    .number({
+      message: "Rating must be a number"
+    })
+    .min(0, "Rating cannot be negative")
+    .max(5, "Rating cannot exceed 100")
+    .optional()
+});
+export const cartSchema = z.object({
+  productId: z.number({ message: "Product Id is required" }),
+  qty: z.number().min(1, { message: "Quantity must be at least 1" }).optional() // optional, defaults to 1 in DB
+});
+export const wishlistSchema = z.object({
+  productId: z.number({ message: "Product Id is required" }),
+});
 export const userUpdateSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
   fullName: z
@@ -120,7 +217,7 @@ export const getSingleUserSChema = z.object({
       message: "Username can only contain lowercase letters, numbers, underscores, and periods. e.g: user123"
     })
 });
-/*                                                       Contact US Schema                                                               */
+/*   Contact US Schema                                                               */
 
 export const contactUsSchema = z.object({
   firstName: z
@@ -164,14 +261,23 @@ export const forgotPasswordRequestFromUserSchema = z.object({
       message: "Invalid email format. e.g: john.doe@example.com"
     })
 });
-export const verifyForgotPasswordRequestSchema = z.object({
-  OTP: z
-    .string({ message: "OTP is required!!" })
-    .min(1, { message: "OTP is required!!" })
-    .min(6, { message: "OTP must be at least 6 characters long." })
-    .max(6, { message: "OTP can be at most 6 characters long." })
-});
+// export const verifyForgotPasswordRequestSchema = z.object({
+//   OTP: z
+//     .string({ message: "OTP is required!!" })
+//     .min(1, { message: "OTP is required!!" })
+//     .min(6, { message: "OTP must be at least 6 characters long." })
+//     .max(6, { message: "OTP can be at most 6 characters long." })
+// });
 export const updateForgotPasswordSchema = z.object({
+  email: z
+    .string({ message: "email is required!!" })
+    .min(1, { message: "email is required!!" })
+    .min(3, { message: "email must be at least 3 characters long." })
+    .max(150, { message: "email can be at most 150 characters long." })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" })
+    .regex(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, {
+      message: "Invalid email format. e.g: john.doe@example.com"
+    }),
   newPassword: z
     .string({ message: "newPassword is required!!" })
     .min(1, { message: "newPassword is required!!" })
