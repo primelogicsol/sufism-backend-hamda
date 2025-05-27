@@ -161,7 +161,7 @@ export const cartSchema = z.object({
   qty: z.number().min(1, { message: "Quantity must be at least 1" }).optional() // optional, defaults to 1 in DB
 });
 export const wishlistSchema = z.object({
-  productId: z.number({ message: "Product Id is required" }),
+  productId: z.number({ message: "Product Id is required" })
 });
 export const userUpdateSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
@@ -176,6 +176,94 @@ export const userUpdateSchema = z.object({
       message: "Full name can only contain letters and spaces. e.g: John Doe"
     })
 });
+
+export const bookServiceSchema = z.object({
+  subject: z.string({ message: "Subject must be string" }).min(2, { message: "Subject must be atleast 2 characters long" }),
+  date: z.string({ message: "Date is required" }).min(2, { message: "Date must be valid" }), //z.preprocess((val) => (typeof val === "string" || val instanceof Date ? new Date(val) : val), z.date({ message: "Date should be valid" })),
+  comment: z.string().optional(),
+  service: z.enum(
+    [
+      "ASSIST_WITH_SPRITUAL_PROGRAM",
+      "SUPPORT_CRAFT_CULTURE",
+      "FUND_RAISING_EVENT_ORGANIZATION",
+      "OUTREACH_COMMUNITY",
+      "HELP_DIGITAL_MEDIA",
+      "CREATE_SACRED_ART_HANDICRAFTS"
+    ],
+    {
+      required_error: "Service is required"
+    }
+  )
+});
+
+export const bookInterviewSchema = z.object({
+  profession: z.string({ message: "Profession must be string" }).min(3, { message: "Profession must be atleast 3 characters long" }).optional(),
+  institution: z.string({ message: "Institution is required" }).min(3, { message: "Institution must be atleast 3 characters long" }).optional(),
+  website: z.string({ message: "Website url must be a valid string" }).min(3, { message: "Website url must be valid " }).optional(),
+  areasOfImpact: z
+    .array(
+      z.enum(
+        [
+          "SPRITUAL_LEADERSHIP",
+          "INTEGRATIVE_HEALTH",
+          "SCIENTIFIC_CONCIOUSNESS",
+          "ECO_STEWARD",
+          "POLICY_REFORM",
+          "TRANS_EDUCATIVE",
+          "ETHICAL_JUSTICE",
+          "CULTURAL_EXPRESSION",
+          "UNITY_DIALOGUE",
+          "YOUTH_EMPOWERMENT"
+        ],
+        { message: "Must be valid impact type" }
+      )
+    )
+    .optional(),
+  spiritualOrientation: z.enum(["SUFI", "FREE_THINKER", "NOT_AFFLIATED"], { message: "Spritual orientation must be valid type" }).optional(),
+  publicVoice: z.boolean({ message: "Must be bool value" }).optional(),
+  interviewIntent: z
+    .array(
+      z.enum(["INSPIRING_OTHERS", "SHARE_KNOWLEDGE", "NETWORK", "PROMOTE_WORK", "DOCUMENT_EXPERIENCE", "SPIRITUAL_DIALOGUE"], {
+        message: "Interview intent must be valid type"
+      })
+    )
+    .optional(),
+  interviewTimeZone: z.enum(["MYSTIC", "SCIENTIFIC", "ACADEMIC"], { message: "Interview time zone must be string" }).optional(),
+  scheduledAt: z.string({ message: "Time must be required " }),
+  additionalNotes: z.string({ message: "Additional notes must be string" }).optional()
+});
+
+export const conferenceRegistration = z.object({
+  institution: z
+    .string({ message: "Institution must be string" })
+    .min(1, { message: "Institution is required!!" })
+    .min(3, { message: "Institution must be at least 3 characters long." })
+    .max(500, { message: "Institution can be at most 500 characters long." })
+    .optional(),
+  abstract: z
+    .string({ message: "Abstract is required!!" })
+    .min(1, { message: "Abstract is required!!" })
+    .min(3, { message: "Abstract must be at least 3 characters long." })
+    .max(500, { message: "Abstract can be at most 500 characters long." }),
+  presentationType: z.enum(["ORAL", "POSTER", "WORKSHOP", "PANEL_DICUSSION"], { message: "Must be valid impact type" }),
+  topic: z.enum(["SUFI_PHILOSOPHY", "QUANTUM_CONSCIOUSNESS", "MYSTICAL_PRACTICES", "HEALING_TRANSITIONS", "INTER_APPROACHES", "OTHER"], {
+    message: "Must be valid impact type"
+  })
+});
+
+export const contactUsSchema = z.object({
+  subject: z
+    .string({ message: "Subject is required" })
+    .min(1, { message: "Subject is required!!" })
+    .min(3, { message: "Subject must be at least 3 characters long." })
+    .max(500, { message: "Subject can be at most 500 characters long." }),
+  message: z
+    .string({ message: "Message is required!!" })
+    .min(1, { message: "Message is required!!" })
+    .min(3, { message: "Message must be at least 3 characters long." })
+    .max(500, { message: "message can be at most 500 characters long." })
+});
+
 export const userUpdateEmailSchema = z.object({
   id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
   email: z
@@ -218,31 +306,6 @@ export const getSingleUserSChema = z.object({
     })
 });
 /*   Contact US Schema                                                               */
-
-export const contactUsSchema = z.object({
-  firstName: z
-    .string({ message: "FirstName is required!!" })
-    .min(1, { message: "FirstName is required!!" })
-    .min(2, { message: "FirstName must be at least 2 characters long." })
-    .max(50, { message: "FirstName can be at most 50 characters long." }),
-
-  lastName: z
-    .string({ message: "LastName is required!!" })
-    .min(1, { message: "LastName is required!!" })
-    .min(3, { message: "LastName must be at least 3 characters long." })
-    .max(50, { message: "LastName can be at most 50 characters long." }),
-  email: z
-    .string({ message: "Email is required!!" })
-    .min(1, { message: "Email is required!!" })
-    .min(3, { message: "Email must be at least 3 characters long." })
-    .max(150, { message: "mEail can be at most 150 characters long." })
-    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
-  message: z
-    .string({ message: "Message is required!!" })
-    .min(1, { message: "Message is required!!" })
-    .min(3, { message: "Message must be at least 3 characters long." })
-    .max(500, { message: "message can be at most 500 characters long." })
-});
 
 export const sendMessagaeToUserSchema = z.object({
   id: z.number({ message: "id is required!!" }).min(1, { message: "id is required!!" }),

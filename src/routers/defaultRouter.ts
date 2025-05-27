@@ -7,4 +7,4 @@ export const defaultRouter: Router = Router();
 
 defaultRouter.use("/", performanceRouter);
 defaultRouter.use("/user", authRouter);
-defaultRouter.use("/user",userRouter)
+defaultRouter.use("/user", userRouter);

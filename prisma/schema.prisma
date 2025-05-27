@@ -21,7 +21,14 @@ model RateLimiterFlexible {
 
 model User {
   id         String         @id @default(cuid())
-  fullName       String
+  fullName       String        @default("")
+  lastName       String        @default("")
+  address        String?        
+  phone          String?
+  city           String?
+  state          String?
+  zipCode        String?
+  country        String?
   email          String        @unique
   password       String?
   avatar         String?        @default("https://via.placeholder.com/70x70")
@@ -35,6 +42,10 @@ model User {
   Review Review[]
   carts Cart[]
   wishlists Wishlist[]
+  bookService BookService[]
+  interview  Interview[]
+  contactUs ContactUs[]
+  conference conference[]
   createdAt      DateTime       @default(now())
   @@map("users")
 }
@@ -76,7 +87,32 @@ model Donation {
   @@map("donations")
 }
 
-
+model conference {
+  id Int @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  institution String? 
+  abstract String?
+  presentationType PRESENTATION_TYPE[]
+  topic CONFERENCE_TYPE?
+  status              Int           @default(0)
+  createdAt DateTime @default(now())
+  @@map("conferences")
+}
+enum CONFERENCE_TYPE {
+  SUFI_PHILOSOPHY
+  QUANTUM_CONSCIOUSNESS
+  MYSTICAL_PRACTICES
+  HEALING_TRANSITIONS
+  INTER_APPROACHES
+  OTHER
+}
+enum PRESENTATION_TYPE {
+  ORAL
+  POSTER
+  WORKSHOP
+  PANEL_DISCUSSION
+}
 enum VolunteeringMode {
   IN_PERSON
   REMOTE
@@ -175,3 +211,87 @@ model Wishlist {
   @@map("wishlists")
 }
 
+model BookService{
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  subject String
+  date String         
+  service SERVICE_TYPE @default(ASSIST_WITH_SPRITUAL_PROGRAM)
+  comment String
+  status              Int           @default(0)//pending =0,completed =1 ,cancel=2
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  @@unique([userId]) 
+  @@map("bookServices")
+}
+enum SERVICE_TYPE {
+ ASSIST_WITH_SPRITUAL_PROGRAM
+ SUPPORT_CRAFT_CULTURE
+ FUND_RAISING_EVENT_ORGANIZATION
+ OUTREACH_COMMUNITY
+ HELP_DIGITAL_MEDIA
+ CREATE_SACRED_ART_HANDICRAFTS
+}
+model Interview {
+  id                  Int                    @id @default(autoincrement())
+  user                User                   @relation(fields: [userId], references: [id])
+  userId              String                
+  profession          String
+  institution         String                 // Fixed typo from "institutional"
+  website             String?                // Made optional since not all may have a website
+  areasOfImpact       IMPACT_TYPE[]          @default([SPRITUAL_LEADERSHIP])
+  spiritualOrientation SPRITUAL_TYPE?
+  publicVoice         Boolean
+  interviewIntent     INTERVIEW_INTENT_TYPE[]
+  status              Int           @default(0)//pending =0,completed =1 ,cancel=2
+  interviewTimeZone   INTERVIEW_TIME_ZONE?                 
+  scheduledAt         DateTime               
+  additionalNotes     String?                // Made optional
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  @@map("interviews")
+}
+
+model ContactUs {
+  id                  Int                    @id @default(autoincrement())
+  user                User                   @relation(fields: [userId], references: [id])
+  userId              String                 
+  message             String
+  subject             String                
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  @@map("contactUs")
+}
+enum SPRITUAL_TYPE {
+ SUFI
+ FREETHINKER
+ NOT_AFFLIATED
+}
+
+enum INTERVIEW_INTENT_TYPE {
+  INSPIRING_OTHERS
+  SHARE_KNOWLEDGE
+  NETWORK
+  PROMOTE_WORK
+  DOCUMENT_EXPERIENCE
+  SPIRITUAL_DIALOGUE
+}
+enum INTERVIEW_TIME_ZONE {
+  MYSTIC
+  SCIENTIFIC
+  ACADEMIC
+}
+enum IMPACT_TYPE {
+  SPRITUAL_LEADERSHIP
+  INTEGRATIVE_HEALTH
+  SCIENTIFIC_CONCIOUSNESS
+  ECO_STEWARD
+  POLICY_REFORM
+  TRANS_EDUCATIVE
+  ETHICAL_JUSTICE
+  CULTURAL_EXPRESSION
+  UNITY_DIALOGUE
+  YOUTH_EMPOWERMENT
+
+}
