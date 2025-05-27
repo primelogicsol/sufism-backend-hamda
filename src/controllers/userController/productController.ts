@@ -1,7 +1,8 @@
+import { CATEGORY_TYPE, type Prisma } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
-import type { TPRODUCT, TREVIEW } from "../../types/types.js";
+import type { TPRODUCT, TPRODUCT_SEARCH, TREVIEW } from "../../types/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
@@ -60,15 +61,93 @@ export default {
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
-    const products = await db.product.findMany({
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
-    if (!products) return httpResponse(req, res, reshttp.notFoundCode, reshttp.notFoundMessage, products);
-    httpResponse(req, res, reshttp.okCode, reshttp.okMessage, products);
-  }),
 
+    // Get query parameters with proper typing
+    const { page = "1", limit = "10", search = "", category = "", sortBy = "createdAt", sortOrder = "desc" } = req.query as TPRODUCT_SEARCH;
+
+    // Convert query parameters to appropriate types
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Build where clause with Prisma type
+    const where: Prisma.ProductWhereInput = {};
+
+    // Search functionality
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } }
+        // { description: { contains: search, mode: "insensitive" } }
+      ];
+    }
+
+    // Category filter
+    if (category) {
+      const categoryUpper = category.toUpperCase();
+
+      const validCategories = Object.values(CATEGORY_TYPE);
+
+      if (validCategories.includes(categoryUpper as CATEGORY_TYPE)) {
+        where.category = categoryUpper as CATEGORY_TYPE;
+      } else {
+        return httpResponse(req, res, reshttp.badRequestCode, "Invalid category");
+      }
+    }
+
+    // Build orderBy clause with Prisma type
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {
+      [sortBy]: sortOrder
+    };
+
+    try {
+      // Get total count for pagination
+      const totalProducts = await db.product.count({ where });
+
+      // Get paginated products
+      const products = await db.product.findMany({
+        where,
+        skip,
+        take: limitNumber,
+        orderBy,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          discount: true,
+          stock: true,
+          images: true,
+          category: true,
+          sku: true,
+          isAvailable: true,
+          createdAt: true
+        }
+      });
+
+      if (!products.length) {
+        return httpResponse(req, res, reshttp.okCode, "No products found");
+      }
+
+      // Prepare pagination metadata
+      const pagination = {
+        totalProducts,
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalProducts / limitNumber),
+        limit: limitNumber,
+        hasNextPage: pageNumber < Math.ceil(totalProducts / limitNumber),
+        hasPrevPage: pageNumber > 1
+      };
+
+      // Response with products and pagination info
+      httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+        products,
+        pagination
+      });
+    } catch (error) {
+      logger.error("Error fetching products:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to fetch products");
+    }
+  }),
   viewProduct: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
     if (!id) {
@@ -85,7 +164,7 @@ export default {
         id: Number(id)
       }
     });
-    if (!product) return httpResponse(req, res, reshttp.notFoundCode, reshttp.notFoundMessage);
+    if (!product) return httpResponse(req, res, reshttp.okCode, reshttp.notFoundMessage);
     httpResponse(req, res, reshttp.okCode, reshttp.okMessage, product);
   }),
   review: asyncHandler(async (req: _Request, res) => {
@@ -128,7 +207,7 @@ export default {
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
-    const reviews =await db.review.findMany({
+    const reviews = await db.review.findMany({
       where: { productId: Number(id) }
     });
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, reviews);

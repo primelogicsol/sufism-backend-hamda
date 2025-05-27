@@ -54,8 +54,8 @@ export default {
     });
 
     if (!user) {
-        logger.warn(`OTP verification attempt for non-existent email: ${email}`);
-        return httpResponse(req, res, reshttp.notFoundCode, "User not found");
+      logger.warn(`OTP verification attempt for non-existent email: ${email}`);
+      return httpResponse(req, res, reshttp.notFoundCode, "User not found");
     }
 
     // if (user.isVerified) {
@@ -64,44 +64,44 @@ export default {
     // }
     // Verify OTP match
     if (user.OTP !== OTP) {
-        logger.warn(`Invalid OTP attempt for: ${email}`);
-        return httpResponse(req, res, reshttp.unauthorizedCode,reshttp.unauthorizedMessage);
+      logger.warn(`Invalid OTP attempt for: ${email}`);
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
     // Check OTP expiry---then resend otp api helps
     if (!user.OTP_EXPIRES_IN || user.OTP_EXPIRES_IN < new Date()) {
-        await db.user.update({
-            where: { email },
-            data: { 
-                OTP: null, 
-                OTP_EXPIRES_IN: null,
-            }
-        });
-        logger.warn(`Expired OTP attempt for: ${email}`);
-        return httpResponse(req, res, reshttp.badRequestCode,"OTP expired. Please try again");
+      await db.user.update({
+        where: { email },
+        data: {
+          OTP: null,
+          OTP_EXPIRES_IN: null
+        }
+      });
+      logger.warn(`Expired OTP attempt for: ${email}`);
+      return httpResponse(req, res, reshttp.badRequestCode, "OTP expired. Please try again");
     }
     const verifiedUser = await db.user.update({
-        where: { email },
-        data: { 
-            isVerified: true,
-            OTP: null,
-            OTP_EXPIRES_IN: null,
-            tokenVersion: { increment: 1 }
-        }
+      where: { email },
+      data: {
+        isVerified: true,
+        OTP: null,
+        OTP_EXPIRES_IN: null,
+        tokenVersion: { increment: 1 }
+      }
     });
 
     const { accessToken, refreshToken } = setTokensAndCookies(verifiedUser, res, true);
 
     logger.info(`User verified successfully: ${email}`);
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
-        accessToken,
-        refreshToken,
-        user: {
-            email: verifiedUser.email,
-            isVerified: verifiedUser.isVerified
-        }
+      accessToken,
+      refreshToken,
+      user: {
+        email: verifiedUser.email,
+        isVerified: verifiedUser.isVerified
+      }
     });
-}),
+  }),
   // ** login user through password after the verification of his/her account
   login: asyncHandler(async (req, res) => {
     const body = req.body as User;
@@ -247,35 +247,33 @@ export default {
       refreshToken
     });
   }),
-  fogotPasswordRequest:asyncHandler(async(req,res)=>{
-       const { email } = req.body as User;
-       const user = await db.user.findUnique({ where: { email } });
-       if (!user) {
-        return httpResponse(req, res, reshttp.notFoundCode, "User not found");
-       }
-       
-        const OTP_TOKEN = generateOtp();
-        //todo@ do we need to check otp expr before sending the new one 
-        await db.user.update({
-          where: { email: user.email },
-          data: { OTP: OTP_TOKEN.otp, OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry }
-        });
-      await gloabalMailMessage(email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
-       return  httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
-  }),
-  passwordReset:asyncHandler(async(req,res)=>{
-    const { email, password} = req.body as User;
+  forgotPasswordRequest: asyncHandler(async (req, res) => {
+    const { email } = req.body as User;
     const user = await db.user.findUnique({ where: { email } });
     if (!user) {
-     return httpResponse(req, res, reshttp.notFoundCode, "User not found");
+      return httpResponse(req, res, reshttp.notFoundCode, "User not found");
+    }
+
+    const OTP_TOKEN = generateOtp();
+    //todo@ do we need to check otp expr before sending the new one
+    await db.user.update({
+      where: { email: user.email },
+      data: { OTP: OTP_TOKEN.otp, OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry }
+    });
+    await gloabalMailMessage(email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
+    return httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
+  }),
+  passwordReset: asyncHandler(async (req, res) => {
+    const { email, password } = req.body as User;
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      return httpResponse(req, res, reshttp.notFoundCode, "User not found");
     }
     const hashedPassword = (await passwordHasher(password!, res)) as string;
-     await db.user.update({
-       where: { email: user.email },
-       data: { password:hashedPassword }
-     });
-    return  httpResponse(req, res, reshttp.okCode, "Password updated successfully");
-})
-}
-
-  
+    await db.user.update({
+      where: { email: user.email },
+      data: { password: hashedPassword }
+    });
+    return httpResponse(req, res, reshttp.okCode, "Password updated successfully");
+  })
+};

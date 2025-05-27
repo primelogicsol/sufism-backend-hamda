@@ -10,7 +10,7 @@ export default {
   membership: asyncHandler(async (req: _Request, res) => {
     const data = req.body as TMEMBERSHIP;
     logger.info(data.collaboratorIntent);
-    logger.info("*****************************")
+    logger.info("*****************************");
     const user = await db.user.findFirst({
       where: {
         id: req.userFromToken?.id

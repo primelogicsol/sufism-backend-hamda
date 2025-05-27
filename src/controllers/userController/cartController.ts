@@ -105,5 +105,42 @@ export default {
     });
 
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, cart);
+  }),
+  updateCartItem: asyncHandler(async (req: _Request, res) => {
+    const userId = req.userFromToken?.id;
+    const { productId, qty } = req.body as TCART;
+
+    const user = await db.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!productId || qty == null || qty < 1) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid productId or quantity");
+    }
+
+    const product = await db.product.findUnique({ where: { id: productId } });
+    if (!product) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Product not found");
+    }
+
+    if (product.stock < qty) {
+      return httpResponse(req, res, reshttp.badRequestCode, `Not enough stock. Only ${product.stock} items available.`);
+    }
+
+    const existingItem = await db.cart.findFirst({
+      where: { userId, productId }
+    });
+
+    if (!existingItem) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Item not found in cart");
+    }
+
+    const updatedItem = await db.cart.update({
+      where: { id: existingItem.id },
+      data: { qty }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, "Cart item updated", updatedItem);
   })
 };

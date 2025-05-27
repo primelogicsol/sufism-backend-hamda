@@ -97,7 +97,7 @@ export default {
       data: {
         amount: data.amount ?? existingDonation.amount,
         pool: data.pool ?? existingDonation.pool,
-        donorType:data.type?? existingDonation.donorType
+        donorType: data.type ?? existingDonation.donorType
       }
     });
 

@@ -1,13 +1,27 @@
 import { Router } from "express";
+import bookServiceController from "../../controllers/userController/bookServiceController.js";
 import cartController from "../../controllers/userController/cartController.js";
+import contactUsController from "../../controllers/userController/contactUsController.js";
 import donationController from "../../controllers/userController/donationController.js";
+import interviewSlotController from "../../controllers/userController/interviewSlotController.js";
 import memberShipController from "../../controllers/userController/memberShipController.js";
 import productController from "../../controllers/userController/productController.js";
 import wishlistController from "../../controllers/userController/wishlistController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
 import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
-import { cartSchema, donationSchema, membershipSchema, productSchema, reviewSchema, wishlistSchema } from "../../validations/zod.js";
+import {
+  bookInterviewSchema,
+  bookServiceSchema,
+  cartSchema,
+  conferenceRegistration,
+  contactUsSchema,
+  donationSchema,
+  membershipSchema,
+  productSchema,
+  reviewSchema,
+  wishlistSchema
+} from "../../validations/zod.js";
 
 export const userRouter: Router = Router();
 
@@ -32,8 +46,24 @@ userRouter.route("/cart").post(authMiddleware.checkToken, validateDataMiddleware
 userRouter.route("/cart/:id").delete(authMiddleware.checkToken, cartController.deleteCartItem);
 userRouter.route("/cart").delete(authMiddleware.checkToken, cartController.clearCart);
 userRouter.route("/cart").get(authMiddleware.checkToken, cartController.viewCart);
+userRouter.route("/cart").patch(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.updateCartItem);
 
 userRouter.route("/wishlist").post(authMiddleware.checkToken, validateDataMiddleware(wishlistSchema), wishlistController.addToWishlist);
 userRouter.route("/wishlist/:id").delete(authMiddleware.checkToken, wishlistController.deleteWishlistItem);
 userRouter.route("/wishlist").delete(authMiddleware.checkToken, wishlistController.clearWishlist);
 userRouter.route("/wishlist").get(authMiddleware.checkToken, wishlistController.viewWishlist);
+
+userRouter.route("/book-service").post(authMiddleware.checkToken, validateDataMiddleware(bookServiceSchema), bookServiceController.bookService);
+userRouter.route("/book-service").get(authMiddleware.checkToken, bookServiceController.viewServiceBooking);
+
+userRouter
+  .route("/book-interview")
+  .post(authMiddleware.checkToken, validateDataMiddleware(bookInterviewSchema), interviewSlotController.interviewBook);
+userRouter.route("/book-interview").get(authMiddleware.checkToken, interviewSlotController.interviewBookView);
+userRouter.route("/book-interview/:id").delete(authMiddleware.checkToken, interviewSlotController.interviewBookCancel);
+
+userRouter.route("/contact-us").post(authMiddleware.checkToken, validateDataMiddleware(contactUsSchema), contactUsController.contactUs);
+
+userRouter
+  .route("/book-conference")
+  .post(authMiddleware.checkToken, validateDataMiddleware(conferenceRegistration), interviewSlotController.interviewBookCancel);
