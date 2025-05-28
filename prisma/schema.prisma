@@ -45,7 +45,7 @@ model User {
   bookService BookService[]
   interview  Interview[]
   contactUs ContactUs[]
-  conference conference[]
+  conference Conference[]
   createdAt      DateTime       @default(now())
   @@map("users")
 }
@@ -87,14 +87,14 @@ model Donation {
   @@map("donations")
 }
 
-model conference {
+model Conference {
   id Int @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @unique
   institution String? 
-  abstract String?
-  presentationType PRESENTATION_TYPE[]
-  topic CONFERENCE_TYPE?
+  abstract String
+  presentationType PRESENTATION_TYPE @default(ORAL)
+  topic CONFERENCE_TYPE @default(SUFI_PHILOSOPHY)
   status              Int           @default(0)
   createdAt DateTime @default(now())
   @@map("conferences")

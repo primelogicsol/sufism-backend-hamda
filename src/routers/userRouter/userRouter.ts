@@ -20,8 +20,10 @@ import {
   membershipSchema,
   productSchema,
   reviewSchema,
+  updateConferenceStatusSchema,
   wishlistSchema
 } from "../../validations/zod.js";
+import conferenceController from "../../controllers/userController/conferenceController.js";
 
 export const userRouter: Router = Router();
 
@@ -64,6 +66,10 @@ userRouter.route("/book-interview/:id").delete(authMiddleware.checkToken, interv
 
 userRouter.route("/contact-us").post(authMiddleware.checkToken, validateDataMiddleware(contactUsSchema), contactUsController.contactUs);
 
+userRouter.route("/conference").post(authMiddleware.checkToken, validateDataMiddleware(conferenceRegistration), conferenceController.conferenceBook);
+
+userRouter.route("/conference").get(authMiddleware.checkToken, conferenceController.viewConferenceBook);
+
 userRouter
-  .route("/book-conference")
-  .post(authMiddleware.checkToken, validateDataMiddleware(conferenceRegistration), interviewSlotController.interviewBookCancel);
+  .route("/conference/:id")
+  .post(authMiddleware.checkToken, validateDataMiddleware(updateConferenceStatusSchema), conferenceController.updateConferenceStatus);

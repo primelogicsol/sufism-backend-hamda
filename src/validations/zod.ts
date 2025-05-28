@@ -245,10 +245,17 @@ export const conferenceRegistration = z.object({
     .min(1, { message: "Abstract is required!!" })
     .min(3, { message: "Abstract must be at least 3 characters long." })
     .max(500, { message: "Abstract can be at most 500 characters long." }),
-  presentationType: z.enum(["ORAL", "POSTER", "WORKSHOP", "PANEL_DICUSSION"], { message: "Must be valid impact type" }),
+  presentationType: z.enum(["ORAL", "POSTER", "WORKSHOP", "PANEL_DICUSSION"], { message: "Must be valid presentation type" }),
   topic: z.enum(["SUFI_PHILOSOPHY", "QUANTUM_CONSCIOUSNESS", "MYSTICAL_PRACTICES", "HEALING_TRANSITIONS", "INTER_APPROACHES", "OTHER"], {
-    message: "Must be valid impact type"
+    message: "Must be valid topic type"
   })
+});
+export const updateConferenceStatusSchema = z.object({
+  status: z
+    .number({ message: "Status must be a number" })
+    .int({ message: "Status must be an integer" })
+    .min(0, { message: "Invalid status value" })
+    .max(2, { message: "Invalid status value" })
 });
 
 export const contactUsSchema = z.object({
