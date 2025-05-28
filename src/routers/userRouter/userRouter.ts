@@ -1,14 +1,14 @@
 import { Router } from "express";
 import bookServiceController from "../../controllers/userController/bookServiceController.js";
 import cartController from "../../controllers/userController/cartController.js";
+import conferenceController from "../../controllers/userController/conferenceController.js";
 import contactUsController from "../../controllers/userController/contactUsController.js";
 import donationController from "../../controllers/userController/donationController.js";
 import interviewSlotController from "../../controllers/userController/interviewSlotController.js";
 import memberShipController from "../../controllers/userController/memberShipController.js";
-import productController from "../../controllers/userController/productController.js";
+import sufiCheckListController from "../../controllers/userController/sufiCheckListController.js";
 import wishlistController from "../../controllers/userController/wishlistController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
-import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
 import {
   bookInterviewSchema,
@@ -18,8 +18,8 @@ import {
   contactUsSchema,
   donationSchema,
   membershipSchema,
-  productSchema,
-  reviewSchema,
+  sufiChecklistSchema,
+  updateConferenceStatusSchema,
   wishlistSchema
 } from "../../validations/zod.js";
 
@@ -34,13 +34,6 @@ userRouter.route("/donation").post(authMiddleware.checkToken, validateDataMiddle
 userRouter.route("/donation").get(authMiddleware.checkToken, donationController.viewDonation);
 userRouter.route("/donation").delete(authMiddleware.checkToken, donationController.deleteDonation);
 userRouter.route("/donation").patch(authMiddleware.checkToken, validateDataMiddleware(donationSchema), donationController.updateDonation);
-
-userRouter.route("/product").post(fileUploader, validateDataMiddleware(productSchema), productController.product);
-userRouter.route("/product").get(productController.viewAllProduct);
-userRouter.route("/product/:id").get(productController.viewProduct);
-
-userRouter.route("/review").post(authMiddleware.checkToken, validateDataMiddleware(reviewSchema), productController.review);
-userRouter.route("/review/:id").get(authMiddleware.checkToken, productController.viewReview);
 
 userRouter.route("/cart").post(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.addToCart);
 userRouter.route("/cart/:id").delete(authMiddleware.checkToken, cartController.deleteCartItem);
@@ -64,6 +57,15 @@ userRouter.route("/book-interview/:id").delete(authMiddleware.checkToken, interv
 
 userRouter.route("/contact-us").post(authMiddleware.checkToken, validateDataMiddleware(contactUsSchema), contactUsController.contactUs);
 
+userRouter.route("/conference").post(authMiddleware.checkToken, validateDataMiddleware(conferenceRegistration), conferenceController.conferenceBook);
+
+userRouter.route("/conference").get(authMiddleware.checkToken, conferenceController.viewConferenceBook);
+
 userRouter
-  .route("/book-conference")
-  .post(authMiddleware.checkToken, validateDataMiddleware(conferenceRegistration), interviewSlotController.interviewBookCancel);
+  .route("/conference/:id")
+  .post(authMiddleware.checkToken, validateDataMiddleware(updateConferenceStatusSchema), conferenceController.updateConferenceStatus);
+
+userRouter
+  .route("/sufi-checklist")
+  .post(authMiddleware.checkToken, validateDataMiddleware(sufiChecklistSchema), sufiCheckListController.createChecklist);
+userRouter.route("/sufi-checklist").get(authMiddleware.checkToken, sufiCheckListController.getChecklist);

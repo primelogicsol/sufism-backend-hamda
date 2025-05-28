@@ -10,6 +10,23 @@ const config = {
   HOST_EMAIL_SECRET: process.env.SMTP_SECRET as string,
   FRONTEND_APP_URL: process.env.FRONTEND_APP_URL as string,
   SMTP_PORT: parseInt(process.env.SMTP_PORT || "465"),
-  SMTP_HOST: process.env.SMTP_HOST as string
+  SMTP_HOST: process.env.SMTP_HOST as string,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
+    ? process.env.CLOUDINARY_API_SECRET
+    : "Unable to fetch CLOUDINARY_API_SECRET from .env file",
+  CLOUDINARY_NAME: process.env.CLOUDINARY_NAME ? process.env.CLOUDINARY_NAME : "Unable to fetch CLOUDINARY_NAME from .env file",
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? process.env.CLOUDINARY_API_KEY : "Unable to fetch CLOUDINARY_API_KEY from .env file"
 };
-export const { PORT, ENV, JWT_SECRET, HOST_EMAIL, HOST_EMAIL_SECRET, FRONTEND_APP_URL, SMTP_PORT, SMTP_HOST } = config;
+export const {
+  PORT,
+  ENV,
+  JWT_SECRET,
+  HOST_EMAIL,
+  HOST_EMAIL_SECRET,
+  FRONTEND_APP_URL,
+  SMTP_PORT,
+  SMTP_HOST,
+  CLOUDINARY_API_SECRET,
+  CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY
+} = config;

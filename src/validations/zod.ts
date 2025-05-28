@@ -115,34 +115,74 @@ export const donationSchema = z.object({
 });
 
 export const productSchema = z.object({
-  // images: z.string()
-  //   .refine((val) => val.length > 0, { message: "Image is required" }),
-  title: z.string({
-    message: "Title must be string"
+  title: z.string({ message: "Title must be a string" }),
+  description: z.string({ message: "Description is required" }),
+  price: z.string({ message: "Price is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Price must be a valid amount"
   }),
-  description: z.string({
-    message: "Description is required"
+  stock: z
+    .string({ message: "Stock is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Stock must be a valid number"
+    })
+    .optional(),
+  tags: z.array(z.string()).optional(),
+  sku: z.string({
+    message: "SKU is required"
   }),
-  price: z.string({
-    message: "Price is required"
-  }),
+  images: z.array(z.string()).optional(),
   discount: z.string().optional(),
-  stock: z.string({
-    message: "Stock is required"
-  }),
   deliveryTime: z.string().optional(),
   note: z.string().optional(),
-  returnPolicy: z.string().optional(), // "30-day return for unused items"
-  category: z.enum(
-    ["JWELERY_ACCESSPORIES", "ART_WALL_CONTROL", "HOME_WALLDECOR", "FASION_UPRAISEL", "WELLNESS_MEDITAION", "DIGITAL_BOOKS", "AUDIO_SPECTRUM"],
-    {
-      message: "Category is required"
-    }
-  ),
-  tags: z.array(z.string()).optional(),
-  sku: z.string({ message: "SKU is required" }),
+  isAvailable: z.boolean().optional(),
+  returnPolicy: z.string().optional()
+});
+// For Digital Book
+export const bookSchema = z.object({
+  title: z.string({ message: "Title must be a string" }),
+  description: z.string({ message: "Description is required" }),
+  price: z.string({ message: "Price is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Price must be a valid amount"
+  }),
+  stock: z
+    .string({ message: "Stock is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Stock must be a valid number"
+    })
+    .optional(),
+  author: z.string({ message: "Author must be string" }).optional(),
+  genre: z.string({ message: "Genre must be string" }).optional(),
+  releaseDate: z.string({ message: "Release date must be string" }).optional(),
+  url: z.string({ message: "url must be string" }).url().optional(),
+  fileType: z.string().optional(),
+  coverImage: z.string().optional(),
   isAvailable: z.boolean().optional()
 });
+// For Audio
+export const audioSchema = z.object({
+  title: z.string({ message: "Title must be a string" }),
+  description: z.string({ message: "Description is required" }),
+  price: z.string({ message: "Price is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Price must be a valid amount"
+  }),
+  stock: z
+    .string({ message: "Stock is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Stock must be a valid number"
+    })
+    .optional(),
+  artist: z.string({ message: "Artist name must be string" }).optional(),
+  mp3Url: z.string().url().optional(),
+  mp4Url: z.string().url().optional(),
+  duration: z
+    .string()
+    .refine((val) => !val || !isNaN(Number(val)), {
+      message: "Duration must be a valid number (in seconds)"
+    })
+    .optional(),
+  isAvailable: z.boolean().optional()
+});
+
 export const reviewSchema = z.object({
   review: z.string({
     message: "Review must be string"
@@ -245,10 +285,31 @@ export const conferenceRegistration = z.object({
     .min(1, { message: "Abstract is required!!" })
     .min(3, { message: "Abstract must be at least 3 characters long." })
     .max(500, { message: "Abstract can be at most 500 characters long." }),
-  presentationType: z.enum(["ORAL", "POSTER", "WORKSHOP", "PANEL_DICUSSION"], { message: "Must be valid impact type" }),
+  presentationType: z.enum(["ORAL", "POSTER", "WORKSHOP", "PANEL_DICUSSION"], { message: "Must be valid presentation type" }),
   topic: z.enum(["SUFI_PHILOSOPHY", "QUANTUM_CONSCIOUSNESS", "MYSTICAL_PRACTICES", "HEALING_TRANSITIONS", "INTER_APPROACHES", "OTHER"], {
-    message: "Must be valid impact type"
+    message: "Must be valid topic type"
   })
+});
+export const sufiChecklistSchema = z.object({
+  progress: z
+    .number({ message: "Progress must be a number" })
+    .int({ message: "Progress must be an integer" })
+    .min(0, { message: "Invalid Progress value" })
+    .max(100, { message: "Invalid Progress value" }),
+  items: z.array(
+    z.object({
+      section: z.enum(["INITIAL_ORIENTATION", "FINDING_GUIDANCE", "PRACTICE_AND_DISCIPLINE", "COMMUNITY_ENGAGEMENT", "ADVANCED_STUDY"]),
+      title: z.string(),
+      status: z.enum(["PENDING", "COMPLETED", "SKIPPED"])
+    })
+  )
+});
+export const updateConferenceStatusSchema = z.object({
+  status: z
+    .number({ message: "Status must be a number" })
+    .int({ message: "Status must be an integer" })
+    .min(0, { message: "Invalid status value" })
+    .max(2, { message: "Invalid status value" })
 });
 
 export const contactUsSchema = z.object({
