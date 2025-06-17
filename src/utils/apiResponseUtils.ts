@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { type THTTPRESPONSE } from "../types/types.js";
+import { type THTTPRESPONSE } from "../type/types.js";
 import logger from "./loggerUtils.js";
 const jsonResponse = (
   status: number,

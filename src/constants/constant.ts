@@ -1,6 +1,6 @@
 import type cors from "cors";
 import { ENV, HOST_EMAIL } from "../configs/config.js";
-import type { ICOOKIEOPTIONS } from "../types/types.js";
+import type { ICOOKIEOPTIONS } from "../type/types.js";
 
 export default {
   COMPANY_NAME: "PrimeLogics",
