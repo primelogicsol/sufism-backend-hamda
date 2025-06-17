@@ -12,7 +12,7 @@ export default {
   generateAccessToken: (payload: TPAYLOAD, res: Response, expiresIn?: string): string | Response => {
     try {
       const token = jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn || ENV === "development" ? "195m" : "15m" });
-      return `Bearer ${token}`;
+      return `${token}`;
     } catch (error: unknown) {
       if (error instanceof Error)
         return res.status(500).json({
@@ -31,7 +31,7 @@ export default {
   generateRefreshToken: (payload: TPAYLOAD, res: Response): string | Response => {
     try {
       const token = jwt.sign({ userID: payload.id, tokenVersion: payload.tokenVersion }, JWT_SECRET, { expiresIn: "7d" });
-      return `Bearer ${token}`;
+      return `${token}`;
     } catch (error: unknown) {
       if (error instanceof Error)
         return res.status(500).json({
