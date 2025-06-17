@@ -12,7 +12,7 @@
     "prebuild": "bun run lint && rimraf -rf ./dist",
     "build": "bun run tsc --build",
     "dev": "bun run build  && concurrently  \"bun --watch ./src/server.ts\" \"tsc -w\"",
-    "start": "bun run build && node --env-file .env ./dist/server.js",
+    "start": "bun run build && bun run --env-file .env ./dist/server.js",
     "commit-lint": "commitlint  --edit",
     "precommit": "concurrently \"eslint .\" \"bun run type-check && bun run fmt && git add .\"",
     "prepare": "husky",
