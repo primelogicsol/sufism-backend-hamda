@@ -1,5 +1,6 @@
-import { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../configs/config.js";
+const { verify } = jwt;
 
 export function verifyToken<T>(token: string, secret: string = JWT_SECRET): [Error | null, T | null] {
   try {
