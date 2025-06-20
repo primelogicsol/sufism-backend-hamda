@@ -19,6 +19,7 @@ import {
   donationSchema,
   donationSchemaU,
   membershipSchema,
+  membershipUpdateSchema,
   sufiChecklistSchema,
   updateConferenceStatusSchema,
   wishlistSchema
@@ -26,8 +27,11 @@ import {
 
 export const userRouter: Router = Router();
 
+userRouter.route("/profile").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.membership);
 userRouter.route("/membership").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.membership);
-userRouter.route("/membership").patch(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.updateMembership);
+userRouter
+  .route("/membership")
+  .patch(authMiddleware.checkToken, validateDataMiddleware(membershipUpdateSchema), memberShipController.updateMembership);
 userRouter.route("/membership").delete(authMiddleware.checkToken, memberShipController.deleteMembership);
 userRouter.route("/membership").get(authMiddleware.checkToken, memberShipController.viewMembership);
 

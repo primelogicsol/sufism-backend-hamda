@@ -236,6 +236,7 @@ model DigitalBook {
   url         String
   fileType    String
   coverImage  String?
+  overviewImages String[]
   wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]

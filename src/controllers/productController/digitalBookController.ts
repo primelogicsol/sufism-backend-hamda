@@ -15,6 +15,7 @@ interface DigitalBookData {
   fileType: string;
   coverImage?: string;
   isAvailable?: boolean;
+  overviewImages?: string[];
 }
 
 interface SearchQuery {
@@ -63,6 +64,7 @@ export default {
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : null,
         url: data.url,
         fileType: data.fileType,
+        overviewImages: data.overviewImages,
         coverImage: files?.find((f) => f.fieldname === "coverImage")?.path || data.coverImage,
         isAvailable: data.isAvailable ?? false
       }

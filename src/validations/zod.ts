@@ -262,6 +262,7 @@ export const bookSchema = z.object({
   genre: z.string({ message: "Genre must be string" }).optional(),
   releaseDate: z.string({ message: "Release date must be string" }).optional(),
   url: z.string({ message: "url must be string" }).url().optional(),
+  overviewImages: z.string().optional(),
   fileType: z.string().optional(),
   coverImage: z.string().optional(),
   isAvailable: z.boolean().optional()

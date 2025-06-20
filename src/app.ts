@@ -1,11 +1,11 @@
 import cors from "cors";
 import express, { type Application } from "express";
 import helmet from "helmet";
+import path from "path";
 import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { defaultRouter } from "./routers/defaultRouter.js";
-import path from "path";
 export const app: Application = express();
 
 //  * Default Middlewares
@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.resolve(__dirname, "../public")));
 
 // * Custom Middlewares
+// app.use
 app.use(endPoints.DEFAULT_ENDPOINT, defaultRouter);
 // * Error handling Middleware
 app.use(notFoundHandler);

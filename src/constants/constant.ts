@@ -37,7 +37,7 @@ export default {
   }
 };
 
-const CORS_ORIGIN = ["https://ssc-hubbah-arshads-projects.vercel.app/", "http://localhost:3000/"];
+const CORS_ORIGIN = ["https://ssc-hubbah-arshads-projects.vercel.app", "http://localhost:3000"];
 export const corsOptions: cors.CorsOptions = {
   origin: CORS_ORIGIN,
   credentials: true,

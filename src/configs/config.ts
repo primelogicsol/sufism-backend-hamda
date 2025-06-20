@@ -1,7 +1,5 @@
-import DotenvFlow from "dotenv-flow";
 import process from "node:process";
 type TENV = "development" | "production" | "test";
-DotenvFlow.config();
 const config = {
   PORT: process.env.PORT || 8001,
   ENV: process.env.NODE_ENV as TENV,
