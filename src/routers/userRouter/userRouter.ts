@@ -17,6 +17,7 @@ import {
   conferenceRegistration,
   contactUsSchema,
   donationSchema,
+  donationSchemaU,
   membershipSchema,
   sufiChecklistSchema,
   updateConferenceStatusSchema,
@@ -33,7 +34,7 @@ userRouter.route("/membership").get(authMiddleware.checkToken, memberShipControl
 userRouter.route("/donation").post(authMiddleware.checkToken, validateDataMiddleware(donationSchema), donationController.donation);
 userRouter.route("/donation").get(authMiddleware.checkToken, donationController.viewDonation);
 userRouter.route("/donation").delete(authMiddleware.checkToken, donationController.deleteDonation);
-userRouter.route("/donation").patch(authMiddleware.checkToken, validateDataMiddleware(donationSchema), donationController.updateDonation);
+userRouter.route("/donation").patch(authMiddleware.checkToken, validateDataMiddleware(donationSchemaU), donationController.updateDonation);
 
 userRouter.route("/cart").post(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.addToCart);
 userRouter.route("/cart/:id").delete(authMiddleware.checkToken, cartController.deleteCartItem);

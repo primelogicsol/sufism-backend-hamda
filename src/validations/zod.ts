@@ -102,6 +102,94 @@ export const membershipSchema = z.object({
   previousVolunteerExp: z.string().optional(),
   volunteerMode: z.enum(["IN_PERSON", "HYBRID", "REMOTE"]).optional()
 });
+export const membershipUpdateSchema = z.object({
+  phone: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim().length >= 5, {
+      message: "Phone number must be at least 5 characters if provided"
+    }),
+
+  country: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Country cannot be empty if provided"
+    }),
+
+  agreedToPrinciples: z.boolean().optional(),
+
+  role: z
+    .array(
+      z.enum(["volunteer", "donor", "collaborator"], {
+        message: "Invalid role type"
+      })
+    )
+    .optional()
+    .refine((val) => val === undefined || val.length > 0, {
+      message: "At least one role is required if provided"
+    }),
+
+  collaboratorIntent: z
+    .array(z.enum(["institutional", "cultural", "interfaithDialogue", "programCorrelation"]))
+    .optional()
+    .refine((val) => val === undefined || val.length > 0, {
+      message: "Collaborator intent cannot be empty if provided"
+    }),
+
+  donorType: z
+    .array(z.enum(["onetime", "monthly", "sponsor", "tools", "remainAnonymous", "receiveUpdates"]))
+    .optional()
+    .refine((val) => val === undefined || val.length > 0, {
+      message: "Donor type cannot be empty if provided"
+    }),
+
+  volunteerSupport: z
+    .array(z.enum(["spiritualProgram", "communityOutreach", "culturalPreservation", "digitalMedia", "craftsmanship"]))
+    .optional()
+    .refine((val) => val === undefined || val.length > 0, {
+      message: "Volunteer support cannot be empty if provided"
+    }),
+
+  consentedToUpdates: z.boolean().optional(),
+
+  additionalInfo: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Additional info cannot be empty if provided"
+    }),
+
+  intentCreation: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Intent creation cannot be empty if provided"
+    }),
+
+  monthlyTime: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Monthly time cannot be empty if provided"
+    }),
+
+  organization: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Organization cannot be empty if provided"
+    }),
+
+  previousVolunteerExp: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Previous volunteer experience cannot be empty if provided"
+    }),
+
+  volunteerMode: z.enum(["IN_PERSON", "HYBRID", "REMOTE"]).optional()
+});
 
 export const donationSchema = z.object({
   // Array validation for roles
@@ -114,6 +202,26 @@ export const donationSchema = z.object({
   pool: z.array(z.string({ message: "Must provide valid pool type" }))
 });
 
+export const donationSchemaU = z.object({
+  amount: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Amount cannot be empty if provided"
+    }),
+  type: z
+    .string()
+    .optional()
+    .refine((val) => val === undefined || val.trim() !== "", {
+      message: "Donation Type cannot be empty if provided"
+    }),
+  pool: z
+    .array(z.string().min(1, "Pool items must not be empty"))
+    .optional()
+    .refine((val) => val === undefined || val.length > 0, {
+      message: "Pool cannot be an empty array if provided"
+    })
+});
 export const productSchema = z.object({
   title: z.string({ message: "Title must be a string" }),
   description: z.string({ message: "Description is required" }),

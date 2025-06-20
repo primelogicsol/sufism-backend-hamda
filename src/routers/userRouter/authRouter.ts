@@ -15,11 +15,7 @@ authRouter.route(`/register`).post(validateDataMiddleware(userRegistrationSchema
 // 2 req per minute from single  ip adress
 authRouter.route(`/verify-account`).post(validateDataMiddleware(verifyOTPSchema), authController.verifyAccount);
 // 5 req per mnute from single  ip adress
-authRouter.route(`/login`).post(
-  validateDataMiddleware(userLoginSchema),
-
-  authController.login
-);
+authRouter.route("/login").post(validateDataMiddleware(userLoginSchema), authController.login);
 
 authRouter.route("/refresh-access-token").get(authController.refreshAccessToken);
 authRouter.route("/resend-OTP").post(validateDataMiddleware(verifyUserSchema), authController.resendOTPLink);

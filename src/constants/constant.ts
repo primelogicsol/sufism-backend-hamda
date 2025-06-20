@@ -4,7 +4,7 @@ import type { ICOOKIEOPTIONS } from "../type/types.js";
 
 export default {
   COMPANY_NAME: "PrimeLogics",
-  DEFAULT_ENDPOINT: "/api/v1",
+  DEFAULT_ENDPOINT: "/v1",
   EMAILS: {
     WHITE_LIST_EMAILS: ["hamda2k23@gmail.com"],
     APP_EMAIL: HOST_EMAIL
