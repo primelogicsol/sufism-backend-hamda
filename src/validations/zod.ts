@@ -313,17 +313,37 @@ export const wishlistSchema = z.object({
   productId: z.number({ message: "Product Id is required" })
 });
 export const userUpdateSchema = z.object({
-  id: z.string({ message: "id is required!!" }).min(1, { message: "id is required!!" }),
-  fullName: z
-    .string({ message: "FullName is required!!" })
-    .min(1, { message: "FullName is required!!" })
-    .min(3, {
-      message: "Full name must be at least 3 characters long. e.g: John Doe"
+  fullName: z.string({ message: "FullName is required!!" }).optional(),
+  address: z
+    .string({
+      message: "Must be valid address"
     })
-    .max(50, { message: "Full name can be at most 50 characters long. e.g: John Doe" })
-    .regex(/^[a-zA-Z ]{3,20}$/, {
-      message: "Full name can only contain letters and spaces. e.g: John Doe"
+    .optional(),
+  phone: z
+    .string({
+      message: "Must be valid address"
     })
+    .optional(),
+  city: z
+    .string({
+      message: "Must be valid address"
+    })
+    .optional(),
+  state: z
+    .string({
+      message: "Must be valid address"
+    })
+    .optional(),
+  zipCode: z
+    .string({
+      message: "Must be valid address"
+    })
+    .optional(),
+  country: z
+    .string({
+      message: "Must be valid address"
+    })
+    .optional()
 });
 
 export const bookServiceSchema = z.object({

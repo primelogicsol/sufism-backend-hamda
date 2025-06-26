@@ -6,6 +6,7 @@ import contactUsController from "../../controllers/userController/contactUsContr
 import donationController from "../../controllers/userController/donationController.js";
 import interviewSlotController from "../../controllers/userController/interviewSlotController.js";
 import memberShipController from "../../controllers/userController/memberShipController.js";
+import profileController from "../../controllers/userController/profileController.js";
 import sufiCheckListController from "../../controllers/userController/sufiCheckListController.js";
 import wishlistController from "../../controllers/userController/wishlistController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
@@ -22,12 +23,14 @@ import {
   membershipUpdateSchema,
   sufiChecklistSchema,
   updateConferenceStatusSchema,
+  userUpdateSchema,
   wishlistSchema
 } from "../../validations/zod.js";
 
 export const userRouter: Router = Router();
 
-userRouter.route("/profile").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.membership);
+userRouter.route("/profile").patch(authMiddleware.checkToken, validateDataMiddleware(userUpdateSchema), profileController.updateUserProfile);
+userRouter.route("/profile").get(authMiddleware.checkToken, profileController.viewUserProfile);
 userRouter.route("/membership").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.membership);
 userRouter
   .route("/membership")

@@ -4,6 +4,7 @@ import helmet from "helmet";
 import path from "path";
 import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
+import PerformanceController from "./controllers/performanceController/performanceController.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { defaultRouter } from "./routers/defaultRouter.js";
 export const app: Application = express();
@@ -16,9 +17,8 @@ app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.resolve(__dirname, "../public")));
-
+app.get("/", PerformanceController.getPerformance);
 // * Custom Middlewares
-// app.use
 app.use(endPoints.DEFAULT_ENDPOINT, defaultRouter);
 // * Error handling Middleware
 app.use(notFoundHandler);

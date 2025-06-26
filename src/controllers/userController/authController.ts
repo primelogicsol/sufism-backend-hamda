@@ -167,7 +167,7 @@ export default {
     }
     const user = await db.user.findUnique({ where: { email: email } });
     if (!user) throw { status: reshttp.notFoundCode, message: reshttp.notFoundMessage };
-    if (user.isVerified) throw { status: reshttp.conflictCode, message: "Account is already verified" };
+    // if (user.isVerified) throw { status: reshttp.conflictCode, message: "Account is already verified" };
     const OTP_TOKEN = generateOtp();
     await db.user.update({
       where: { email: user.email },
