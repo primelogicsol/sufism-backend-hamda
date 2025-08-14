@@ -1,33 +1,52 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { NextFunction, Request, Response } from "express";
+
 interface CustomError extends Error {
-  success?: boolean;
   status?: number;
+  success?: boolean;
 }
 
-export const notFoundHandler = (req: Request, __: Response, next: NextFunction) => {
-  const error: CustomError = new Error(`This Route(${req.originalUrl}) doesn't exist on server`);
+export const notFoundHandler = (req: Request, _res: Response, next: NextFunction) => {
+  const error: CustomError = new Error(`Route not found: ${req.originalUrl}`);
   error.status = 404;
   next(error);
 };
 
-export const errorHandler = (error: CustomError, _req: Request, res: Response) => {
-  const errObject = {
+// Fixed error handler with proper signature
+export const errorHandler = (
+  error: CustomError,
+  _req: Request,
+  res: Response,
+  next: NextFunction // Add this parameter
+) => {
+  // Critical: Check if headers already sent
+  if (res.headersSent) {
+    console.error("HEADERS ALREADY SENT - Skipping error handler");
+    return next(error); // Delegate to Express default handler
+  }
+
+  const status = error.status || 500;
+  let message = "Internal server error";
+
+  if (error instanceof PrismaClientKnownRequestError) {
+    message = "Database operation failed";
+    console.error("Prisma Error:", error.message);
+  } else if (status !== 500) {
+    message = error.message;
+  }
+
+  // Security: Prevent detailed errors in production
+  const isProduction = process.env.NODE_ENV === "production";
+  const response = {
     success: false,
-    statusCode: error.status || 500,
-    message:
-      error instanceof PrismaClientKnownRequestError
-        ? "something went wrong while working with prisma!!"
-        : error.message + "!!" || "internal server error!!",
-    data: null
-    // requestInfo: {
-    //   url: req.originalUrl,
-    //   method: req.method,
-    //   ...(ENV !== "production" && { ip: req?.ip }) // Only add `ip` if not in production
-    // },
-    //...(ENV !== "production" && { stack: error.stack ? error.stack : "No stack has been sent" }) // Only add `ip` if not in production
+    statusCode: status,
+    message: message + "!",
+    data: null,
+    ...(!isProduction && {
+      stack: error.stack,
+      fullError: JSON.stringify(error)
+    })
   };
-  res.status(error.status || 500).json(errObject);
-  //   .end();
-  // next();
+
+  res.status(status).json(response);
 };
