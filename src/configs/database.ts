@@ -3,7 +3,7 @@ import { app } from "../app.js";
 import logger from "../utils/loggerUtils.js";
 import { PORT } from "./config.js";
 
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
 const db = new PrismaClient({});
 
 const connectDB = async (): Promise<void> => {
