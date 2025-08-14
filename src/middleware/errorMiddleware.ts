@@ -11,7 +11,7 @@ export const notFoundHandler = (req: Request, __: Response, next: NextFunction) 
   next(error);
 };
 
-export const errorHandler = (error: CustomError, _req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (error: CustomError, _req: Request, res: Response) => {
   const errObject = {
     success: false,
     statusCode: error.status || 500,
@@ -27,9 +27,7 @@ export const errorHandler = (error: CustomError, _req: Request, res: Response, n
     // },
     //...(ENV !== "production" && { stack: error.stack ? error.stack : "No stack has been sent" }) // Only add `ip` if not in production
   };
-  res
-    .status(error.status || 500)
-    .json(errObject)
-    .end();
-  next();
+  res.status(error.status || 500).json(errObject);
+  //   .end();
+  // next();
 };
