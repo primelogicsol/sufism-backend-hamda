@@ -280,5 +280,42 @@ export default {
 
     logger.info(`Review added by user ${user.fullName} for item ${meditations.title}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
+  }),
+  getReviews: asyncHandler(async (req: _Request, res) => {
+    const { id } = req.params;
+
+    const user = await db.user.findFirst({
+      where: { id: req.userFromToken?.id }
+    });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const fashion = await db.meditation.findFirst({
+      where: { id: Number(id) }
+    });
+
+    if (!fashion) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Meditation not found");
+    }
+
+    const reviews = await db.review.findMany({
+      where: { fashionId: Number(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, reviews);
   })
 };

@@ -31,18 +31,17 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    // Check for existing productId
-    const existingMusic = await db.music.findFirst({
-      where: { productId: Number(data.productId) }
-    });
+    // // Check for existing productId
+    // const existingMusic = await db.music.findFirst({
+    //   where: { productId: Number(data.productId) }
+    // });
 
-    if (existingMusic) {
-      return httpResponse(req, res, reshttp.conflictCode, "Music with this product ID already exists");
-    }
+    // if (existingMusic) {
+    //   return httpResponse(req, res, reshttp.conflictCode, "Music with this product ID already exists");
+    // }
 
     const music = await db.music.create({
       data: {
-        productId: Number(data.productId),
         title: data.title,
         artist: data.artist,
         mp3Url: files?.find((f) => f.fieldname === "mp3File")?.path || data.mp3Url,
@@ -178,17 +177,16 @@ export default {
     }
 
     // Check productId uniqueness if updating productId
-    if (data.productId && data.productId !== existingMusic.productId) {
-      const productIdExists = await db.music.findFirst({
-        where: { productId: Number(data.productId) }
-      });
-      if (productIdExists) {
-        return httpResponse(req, res, reshttp.conflictCode, "Product ID already exists");
-      }
-    }
+    // if (data.productId && data.productId !== existingMusic.productId) {
+    //   const productIdExists = await db.music.findFirst({
+    //     where: { productId: Number(data.productId) }
+    //   });
+    //   if (productIdExists) {
+    //     return httpResponse(req, res, reshttp.conflictCode, "Product ID already exists");
+    //   }
+    // }
 
     const updateData: Prisma.MusicUpdateInput = {};
-    if (data.productId) updateData.productId = Number(data.productId);
     if (data.title) updateData.title = data.title;
     if (data.artist !== undefined) updateData.artist = data.artist;
     if (data.duration !== undefined) updateData.duration = data.duration ? Number(data.duration) : null;
@@ -310,5 +308,42 @@ export default {
 
     logger.info(`Review added by user ${user.fullName} for music: ${music.title}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
+  }),
+  getReviews: asyncHandler(async (req: _Request, res) => {
+    const { id } = req.params;
+
+    const user = await db.user.findFirst({
+      where: { id: req.userFromToken?.id }
+    });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const accessory = await db.music.findFirst({
+      where: { id: Number(id) }
+    });
+
+    if (!accessory) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Music item not found");
+    }
+
+    const reviews = await db.review.findMany({
+      where: { accessoriesId: Number(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, reviews);
   })
 };

@@ -22,7 +22,7 @@ export default {
 
     // Check for existing SKU
     const existingfashion = await db.fashion.findFirst({
-      where: { sku: data.sku }
+      where: { sku: data.sku, isDelete: false }
     });
 
     if (existingfashion) {
@@ -152,7 +152,7 @@ export default {
 
     // Check if fashion exists
     const existingfashion = await db.fashion.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), isDelete: false }
     });
 
     if (!existingfashion) {

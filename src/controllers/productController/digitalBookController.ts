@@ -7,7 +7,6 @@ import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
 
 interface DigitalBookData {
-  productId: number;
   author?: string;
   genre?: string;
   releaseDate?: string;
@@ -47,18 +46,8 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    // Check for existing productId
-    const existingBook = await db.digitalBook.findFirst({
-      where: { productId: Number(data.productId) }
-    });
-
-    if (existingBook) {
-      return httpResponse(req, res, reshttp.conflictCode, "Digital book with this product ID already exists");
-    }
-
     const digitalBook = await db.digitalBook.create({
       data: {
-        productId: Number(data.productId),
         author: data.author,
         genre: data.genre,
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : null,
@@ -70,7 +59,7 @@ export default {
       }
     });
 
-    logger.info(`Digital book created with product ID: ${digitalBook.productId}`);
+    logger.info(`Digital book created with  ID: ${digitalBook.id}`);
     return httpResponse(req, res, reshttp.createdCode, "Digital book created successfully", digitalBook);
   }),
 
@@ -199,18 +188,17 @@ export default {
       return httpResponse(req, res, reshttp.notFoundCode, "Digital book not found");
     }
 
-    // Check productId uniqueness if updating productId
-    if (data.productId && data.productId !== existingBook.productId) {
-      const productIdExists = await db.digitalBook.findFirst({
-        where: { productId: Number(data.productId) }
-      });
-      if (productIdExists) {
-        return httpResponse(req, res, reshttp.conflictCode, "Product ID already exists");
-      }
-    }
+    // // Check productId uniqueness if updating productId
+    // if (data.productId && data.productId !== existingBook.productId) {
+    //   const productIdExists = await db.digitalBook.findFirst({
+    //     where: { productId: Number(data.productId) }
+    //   });
+    //   if (productIdExists) {
+    //     return httpResponse(req, res, reshttp.conflictCode, "Product ID already exists");
+    //   }
+    // }
 
     const updateData: Prisma.DigitalBookUpdateInput = {};
-    if (data.productId) updateData.productId = Number(data.productId);
     if (data.author !== undefined) updateData.author = data.author;
     if (data.genre !== undefined) updateData.genre = data.genre;
     if (data.releaseDate !== undefined) updateData.releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
@@ -242,7 +230,7 @@ export default {
       }
     });
 
-    logger.info(`Digital book updated with product ID: ${updatedBook.productId}`);
+    logger.info(`Digital book updated with product ID: ${updatedBook.fileType}`);
     return httpResponse(req, res, reshttp.okCode, "Digital book updated successfully", updatedBook);
   }),
 
@@ -271,7 +259,7 @@ export default {
       data: { isDelete: true }
     });
 
-    logger.info(`Digital book deleted with product ID: ${digitalBook.productId}`);
+    logger.info(`Digital book deleted with product`);
     return httpResponse(req, res, reshttp.okCode, "Digital book deleted successfully");
   }),
 
@@ -325,7 +313,7 @@ export default {
       }
     });
 
-    logger.info(`Review added by user for digital book with product ID ${digitalBook.productId}`);
+    logger.info(`Review added by user for digital book with product ID ${digitalBook.author}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
   })
 };

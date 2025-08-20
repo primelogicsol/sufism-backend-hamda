@@ -156,6 +156,10 @@ export interface TCREATE_INTERVIEW_REQUEST {
   additionalNotes?: string;
 }
 
+export interface InterviewRequestBody {
+  interviewHeldDate: string; // or Date if you expect Date object
+}
+
 export interface TCREATE_CONFERENCE_REGISTRATION {
   institution: string;
   abstract: string;

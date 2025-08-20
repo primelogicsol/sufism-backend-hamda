@@ -238,7 +238,6 @@ export const productSchema = z.object({
   sku: z.string({
     message: "SKU is required"
   }),
-  images: z.array(z.string()).optional(),
   discount: z.string().optional(),
   deliveryTime: z.string().optional(),
   note: z.string().optional(),

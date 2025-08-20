@@ -287,5 +287,42 @@ export default {
 
     logger.info(`Review added by user ${user.fullName} for item ${homeAndLivingItem.title}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
+  }),
+  getReviews: asyncHandler(async (req: _Request, res) => {
+    const { id } = req.params;
+
+    const user = await db.user.findFirst({
+      where: { id: req.userFromToken?.id }
+    });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const accessory = await db.homeAndLiving.findFirst({
+      where: { id: Number(id) }
+    });
+
+    if (!accessory) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Item not found");
+    }
+
+    const reviews = await db.review.findMany({
+      where: { accessoriesId: Number(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, reviews);
   })
 };
