@@ -228,17 +228,13 @@ export const productSchema = z.object({
   price: z.string({ message: "Price is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: "Price must be a valid amount"
   }),
-  stock: z
-    .string({ message: "Stock is required" })
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-      message: "Stock must be a valid number"
-    })
-    .optional(),
+  stock: z.string({ message: "Stock is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Stock must be a valid number"
+  }),
   tags: z.array(z.string()).optional(),
   sku: z.string({
     message: "SKU is required"
   }),
-  images: z.array(z.string()).optional(),
   discount: z.string().optional(),
   deliveryTime: z.string().optional(),
   note: z.string().optional(),
@@ -258,14 +254,14 @@ export const bookSchema = z.object({
       message: "Stock must be a valid number"
     })
     .optional(),
-  author: z.string({ message: "Author must be string" }).optional(),
+  author: z.string({ message: "Author must be string" }),
   genre: z.string({ message: "Genre must be string" }).optional(),
   releaseDate: z.string({ message: "Release date must be string" }).optional(),
-  url: z.string({ message: "url must be string" }).url().optional(),
+  url: z.string().optional(),
   overviewImages: z.string().optional(),
   fileType: z.string().optional(),
   coverImage: z.string().optional(),
-  isAvailable: z.boolean().optional()
+  isAvailable: z.string().optional()
 });
 // For Audio
 export const audioSchema = z.object({
@@ -274,12 +270,9 @@ export const audioSchema = z.object({
   price: z.string({ message: "Price is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
     message: "Price must be a valid amount"
   }),
-  stock: z
-    .string({ message: "Stock is required" })
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-      message: "Stock must be a valid number"
-    })
-    .optional(),
+  stock: z.string({ message: "Stock is required" }).refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+    message: "Stock must be a valid number"
+  }),
   artist: z.string({ message: "Artist name must be string" }).optional(),
   mp3Url: z.string().url().optional(),
   mp4Url: z.string().url().optional(),

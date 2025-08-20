@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Prisma } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
@@ -7,15 +8,17 @@ import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
 
 interface DigitalBookData {
-  productId: number;
   author?: string;
   genre?: string;
   releaseDate?: string;
-  url: string;
+  url?: string;
   fileType: string;
   coverImage?: string;
-  isAvailable?: boolean;
+  isAvailable?: string;
   overviewImages?: string[];
+  title: string;
+  description: string;
+  price: number;
 }
 
 interface SearchQuery {
@@ -32,218 +35,277 @@ interface ReviewData {
   rating: number;
   content: string;
 }
+type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
   // Create Digital Book
   create: asyncHandler(async (req: _Request, res) => {
-    const files = req.files as Express.Multer.File[];
-    const data = req.body as DigitalBookData;
-
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
-
-    if (!user || user.role != "member") {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
-
-    // Check for existing productId
-    const existingBook = await db.digitalBook.findFirst({
-      where: { productId: Number(data.productId) }
-    });
-
-    if (existingBook) {
-      return httpResponse(req, res, reshttp.conflictCode, "Digital book with this product ID already exists");
-    }
-
-    const digitalBook = await db.digitalBook.create({
-      data: {
-        productId: Number(data.productId),
-        author: data.author,
-        genre: data.genre,
-        releaseDate: data.releaseDate ? new Date(data.releaseDate) : null,
-        url: data.url,
-        fileType: data.fileType,
-        overviewImages: data.overviewImages,
-        coverImage: files?.find((f) => f.fieldname === "coverImage")?.path || data.coverImage,
-        isAvailable: data.isAvailable ?? false
+    try {
+      const files = req.files as MulterFiles;
+      const data = req.body as DigitalBookData;
+      const user = await db.user.findFirst({
+        where: { id: req.userFromToken?.id }
+      });
+      //  logger.info(files);
+      logger.info("_______");
+      if (!user || user.role !== "vendor") {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
       }
-    });
 
-    logger.info(`Digital book created with product ID: ${digitalBook.productId}`);
-    return httpResponse(req, res, reshttp.createdCode, "Digital book created successfully", digitalBook);
+      const releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
+
+      if (releaseDate && isNaN(releaseDate.getTime())) {
+        return httpResponse(req, res, reshttp.forbiddenCode, "Invalid releaseDate format");
+      }
+      if (isNaN(Number(data.price))) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Invalid price");
+      }
+      if (!files?.thumbnail?.length) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Cover image (thumbnail) is required");
+      }
+
+      if (!files?.document?.length) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Document is required");
+      }
+      const digitalBook = await db.digitalBook.create({
+        data: {
+          userId: user.id,
+          title: data.title,
+          descritpion: data.description,
+          author: data.author,
+          genre: data.genre,
+          price: Number(data.price),
+          releaseDate: releaseDate || null,
+          url: files?.document?.[0]?.path || "",
+          overviewImages: files?.overviewImages?.map((file) => file.path) || [],
+          coverImage: files?.thumbnail?.[0]?.path || "",
+          isAvailable: data.isAvailable === "true"
+        }
+      });
+
+      logger.info(`Digital book created with ID: ${digitalBook.id}`);
+      return httpResponse(req, res, reshttp.createdCode, "Digital book created successfully", digitalBook);
+    } catch (error) {
+      logger.error("Error creating digital book:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Something went wrong while creating the digital book");
+    }
   }),
 
   // Get all digital books
   getAll: asyncHandler(async (req: _Request, res) => {
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
+    try {
+      const user = await db.user.findFirst({
+        where: { id: req.userFromToken?.id }
+      });
 
-    if (!user) {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
+      if (!user) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+      }
 
-    const { page = "1", limit = "10", search = "", sortBy = "createdAt", sortOrder = "desc", genre, author } = req.query as SearchQuery;
+      const { page = "1", limit = "10", search = "", sortBy = "createdAt", sortOrder = "desc", genre, author } = req.query as SearchQuery;
 
-    const pageNumber = parseInt(page, 10);
-    const limitNumber = parseInt(limit, 10);
-    const skip = (pageNumber - 1) * limitNumber;
+      const pageNumber = parseInt(page, 10);
+      const limitNumber = parseInt(limit, 10);
+      const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.DigitalBookWhereInput = {};
+      const where: Prisma.DigitalBookWhereInput = {
+        isDelete: false
+      };
+      if (user.role === "vendor") {
+        where.userId = user.id;
+      }
 
-    if (search) {
-      where.OR = [{ author: { contains: search, mode: "insensitive" } }, { genre: { contains: search, mode: "insensitive" } }];
-    }
+      if (search) {
+        where.OR = [
+          { author: { contains: search, mode: "insensitive" } },
+          { genre: { contains: search, mode: "insensitive" } },
+          { title: { contains: search, mode: "insensitive" } } // ✅ bonus: allow search by title
+        ];
+      }
 
-    if (genre) {
-      where.genre = { contains: genre, mode: "insensitive" };
-    }
+      if (genre) {
+        where.genre = { contains: genre, mode: "insensitive" };
+      }
 
-    if (author) {
-      where.author = { contains: author, mode: "insensitive" };
-    }
+      if (author) {
+        where.author = { contains: author, mode: "insensitive" };
+      }
 
-    const orderBy = { [sortBy]: sortOrder };
+      const orderBy: Prisma.DigitalBookOrderByWithRelationInput = { [sortBy]: sortOrder };
 
-    const total = await db.digitalBook.count({ where });
-    const digitalBooks = await db.digitalBook.findMany({
-      where,
-      skip,
-      take: limitNumber,
-      orderBy,
-      include: {
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true
+      const total = await db.digitalBook.count({ where });
+
+      const digitalBooks = await db.digitalBook.findMany({
+        where,
+        skip,
+        take: limitNumber,
+        orderBy,
+        include: {
+          reviews: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
               }
             }
           }
         }
+      });
+      let finalBooks;
+      if (user.role == "user") {
+        finalBooks = digitalBooks.map((book) => {
+          // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+          const { url, ...rest } = book;
+          return rest;
+        });
+        return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+          digitalBooks: finalBooks,
+          pagination: {
+            totalItems: total,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(total / limitNumber),
+            limit: limitNumber,
+            hasNextPage: pageNumber < Math.ceil(total / limitNumber),
+            hasPrevPage: pageNumber > 1
+          }
+        });
       }
-    });
-
-    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
-      digitalBooks,
-      pagination: {
-        totalItems: total,
-        currentPage: pageNumber,
-        totalPages: Math.ceil(total / limitNumber),
-        limit: limitNumber,
-        hasNextPage: pageNumber < Math.ceil(total / limitNumber),
-        hasPrevPage: pageNumber > 1
-      }
-    });
+      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+        digitalBooks: digitalBooks,
+        pagination: {
+          totalItems: total,
+          currentPage: pageNumber,
+          totalPages: Math.ceil(total / limitNumber),
+          limit: limitNumber,
+          hasNextPage: pageNumber < Math.ceil(total / limitNumber),
+          hasPrevPage: pageNumber > 1
+        }
+      });
+    } catch (error) {
+      logger.error("Error fetching digital books:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Something went wrong while fetching the digital books");
+    }
   }),
 
   // Get single digital book
   getById: asyncHandler(async (req: _Request, res) => {
-    const { id } = req.params;
+    try {
+      const { id } = req.params;
+      logger.info(id);
+      if (!id || isNaN(Number(id))) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Invalid book ID");
+      }
 
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
+      const user = await db.user.findFirst({
+        where: { id: req.userFromToken?.id }
+      });
 
-    if (!user) {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
+      if (!user) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+      }
 
-    const digitalBook = await db.digitalBook.findFirst({
-      where: { id: Number(id) },
-      include: {
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true
+      const digitalBook = await db.digitalBook.findFirst({
+        where: { id: Number(id), isDelete: false },
+        include: {
+          reviews: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
               }
             }
           }
         }
+      });
+
+      if (!digitalBook) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Digital book not found");
       }
-    });
-
-    if (!digitalBook) {
-      return httpResponse(req, res, reshttp.notFoundCode, "Digital book not found");
+      let responseBook;
+      if (user.role !== "vendor") {
+        // eslint-disable-next-line no-unused-vars
+        const { url, ...rest } = digitalBook;
+        responseBook = rest;
+        return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, responseBook);
+      }
+      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, digitalBook);
+    } catch (error) {
+      logger.error("Error fetching digital book by ID:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Something went wrong while fetching the digital book");
     }
-
-    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, digitalBook);
   }),
 
   // Update digital book
   update: asyncHandler(async (req: _Request, res) => {
-    const { id } = req.params;
-    const files = req.files as Express.Multer.File[];
-    const data = req.body as Partial<DigitalBookData>;
+    try {
+      const { id } = req.params;
+      const files = req.files as MulterFiles;
+      const data = req.body as Partial<DigitalBookData>;
 
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
-
-    if (!user || user.role != "member") {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
-
-    // Check if book exists
-    const existingBook = await db.digitalBook.findFirst({
-      where: { id: Number(id) }
-    });
-
-    if (!existingBook) {
-      return httpResponse(req, res, reshttp.notFoundCode, "Digital book not found");
-    }
-
-    // Check productId uniqueness if updating productId
-    if (data.productId && data.productId !== existingBook.productId) {
-      const productIdExists = await db.digitalBook.findFirst({
-        where: { productId: Number(data.productId) }
-      });
-      if (productIdExists) {
-        return httpResponse(req, res, reshttp.conflictCode, "Product ID already exists");
+      if (!id || isNaN(Number(id))) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Invalid book ID");
       }
-    }
 
-    const updateData: Prisma.DigitalBookUpdateInput = {};
-    if (data.productId) updateData.productId = Number(data.productId);
-    if (data.author !== undefined) updateData.author = data.author;
-    if (data.genre !== undefined) updateData.genre = data.genre;
-    if (data.releaseDate !== undefined) updateData.releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
-    if (data.url) updateData.url = data.url;
-    if (data.fileType) updateData.fileType = data.fileType;
-    if (data.isAvailable !== undefined) updateData.isAvailable = data.isAvailable;
+      const user = await db.user.findFirst({
+        where: { id: req.userFromToken?.id }
+      });
 
-    if (files?.find((f) => f.fieldname === "coverImage")) {
-      updateData.coverImage = files.find((f) => f.fieldname === "coverImage")?.path;
-    } else if (data.coverImage !== undefined) {
-      updateData.coverImage = data.coverImage;
-    }
+      if (!user || user.role !== "vendor") {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+      }
+      const existingBook = await db.digitalBook.findFirst({
+        where: { id: Number(id), isDelete: false, userId: user.id }
+      });
 
-    const updatedBook = await db.digitalBook.update({
-      where: { id: Number(id) },
-      data: updateData,
-      include: {
-        reviews: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true
+      if (!existingBook) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Digital book not found");
+      }
+      const releaseDate = data.releaseDate ? new Date(data.releaseDate) : null;
+      if (releaseDate && isNaN(releaseDate.getTime())) {
+        return httpResponse(req, res, reshttp.forbiddenCode, "Invalid releaseDate format");
+      }
+
+      const updateData: Prisma.DigitalBookUpdateInput = {};
+
+      if (data.author) updateData.author = data.author;
+      if (data.title) updateData.title = data.title;
+      if (data.genre) updateData.genre = data.genre;
+      if (data.releaseDate) updateData.releaseDate = releaseDate;
+      if (files?.document?.length) updateData.url = files.document[0].path;
+      if (files?.overviewImages?.length) updateData.overviewImages = files.overviewImages.map((file) => file.path);
+      if (files?.thumbnail?.length) updateData.coverImage = files.thumbnail[0].path;
+      if (data.isAvailable !== undefined) updateData.isAvailable = data.isAvailable == "true";
+
+      const updatedBook = await db.digitalBook.update({
+        where: { id: Number(id) },
+        data: updateData,
+        include: {
+          reviews: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
               }
             }
           }
         }
-      }
-    });
+      });
 
-    logger.info(`Digital book updated with product ID: ${updatedBook.productId}`);
-    return httpResponse(req, res, reshttp.okCode, "Digital book updated successfully", updatedBook);
+      logger.info(`✅ Digital book updated successfully with ID: ${updatedBook.id}`);
+      return httpResponse(req, res, reshttp.okCode, "Digital book updated successfully", updatedBook);
+    } catch (error) {
+      logger.error("❌ Error updating digital book:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Something went wrong while updating the digital book");
+    }
   }),
 
   // Delete digital book
@@ -254,12 +316,12 @@ export default {
       where: { id: req.userFromToken?.id }
     });
 
-    if (!user || user.role != "member") {
+    if (!user || user.role != "vendor") {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
     const digitalBook = await db.digitalBook.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!digitalBook) {
@@ -271,7 +333,7 @@ export default {
       data: { isDelete: true }
     });
 
-    logger.info(`Digital book deleted with product ID: ${digitalBook.productId}`);
+    logger.info(`Digital book deleted with product`);
     return httpResponse(req, res, reshttp.okCode, "Digital book deleted successfully");
   }),
 
@@ -325,7 +387,7 @@ export default {
       }
     });
 
-    logger.info(`Review added by user for digital book with product ID ${digitalBook.productId}`);
+    logger.info(`Review added by user for digital book with product ID ${digitalBook.author}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
   })
 };

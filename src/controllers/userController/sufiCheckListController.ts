@@ -5,6 +5,7 @@ import type { _Request } from "../../middleware/authMiddleware.js";
 import type { TCreateSufiChecklistRequest } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
+import logger from "../../utils/loggerUtils.js";
 
 export default {
   createChecklist: asyncHandler(async (req: _Request, res) => {
@@ -72,7 +73,8 @@ export default {
         return httpResponse(req, res, reshttp.createdCode, "Checklist created successfully");
       }
     } catch (error) {
-      console.error("Checklist error:", error);
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.info(`Checklist error:${error}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Something went wrong", {
         error: (error as Error).message
       });

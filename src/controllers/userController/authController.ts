@@ -30,6 +30,7 @@ export default {
         fullName: body.fullName,
         email: body.email,
         password: hashedPassword,
+        role: body.role ?? "user",
         OTP: OTP_TOKEN.otp,
         OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry,
         isVerified: false

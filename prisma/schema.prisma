@@ -20,87 +20,95 @@ model RateLimiterFlexible {
 }
 
 model User {
-  id         String         @id @default(cuid())
-  fullName       String        @default("")
-  role           String        @default("user")//user ,vendor,member
-  lastName       String        @default("")
-  address        String?        
+  id             String         @id @default(cuid())
+  fullName       String         @default("")
+  role           String         @default("user") //user ,vendor,member
+  lastName       String         @default("")
+  address        String?
   phone          String?
   city           String?
   state          String?
   zipCode        String?
   country        String?
-  email          String        @unique
+  email          String         @unique
   password       String?
   avatar         String?        @default("https://via.placeholder.com/70x70")
   OTP            String?        @unique
   OTP_EXPIRES_IN DateTime?
   isVerified     Boolean        @default(false)
   tokenVersion   Int            @default(0)
-  authProvider   AuthProvider @default(credentials)
-  member     Member?  
-  donation Donation?
-  reviews Review[]
-  carts Cart[]
-  wishlists Wishlist[]
-  bookService BookService[]
-  interview  Interview[]
-  contactUs ContactUs[]
-  conference Conference[]
+  authProvider   AuthProvider   @default(credentials)
+  member         Member?
+  donation       Donation?
+  reviews        Review[]
+  carts          Cart[]
+  wishlists      Wishlist[]
+  bookService    BookService[]
+  interview      Interview?
+  contactUs      ContactUs[]
+  conference     Conference[]
   sufiChecklist  SufiChecklist?
+  orderPlace Order[]
+  digitalBoook DigitalBook[]
+  music Music[]
   createdAt      DateTime       @default(now())
+
   @@map("users")
 }
 
-
 model Member {
-  id        String   @id @default(cuid())//Todo better to use id
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
-  phone     String?
-  country   String
-  role    String[]//todo: add role 
-  
-  volunteerSupport String[] @default([""])
-  previousVolunteerExp String?
-  monthlyTime String?
-  volunteerMode VolunteeringMode @default(IN_PERSON)
+  id      String   @id @default(cuid()) //Todo better to use id
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String   @unique
+  phone   String?
+  country String
+  role    String[] //todo: add role 
 
-  donorType   String[] @default([""])
+  volunteerSupport     String[]         @default([""])
+  previousVolunteerExp String?
+  monthlyTime          String?
+  volunteerMode        VolunteeringMode @default(IN_PERSON)
+
+  donorType String[] @default([""])
 
   collaboratorIntent String[] @default([""])
-  organization String?
-  intentCreation String?
+  organization       String?
+  intentCreation     String?
 
-  additionalInfo String?
-  agreedToPrinciples Boolean @default(false)
-  consentedToUpdates Boolean @default(false)
-  createdAt DateTime @default(now())
+  additionalInfo     String?
+  agreedToPrinciples Boolean  @default(false)
+  consentedToUpdates Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
   @@map("members")
 }
+
 model Donation {
-  id        Int   @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
-  amount String
-  pool   TPOOL[] @default([SUFI_SCIENCE_CENTER])
-  donorType   DONATION_TYPE @default(ONE_TIME)
-  createdAt DateTime @default(now())
+  id        Int           @id @default(autoincrement())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String        @unique
+  amount    String
+  pool      TPOOL[]       @default([SUFI_SCIENCE_CENTER])
+  donorType DONATION_TYPE @default(ONE_TIME)
+  createdAt DateTime      @default(now())
+
   @@map("donations")
 }
 
 model Conference {
-  id Int @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
-  institution String? 
-  abstract String
+  id               Int               @id @default(autoincrement())
+  user             User              @relation(fields: [userId], references: [id])
+  userId           String            @unique
+  institution      String?
+  abstract         String
   presentationType PRESENTATION_TYPE @default(ORAL)
-  topic CONFERENCE_TYPE @default(SUFI_PHILOSOPHY)
-  status              Int           @default(0)
-  createdAt DateTime @default(now())
+  topic            CONFERENCE_TYPE   @default(SUFI_PHILOSOPHY)
+  status           Int               @default(0)
+  createdAt        DateTime          @default(now())
+
   @@map("conferences")
 }
+
 enum CONFERENCE_TYPE {
   SUFI_PHILOSOPHY
   QUANTUM_CONSCIOUSNESS
@@ -109,17 +117,20 @@ enum CONFERENCE_TYPE {
   INTER_APPROACHES
   OTHER
 }
+
 enum PRESENTATION_TYPE {
   ORAL
   POSTER
   WORKSHOP
   PANEL_DISCUSSION
 }
+
 enum VolunteeringMode {
   IN_PERSON
   REMOTE
   HYBRID
 }
+
 enum DONATION_TYPE {
   ONE_TIME
   MONTHLY
@@ -136,295 +147,338 @@ enum TPOOL {
   SPONSOR_SCHOLAR
   PRESERVE_ART_AND_CRAFT
   SPONSOR_EVENTS
+}
 
-  }
-  model Accessories {
-    id          Int      @id @default(autoincrement())
-    stock       Int      @default(0)
-    title       String
-    description String?
-    price       Float
-    tags        String[]      @default([])
-    sku         String        @unique
-    images      String[] @default([])
-    wishlist    Wishlist[]
+model Accessories {
+  id          Int        @id @default(autoincrement())
+  stock       Int        @default(0)
+  title       String
+  description String?
+  price       Float
+  tags        String[]   @default([])
+  sku         String     @unique
+  images      String[]   @default([])
+  wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDelete    Boolean    @default(false)
+
   @@map("accessories")
 }
 
 model Decoration {
-  id          Int      @id @default(autoincrement())
-  stock       Int      @default(0)
+  id          Int        @id @default(autoincrement())
+  stock       Int        @default(0)
   title       String
   description String?
   price       Float
-  tags        String[]      @default([])
-  sku         String        @unique
-  images      String[] @default([])
+  tags        String[]   @default([])
+  sku         String     @unique
+  images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDelete    Boolean    @default(false)
+
   @@map("decorations")
 }
 
 model HomeAndLiving {
-  id          Int      @id @default(autoincrement())
-  stock       Int      @default(0)
+  id          Int        @id @default(autoincrement())
+  stock       Int        @default(0)
   title       String
   description String?
   price       Float
-  tags        String[]      @default([])
-  sku         String        @unique
+  tags        String[]   @default([])
+  sku         String     @unique
   wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]
-  images      String[] @default([])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
+  images      String[]   @default([])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDelete    Boolean    @default(false)
+
   @@map("homeAndLiving")
 }
 
 model Fashion {
-  id          Int      @id @default(autoincrement())
-  stock       Int      @default(0)
+  id          Int        @id @default(autoincrement())
+  stock       Int        @default(0)
   title       String
   description String?
   price       Float
-  tags        String[]      @default([])
-  sku         String        @unique
-  images      String[] @default([])
+  tags        String[]   @default([])
+  sku         String     @unique
+  images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
-    @@map("fashion")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDelete    Boolean    @default(false)
+
+  @@map("fashion")
 }
 
 model Meditation {
-  id          Int      @id @default(autoincrement())
-  stock       Int      @default(0)
+  id          Int        @id @default(autoincrement())
+  stock       Int        @default(0)
   title       String
   description String?
   price       Float
-  tags        String[]      @default([])
-  sku         String        @unique
-  images      String[] @default([])
+  tags        String[]   @default([])
+  sku         String     @unique
+  images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
   reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDelete    Boolean    @default(false)
 }
 
 model DigitalBook {
-  id          Int      @id @default(autoincrement())
-  productId   Int      @unique
-  author      String?
-  genre       String?
-  releaseDate DateTime?
-  url         String
-  fileType    String
-  coverImage  String?
-  overviewImages String[]
-  wishlist    Wishlist[]
-  cart        Cart[]
-  reviews     Review[]
-  isAvailable Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDelete   Boolean @default(false)
+  userId    String
+  id             Int        @id @default(autoincrement())
+  author         String?
+  user        User        @relation(fields: [userId], references: [id])
+  title         String    @default("")
+  descritpion         String    @default("")
+  genre          String?
+  releaseDate    DateTime?
+  url            String?
+  fileType       String?
+  coverImage     String?
+  price          Float     @default(0)
+  overviewImages String[]  @default([])
+  wishlist       Wishlist[]
+  cart           Cart[]
+  reviews        Review[]
+  isAvailable    Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  isDelete       Boolean    @default(false)
+
   @@map("digitalBooks")
 }
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+model Order {
+  id              Int          @id @default(autoincrement())
+  userId          String
+  quantity        Int          @default(1)
+  status          OrderStatus  @default(PENDING)
+  amount          Float
+  stripeSessionId String?
+  stripePaymentId String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
+  user        User        @relation(fields: [userId], references: [id])
+  productId  Int
+
+  @@map("orders")
+}
 model Music {
-  id          Int      @id @default(autoincrement())
-  productId   Int      @unique
+  id          Int        @id @default(autoincrement())
   title       String
+  description       String
   artist      String?
   mp3Url      String?
   mp4Url      String?
   duration    Int?
+  stock       Int        @default(0)
+  price          Float     @default(0)
   reviews     Review[]
   wishlist    Wishlist[]
   cart        Cart[]
-  isDelete   Boolean @default(false)
-  isAvailable Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isDelete    Boolean    @default(false)
+  isAvailable Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User        @relation(fields: [userId], references: [id])
+  userId    String
+
   @@map("music")
 }
 
 // FIXED: Review model with optional relations
 model Review {
-  id          Int      @id @default(autoincrement())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  rating      Int
-  content     String
-  createdAt   DateTime @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int
+  content   String
+  createdAt DateTime @default(now())
+
   // Optional foreign keys - only one should be filled at a time
-  musicId      Int?
-  music        Music?        @relation(fields: [musicId], references: [id], onDelete: Cascade)
-  
-  bookId       Int?
-  digitalBook  DigitalBook?  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  
+  musicId Int?
+  music   Music? @relation(fields: [musicId], references: [id], onDelete: Cascade)
+
+  bookId      Int?
+  digitalBook DigitalBook? @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
   meditationId Int?
-  meditation   Meditation?   @relation(fields: [meditationId], references: [id], onDelete: Cascade)
-  
-  fashionId    Int?
-  fashion      Fashion?      @relation(fields: [fashionId], references: [id], onDelete: Cascade)
-  
-  livingId     Int?
-  living       HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
-  
+  meditation   Meditation? @relation(fields: [meditationId], references: [id], onDelete: Cascade)
+
+  fashionId Int?
+  fashion   Fashion? @relation(fields: [fashionId], references: [id], onDelete: Cascade)
+
+  livingId Int?
+  living   HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
+
   decorationId Int?
-  decoration   Decoration?   @relation(fields: [decorationId], references: [id], onDelete: Cascade)
-  
+  decoration   Decoration? @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+
   accessoriesId Int?
-  accessories   Accessories?  @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
-  
+  accessories   Accessories? @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
+
   @@map("reviews")
 }
 
 // FIXED: Cart model with optional relations
 model Cart {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  qty          Int      @default(1)
-  createdAt    DateTime @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  qty       Int      @default(1)
+  createdAt DateTime @default(now())
+
   // Optional foreign keys - only one should be filled at a time
-  musicId      Int?
-  music        Music?        @relation(fields: [musicId], references: [id], onDelete: Cascade)
-  
-  bookId       Int?
-  digitalBook  DigitalBook?  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  
+  musicId Int?
+  music   Music? @relation(fields: [musicId], references: [id], onDelete: Cascade)
+
+  bookId      Int?
+  digitalBook DigitalBook? @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
   meditationId Int?
-  meditation   Meditation?   @relation(fields: [meditationId], references: [id], onDelete: Cascade)
-  
-  fashionId    Int?
-  fashion      Fashion?      @relation(fields: [fashionId], references: [id], onDelete: Cascade)
-  
-  livingId     Int?
-  living       HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
-  
+  meditation   Meditation? @relation(fields: [meditationId], references: [id], onDelete: Cascade)
+
+  fashionId Int?
+  fashion   Fashion? @relation(fields: [fashionId], references: [id], onDelete: Cascade)
+
+  livingId Int?
+  living   HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
+
   decorationId Int?
-  decoration   Decoration?   @relation(fields: [decorationId], references: [id], onDelete: Cascade)
-  
+  decoration   Decoration? @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+
   accessoriesId Int?
-  accessories   Accessories?  @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
-  
+  accessories   Accessories? @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
+
   @@map("carts")
 }
 
 model Wishlist {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  createdAt    DateTime @default(now())
-  
-  // Optional foreign keys - only one should be filled at a time
-  musicId      Int?
-  music        Music?        @relation(fields: [musicId], references: [id], onDelete: Cascade)
-  
-  bookId       Int?
-  digitalBook  DigitalBook?  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  
-  meditationId Int?
-  meditation   Meditation?   @relation(fields: [meditationId], references: [id], onDelete: Cascade)
-  
-  fashionId    Int?
-  fashion      Fashion?      @relation(fields: [fashionId], references: [id], onDelete: Cascade)
-  
-  livingId     Int?
-  living       HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
-  
-  decorationId Int?
-  decoration   Decoration?   @relation(fields: [decorationId], references: [id], onDelete: Cascade)
-  
-  accessoriesId Int?
-  accessories   Accessories?  @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
-  
-  @@map("wishlists")
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 
+  // Optional foreign keys - only one should be filled at a time
+  musicId Int?
+  music   Music? @relation(fields: [musicId], references: [id], onDelete: Cascade)
+
+  bookId      Int?
+  digitalBook DigitalBook? @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  meditationId Int?
+  meditation   Meditation? @relation(fields: [meditationId], references: [id], onDelete: Cascade)
+
+  fashionId Int?
+  fashion   Fashion? @relation(fields: [fashionId], references: [id], onDelete: Cascade)
+
+  livingId Int?
+  living   HomeAndLiving? @relation(fields: [livingId], references: [id], onDelete: Cascade)
+
+  decorationId Int?
+  decoration   Decoration? @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+
+  accessoriesId Int?
+  accessories   Accessories? @relation(fields: [accessoriesId], references: [id], onDelete: Cascade)
+
+  @@map("wishlists")
 }
 
-model BookService{
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+model BookService {
+  id        Int          @id @default(autoincrement())
+  user      User         @relation(fields: [userId], references: [id])
   userId    String
-  subject String
-  date String         
-  service SERVICE_TYPE @default(ASSIST_WITH_SPRITUAL_PROGRAM)
-  comment String
-  status              Int           @default(0)//pending =0,completed =1 ,cancel=2
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
-  @@unique([userId]) 
+  subject   String
+  date      String
+  service   SERVICE_TYPE @default(ASSIST_WITH_SPRITUAL_PROGRAM)
+  comment   String
+  status    Int          @default(0) //pending =0,completed =1 ,cancel=2
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([userId])
   @@map("bookServices")
 }
+
 enum STATUS_TYPE {
   PENDING
   ACCEPTED
   REJECTED
 }
+
 enum SERVICE_TYPE {
- ASSIST_WITH_SPRITUAL_PROGRAM
- SUPPORT_CRAFT_CULTURE
- FUND_RAISING_EVENT_ORGANIZATION
- OUTREACH_COMMUNITY
- HELP_DIGITAL_MEDIA
- CREATE_SACRED_ART_HANDICRAFTS
+  ASSIST_WITH_SPRITUAL_PROGRAM
+  SUPPORT_CRAFT_CULTURE
+  FUND_RAISING_EVENT_ORGANIZATION
+  OUTREACH_COMMUNITY
+  HELP_DIGITAL_MEDIA
+  CREATE_SACRED_ART_HANDICRAFTS
 }
+
 model Interview {
-  id                  Int                    @id @default(autoincrement())
-  user                User                   @relation(fields: [userId], references: [id])
-  userId              String                
-  profession          String
-  institution         String                 // Fixed typo from "institutional"
-  website             String?                // Made optional since not all may have a website
-  areasOfImpact       IMPACT_TYPE[]          @default([SPRITUAL_LEADERSHIP])
+  id                   Int                     @id @default(autoincrement())
+  user                 User                    @relation(fields: [userId], references: [id])
+  userId               String @unique
+  acceptedByWho               String?    
+  profession           String
+  institution          String // Fixed typo from "institutional"
+  website              String? // Made optional since not all may have a website
+  areasOfImpact        IMPACT_TYPE[]           @default([SPRITUAL_LEADERSHIP])
   spiritualOrientation SPRITUAL_TYPE?
-  publicVoice         Boolean
-  interviewIntent     INTERVIEW_INTENT_TYPE[]
-  status              Int           @default(0)//pending =0,completed =1 ,cancel=2
-  interviewTimeZone   INTERVIEW_TIME_ZONE?                 
-  scheduledAt         DateTime               
-  additionalNotes     String?                // Made optional
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
+  publicVoice          Boolean
+  interviewIntent      INTERVIEW_INTENT_TYPE[]
+  status               Int                     @default(0) //pending =0,completed =1 ,cancel=2
+  interviewTimeZone    INTERVIEW_TIME_ZONE?
+  scheduledAt          DateTime
+  additionalNotes      String? // Made optional
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+
   @@map("interviews")
 }
 
 model ContactUs {
-  id                  Int                    @id @default(autoincrement())
-  user                User                   @relation(fields: [userId], references: [id])
-  userId              String                 
-  message             String
-  subject             String                
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  subject   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("contactUs")
 }
+
 enum SPRITUAL_TYPE {
- SUFI
- FREETHINKER
- NOT_AFFLIATED
+  SUFI
+  FREETHINKER
+  NOT_AFFLIATED
 }
 
 enum INTERVIEW_INTENT_TYPE {
@@ -435,11 +489,13 @@ enum INTERVIEW_INTENT_TYPE {
   DOCUMENT_EXPERIENCE
   SPIRITUAL_DIALOGUE
 }
+
 enum INTERVIEW_TIME_ZONE {
   MYSTIC
   SCIENTIFIC
   ACADEMIC
 }
+
 enum IMPACT_TYPE {
   SPRITUAL_LEADERSHIP
   INTEGRATIVE_HEALTH
@@ -451,20 +507,22 @@ enum IMPACT_TYPE {
   CULTURAL_EXPRESSION
   UNITY_DIALOGUE
   YOUTH_EMPOWERMENT
-
 }
+
 model SufiChecklist {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
+  id       Int    @id @default(autoincrement())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String @unique
   // status     String  @default("Threshold of the Path")  
-  progress  Int      @default(0)//in perc
-  
+  progress Int    @default(0) //in perc
+
   items     SufiChecklistItem[]
-  createdAt DateTime @default(now())
-  updatedAt  DateTime           @updatedAt
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
   @@map("sufi_checklists")
 }
+
 model SufiChecklistItem {
   id          Int                 @id @default(autoincrement())
   checklist   SufiChecklist       @relation(fields: [checklistId], references: [id])
@@ -474,8 +532,10 @@ model SufiChecklistItem {
   status      ChecklistItemStatus @default(PENDING)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+
   @@map("sufi_checklist_items")
 }
+
 enum ChecklistSection {
   INITIAL_ORIENTATION
   FINDING_GUIDANCE
@@ -489,6 +549,7 @@ enum ChecklistItemStatus {
   COMPLETED
   SKIPPED
 }
+
 enum SUFI_PATH_STATUS {
   THRESHOLD
   EXPLORATION

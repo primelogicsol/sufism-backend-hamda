@@ -6,10 +6,11 @@ import type { ReviewData, SearchQuery, T_ITEM } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
+type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
   create: asyncHandler(async (req: _Request, res) => {
-    const images = req.files as Express.Multer.File[];
+    const images = req.files as MulterFiles;
     const data = req.body as T_ITEM;
 
     const user = await db.user.findFirst({
@@ -37,7 +38,7 @@ export default {
         tags: data.tags || [],
         sku: data.sku,
         stock: Number(data.stock) || 0,
-        images: images?.map((file) => file.path) || []
+        images: images.images?.map((file) => file.path) || []
       }
     });
 
@@ -137,7 +138,7 @@ export default {
 
   update: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
-    const images = req.files as Express.Multer.File[];
+    const images = req.files as MulterFiles;
     const data = req.body as Partial<T_ITEM>;
 
     const user = await db.user.findFirst({
@@ -174,8 +175,8 @@ export default {
     if (data.tags) updateData.tags = data.tags;
     if (data.sku) updateData.sku = data.sku;
     if (data.stock !== undefined) updateData.stock = Number(data.stock);
-    if (images && images.length > 0) {
-      updateData.images = images.map((file) => file.path);
+    if (images && images.images.length > 0) {
+      updateData.images = images.images.map((file) => file.path);
     }
 
     const updatedItem = await db.meditation.update({
@@ -280,5 +281,42 @@ export default {
 
     logger.info(`Review added by user ${user.fullName} for item ${meditations.title}`);
     return httpResponse(req, res, reshttp.createdCode, "Review added successfully", review);
+  }),
+  getReviews: asyncHandler(async (req: _Request, res) => {
+    const { id } = req.params;
+
+    const user = await db.user.findFirst({
+      where: { id: req.userFromToken?.id }
+    });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const fashion = await db.meditation.findFirst({
+      where: { id: Number(id) }
+    });
+
+    if (!fashion) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Meditation not found");
+    }
+
+    const reviews = await db.review.findMany({
+      where: { fashionId: Number(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, reviews);
   })
 };
