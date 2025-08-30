@@ -1,5 +1,7 @@
 import { Router } from "express";
 import authController from "../../controllers/userController/authController.js";
+import adminController, { verify as adminVerify } from "../../controllers/adminController/adminController.js";
+import { adminAuth } from "../../middleware/adminAuthMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
 import {
   forgotPasswordRequestFromUserSchema,
@@ -16,6 +18,8 @@ authRouter.route(`/register`).post(validateDataMiddleware(userRegistrationSchema
 authRouter.route(`/verify-account`).post(validateDataMiddleware(verifyOTPSchema), authController.verifyAccount);
 // 5 req per mnute from single  ip adress
 authRouter.route("/login").post(validateDataMiddleware(userLoginSchema), authController.login);
+authRouter.route("/admin/login").post(adminController.login);
+authRouter.route("/admin/verify").get(adminAuth, adminVerify);
 
 authRouter.route("/refresh-access-token").get(authController.refreshAccessToken);
 authRouter.route("/resend-OTP").post(validateDataMiddleware(verifyUserSchema), authController.resendOTPLink);

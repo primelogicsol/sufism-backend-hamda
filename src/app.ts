@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { type Application } from "express";
 import helmet from "helmet";
 import path from "path";
+import { fileURLToPath } from "url";
 import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
 import PerformanceController from "./controllers/performanceController/performanceController.js";
@@ -16,6 +17,9 @@ app.disable("x-powered-by");
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.use(express.static(path.resolve(__dirname, "../public")));
 app.get("/", PerformanceController.getPerformance);
 // * Custom Middlewares

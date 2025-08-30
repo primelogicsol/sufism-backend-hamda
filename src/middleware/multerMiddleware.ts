@@ -2,6 +2,7 @@ import { type RequestHandler } from "express";
 import multer from "multer";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import logger from "../utils/loggerUtils.js";
 
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -11,6 +12,8 @@ export const supportedDocTypes = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // docx
 ];
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export const supportedMusicTypes = [
   "audio/mpeg", // mp3
   "audio/mp3", // mp3
