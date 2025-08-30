@@ -11,7 +11,7 @@ export type TPAYLOAD = {
 export default {
   generateAccessToken: (payload: TPAYLOAD, res: Response, expiresIn?: string): string | Response => {
     try {
-      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn || ENV === "development" ? "195m" : "15m" });
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn || ENV === "development" ? "195m" : "195m" });
       return `${token}`;
     } catch (error: unknown) {
       if (error instanceof Error)

@@ -6,6 +6,7 @@ import type { ReviewData, SearchQuery, T_ITEM } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
+type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
   // Add this method to the existing controller
@@ -93,7 +94,7 @@ export default {
 
   // Create Decoration
   create: asyncHandler(async (req: _Request, res) => {
-    const images = req.files as Express.Multer.File[];
+    const images = req.files as MulterFiles;
     const data = req.body as T_ITEM;
 
     const user = await db.user.findFirst({
@@ -121,7 +122,7 @@ export default {
         tags: data.tags || [],
         sku: data.sku,
         stock: Number(data.stock) || 0,
-        images: images?.map((file) => file.path) || []
+        images: images.images?.map((file) => file.path) || []
       }
     });
 
@@ -229,7 +230,7 @@ export default {
   // Update decoration
   update: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
-    const images = req.files as Express.Multer.File[];
+    const images = req.files as MulterFiles;
     const data = req.body as Partial<T_ITEM>;
 
     const user = await db.user.findFirst({
@@ -265,8 +266,8 @@ export default {
     if (data.tags) updateData.tags = data.tags;
     if (data.sku) updateData.sku = data.sku;
     if (data.stock !== undefined) updateData.stock = Number(data.stock);
-    if (images && images.length > 0) {
-      updateData.images = images.map((file) => file.path);
+    if (images && images.images.length > 0) {
+      updateData.images = images.images.map((file) => file.path);
     }
 
     const updatedDecoration = await db.decoration.update({

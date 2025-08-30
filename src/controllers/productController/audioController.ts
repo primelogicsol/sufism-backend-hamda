@@ -11,48 +11,51 @@ interface MusicData {
   productId: number;
   title: string;
   artist?: string;
-  mp3Url?: string;
-  mp4Url?: string;
+  description: string;
+  stock: string;
   duration?: number;
   isAvailable?: boolean;
+  price: string;
 }
+type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
   // Create Music
   create: asyncHandler(async (req: _Request, res) => {
-    const files = req.files as Express.Multer.File[];
-    const data = req.body as MusicData;
+    try {
+      const files = req.files as MulterFiles;
+      const data = req.body as MusicData;
 
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
+      const user = await db.user.findFirst({
+        where: { id: req.userFromToken?.id }
+      });
 
-    if (!user || user.role != "vendor") {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
-
-    // // Check for existing productId
-    // const existingMusic = await db.music.findFirst({
-    //   where: { productId: Number(data.productId) }
-    // });
-
-    // if (existingMusic) {
-    //   return httpResponse(req, res, reshttp.conflictCode, "Music with this product ID already exists");
-    // }
-
-    const music = await db.music.create({
-      data: {
-        title: data.title,
-        artist: data.artist,
-        mp3Url: files?.find((f) => f.fieldname === "mp3File")?.path || data.mp3Url,
-        mp4Url: files?.find((f) => f.fieldname === "mp4File")?.path || data.mp4Url,
-        duration: data.duration ? Number(data.duration) : null,
-        isAvailable: data.isAvailable ?? false
+      if (!user || user.role != "vendor") {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
       }
-    });
+      const music = await db.music.create({
+        data: {
+          title: data.title,
+          user: {
+            connect: { id: user.id }
+          },
+          description: data.description,
+          artist: data.artist,
+          price: Number(data.price),
+          stock: Number(data.stock),
+          mp3Url: files?.music?.[0]?.path || "",
+          mp4Url: files?.video?.[0]?.path || "",
+          duration: data.duration ? Number(data.duration) : null,
+          isAvailable: data.isAvailable ?? false
+        }
+      });
 
-    logger.info(`Music created: ${music.title} by ${music.artist || "Unknown Artist"}`);
-    return httpResponse(req, res, reshttp.createdCode, "Music created successfully", music);
+      logger.info(`Music created: ${music.title} by ${music.artist || "Unknown Artist"}`);
+      return httpResponse(req, res, reshttp.createdCode, "Music created successfully", music);
+    } catch (error) {
+      logger.error("Error creating music:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create music");
+    }
   }),
 
   // Get all music
@@ -71,8 +74,12 @@ export default {
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.MusicWhereInput = {};
-
+    const where: Prisma.MusicWhereInput = {
+      isDelete: false
+    };
+    if (user.role === "vendor") {
+      where.userId = user.id;
+    }
     if (search) {
       where.OR = [{ title: { contains: search, mode: "insensitive" } }, { artist: { contains: search, mode: "insensitive" } }];
     }
@@ -103,7 +110,25 @@ export default {
         }
       }
     });
-
+    let filterRecord;
+    if (user.role == "user") {
+      filterRecord = musicTracks.map((rec) => {
+        // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+        const { mp3Url, mp4Url, ...rest } = rec;
+        return rest;
+      });
+      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+        filterRecord,
+        pagination: {
+          totalItems: total,
+          currentPage: pageNumber,
+          totalPages: Math.ceil(total / limitNumber),
+          limit: limitNumber,
+          hasNextPage: pageNumber < Math.ceil(total / limitNumber),
+          hasPrevPage: pageNumber > 1
+        }
+      });
+    }
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
       musicTracks,
       pagination: {
@@ -130,7 +155,7 @@ export default {
     }
 
     const music = await db.music.findFirst({
-      where: { id: Number(id) },
+      where: { id: Number(id), isDelete: false },
       include: {
         reviews: {
           include: {
@@ -156,7 +181,7 @@ export default {
   // Update music
   update: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
-    const files = req.files as Express.Multer.File[];
+    const files = req.files as MulterFiles;
     const data = req.body as Partial<MusicData>;
 
     const user = await db.user.findFirst({
@@ -192,16 +217,12 @@ export default {
     if (data.duration !== undefined) updateData.duration = data.duration ? Number(data.duration) : null;
     if (data.isAvailable !== undefined) updateData.isAvailable = data.isAvailable;
 
-    if (files?.find((f) => f.fieldname === "mp3File")) {
-      updateData.mp3Url = files.find((f) => f.fieldname === "mp3File")?.path;
-    } else if (data.mp3Url !== undefined) {
-      updateData.mp3Url = data.mp3Url;
+    if (files.images?.find((f) => f.fieldname === "mp3File")) {
+      updateData.mp3Url = files.music.find((f) => f.fieldname === "mp3File")?.path;
     }
 
-    if (files?.find((f) => f.fieldname === "mp4File")) {
-      updateData.mp4Url = files.find((f) => f.fieldname === "mp4File")?.path;
-    } else if (data.mp4Url !== undefined) {
-      updateData.mp4Url = data.mp4Url;
+    if (files?.images.find((f) => f.fieldname === "mp4File")) {
+      updateData.mp4Url = files.images.find((f) => f.fieldname === "mp4File")?.path;
     }
 
     const updatedMusic = await db.music.update({

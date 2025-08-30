@@ -1,7 +1,7 @@
+import type { Cart } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
-import type { Cart } from "@prisma/client";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 
@@ -61,7 +61,7 @@ export default {
     return httpResponse(req, res, reshttp.okCode, "Item added to cart", cartItem);
   }),
 
-  // ❌ Delete Cart Item
+  //  Delete Cart Item
   deleteCartItem: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
@@ -97,7 +97,7 @@ export default {
     return httpResponse(req, res, reshttp.okCode, "Item removed from cart");
   }),
 
-  // 🧹 Clear Cart
+  //  Clear Cart
   clearCart: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
@@ -111,7 +111,7 @@ export default {
     return httpResponse(req, res, reshttp.okCode, "Cart cleared");
   }),
 
-  // 👀 View Cart
+  //  View Cart
   viewCart: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
@@ -136,7 +136,7 @@ export default {
     return httpResponse(req, res, reshttp.okCode, "Cart fetched", cartItems);
   }),
 
-  // 🔁 Update Cart Item Quantity
+  //  Update Cart Item Quantity
   updateCartItem: asyncHandler(async (req: _Request, res) => {
     const { category, productId, qty } = req.body as {
       category: CartCategory;

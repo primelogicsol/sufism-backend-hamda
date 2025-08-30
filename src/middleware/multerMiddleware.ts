@@ -6,9 +6,26 @@ import { fileURLToPath } from "node:url";
 import logger from "../utils/loggerUtils.js";
 
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+export const supportedDocTypes = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // docx
+];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+export const supportedMusicTypes = [
+  "audio/mpeg", // mp3
+  "audio/mp3", // mp3
+  "audio/wav", // wav (optional)
+  "audio/ogg" // ogg (optional)
+];
+
+export const supportedVideoTypes = [
+  "video/mp4", // mp4
+  "video/webm", // webm (optional)
+  "video/ogg" // ogv (optional)
+];
 const uploadDir = path.resolve(__dirname, "../../public/uploads/productImages");
 
 // Create directory if it doesn't exist
@@ -39,8 +56,13 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  if (!supportedImageTypes.includes(file.mimetype)) {
-    const errorMsg = `Unsupported image type: ${file.mimetype}. Allowed types: ${supportedImageTypes.join(", ")}`;
+  if (
+    !supportedImageTypes.includes(file.mimetype) &&
+    !supportedDocTypes.includes(file.mimetype) &&
+    !supportedMusicTypes.includes(file.mimetype) &&
+    !supportedVideoTypes.includes(file.mimetype)
+  ) {
+    const errorMsg = `Unsupported file type: ${file.mimetype}. Allowed types: ${[...supportedImageTypes, ...supportedDocTypes, ...supportedMusicTypes, ...supportedVideoTypes].join(", ")}`;
     logger.warn(errorMsg);
     return cb(new Error(errorMsg));
   }
@@ -59,12 +81,21 @@ const upload = multer({
 
 // Middleware with error logging
 const fileUploader: RequestHandler = async (req, res, next) => {
-  await upload.array("images", 5)(req, res, (err: unknown) => {
+  const uploader = upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "overviewImages", maxCount: 5 },
+    { name: "images", maxCount: 5 },
+    { name: "document", maxCount: 1 },
+    { name: "music", maxCount: 3 },
+    { name: "video", maxCount: 2 }
+  ]);
+
+  await uploader(req, res, (err: unknown) => {
     if (err) {
       logger.error("Multer upload error:", err);
       return res.status(400).json({ error: (err as Error).message });
     }
-    logger.info(`Uploaded ${req.files ? (req.files as Express.Multer.File[]).length : 0} file(s) successfully.`);
+    logger.info(`Uploaded files: ${JSON.stringify(req.files, null, 2)}`);
     next();
   });
 };

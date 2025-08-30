@@ -49,15 +49,18 @@ productRouter
   .post(authMiddleware.checkToken, fileUploader, validateDataMiddleware(productSchema), accessoriesController.create);
 productRouter.route("/accessories/:id").patch(authMiddleware.checkToken, fileUploader, accessoriesController.update);
 productRouter.route("/accessories/:id").delete(authMiddleware.checkToken, accessoriesController.delete);
-productRouter.route("/review-accessories").post(authMiddleware.checkToken, accessoriesController.addReview);
+productRouter.route("/review-accessories/:id").post(authMiddleware.checkToken, accessoriesController.addReview);
 productRouter.route("/review-accessories/:id").get(authMiddleware.checkToken, accessoriesController.getReviews);
 productRouter.route("/accessories/:id").get(authMiddleware.checkToken, accessoriesController.getById);
 productRouter.route("/accessories").get(authMiddleware.checkToken, accessoriesController.getAll);
 
 productRouter.route("/digital-books").post(authMiddleware.checkToken, fileUploader, validateDataMiddleware(bookSchema), digitalBookController.create);
-productRouter.route("/digital-books").patch(authMiddleware.checkToken, fileUploader, digitalBookController.update);
+productRouter.route("/digital-books/:id").get(authMiddleware.checkToken, digitalBookController.getById);
+productRouter.route("/digital-books").get(authMiddleware.checkToken, digitalBookController.getAll);
+productRouter.route("/digital-books/:id").patch(authMiddleware.checkToken, fileUploader, digitalBookController.update);
 productRouter.route("/digital-books/:id").delete(authMiddleware.checkToken, digitalBookController.delete);
 productRouter.route("/digital-books").post(authMiddleware.checkToken, digitalBookController.addReview);
+productRouter.route("/review-digital-books/:id").post(authMiddleware.checkToken, digitalBookController.addReview);
 
 productRouter.route("/living").post(authMiddleware.checkToken, fileUploader, validateDataMiddleware(productSchema), livingController.create);
 productRouter.route("/living/:id").patch(authMiddleware.checkToken, fileUploader, livingController.update);
