@@ -2,10 +2,13 @@ import { type RequestHandler } from "express";
 import multer from "multer";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import logger from "../utils/loggerUtils.js";
 
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const uploadDir = path.resolve(__dirname, "../../public/uploads/productImages");
 
 // Create directory if it doesn't exist
