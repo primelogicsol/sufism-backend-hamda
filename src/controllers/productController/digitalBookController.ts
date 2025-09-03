@@ -157,7 +157,7 @@ export default {
       let finalBooks;
       if (user.role == "user") {
         finalBooks = digitalBooks.map((book) => {
-          // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+          // eslint-disable-next-line no-unused-vars
           const { url, ...rest } = book;
           return rest;
         });

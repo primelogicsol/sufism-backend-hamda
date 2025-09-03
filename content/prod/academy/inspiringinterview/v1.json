@@ -44,7 +44,7 @@
       "type": "sectionHeader",
       "tagline": "Inspiring Interviews",
       "title": "Lived Journeys. Lit Souls. Lasting Echoes.",
-      "html": "<p>In inspiring interviews, you’ll meet individuals whose lives have been radically reshaped by the essence of Sufism. These are not celebrities—they are awakened souls: quiet reformers, radiant artists, silent servers, and bold seekers. Each conversation is a mirror into a life transformed. Some found God in grief. Some turned their professions into paths of light. Others carry centuries-old wisdom into modern chaos.</p>"
+      "html": "In inspiring interviews, you'll meet individuals whose lives have been radically reshaped by the essence of Sufism. These are not celebrities—they are awakened souls: quiet reformers, radiant artists, silent servers, and bold seekers. Each conversation is a mirror into a life transformed. Some found God in grief. Some turned their professions into paths of light. Others carry centuries-old wisdom into modern chaos."
     },
     {
       "type": "sidebar",
@@ -52,19 +52,19 @@
       "categories": [
         {
           "label": "Dialog Series",
-          "href": "/academy/dialogseries"
+          "href": "/dialogseries"
         },
         {
           "label": "Hard Talk",
-          "href": "/academy/hardtalk"
+          "href": "/hardtalk"
         },
         {
           "label": "Sacred Professions",
-          "href": "/academy/sacredprofessions"
+          "href": "/sacredprofessions"
         },
         {
           "label": "Inspiring Interviews",
-          "href": "/academy/inspiringinterview",
+          "href": "/inspiringinterview",
           "active": true
         }
       ]
@@ -72,10 +72,7 @@
     {
       "type": "listToolbar",
       "showingText": "Showing 1–9 results",
-      "sortOptions": [
-        "Sort by popular",
-        "Sort by Ratings"
-      ]
+      "sortOptions": ["Sort by popular", "Sort by Ratings"]
     },
     {
       "type": "cardGrid",
@@ -88,7 +85,7 @@
         },
         {
           "title": "Feather touched fire",
-          "text": "Layla Sabreen's journey from dance to divine surrender ",
+          "text": "Layla Sabreen's journey from dance to divine surrender",
           "image": "/assets/images/interview/2.png",
           "href": "/interviewdetails"
         },
@@ -137,6 +134,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-08-27T10:09:03.674Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }

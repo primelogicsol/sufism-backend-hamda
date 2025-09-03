@@ -8,39 +8,39 @@
       "type": "heroSlider",
       "slides": [
         {
-          "subTitle": "Unveiling the Secrets of Healing ",
-          "title": "Sacred Paths to<br/> Wholeness ",
-          "text": "Healing mysteries guide seekers toward spiritual and physical<br/> restoration through sacred knowledge. ",
+          "subTitle": "Unveiling the Secrets of Healing",
+          "title": "Sacred Paths to<br/> Wholeness",
+          "text": "Healing mysteries guide seekers toward spiritual and physical<br/> restoration through sacred knowledge.",
           "buttonText": "Read More",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Sacred Wisdom of Healing  ",
-          "title": " Unlocking the Body’s <br/>Divine Power",
-          "text": "Through healing mysteries, seekers awaken their inner capacity for<br/> spiritual and physical restoration.    ",
+          "subTitle": "Sacred Wisdom of Healing",
+          "title": "Unlocking the Body's <br/>Divine Power",
+          "text": "Through healing mysteries, seekers awaken their inner capacity for<br/> spiritual and physical restoration.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Healing Through Spiritual Wisdom  ",
-          "title": "Restoring Harmony <br/>and Balance ",
-          "text": "Healing mysteries offer insight into the sacred connection<br/> between mind, body, and spirit. ",
+          "subTitle": "Healing Through Spiritual Wisdom",
+          "title": "Restoring Harmony <br/>and Balance",
+          "text": "Healing mysteries offer insight into the sacred connection<br/> between mind, body, and spirit.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "The Path to Wholeness  ",
-          "title": "Unlocking Sacred <br/>Healing Codes  ",
-          "text": "By understanding healing mysteries, seekers find the key to<br/> restoring balance and spiritual health.  ",
+          "subTitle": "The Path to Wholeness",
+          "title": "Unlocking Sacred <br/>Healing Codes",
+          "text": "By understanding healing mysteries, seekers find the key to<br/> restoring balance and spiritual health.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
           "subTitle": "Spiritual Restoration Revealed",
-          "title": "The Sacred Art of <br/>Healing ",
-          "text": "Healing mysteries provide seekers with the tools to restore<br/> body and soul through sacred knowledge. ",
+          "title": "The Sacred Art of <br/>Healing",
+          "text": "Healing mysteries provide seekers with the tools to restore<br/> body and soul through sacred knowledge.",
           "buttonText": "Join Now",
-          "buttonLink": "/"
+          "buttonLink": "/membership"
         }
       ]
     },
@@ -57,7 +57,7 @@
     {
       "type": "featureList",
       "items": [
-        { "text": " Bridging Sufi Healing Traditions & Modern Science" },
+        { "text": "Bridging Sufi Healing Traditions & Modern Science" },
         { "text": "Exploring the Role of Energy, Mind & Spirit in Well-Being" },
         { "text": "Understanding Biofield Mechanics & Healing Sciences" },
         { "text": "Developing Practical Tools for Self-Healing & Spiritual Vitality" }
@@ -75,6 +75,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-05-29T00:00:00.000Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }

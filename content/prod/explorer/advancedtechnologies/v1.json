@@ -8,37 +8,37 @@
       "type": "heroSlider",
       "slides": [
         {
-          "subTitle": "Merging Spirit with Innovation ",
-          "title": " Unlocking the Sacred Power<br/> of Technology",
+          "subTitle": "Merging Spirit with Innovation",
+          "title": "Unlocking the Sacred Power<br/> of Technology",
           "text": "Advanced technologies bridge the gap between spiritual wisdom and modern innovation, <br/>guiding seekers toward enlightenment.",
           "buttonText": "Read More",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Technology as a Path to Awakening ",
+          "subTitle": "Technology as a Path to Awakening",
           "title": "Harnessing Modern Tools for<br/> Spiritual Growth",
           "text": "Through advanced technologies, seekers gain new insights into ancient<br/> spiritual truths and universal order.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Innovation in Service of Spirit ",
-          "title": "Aligning Modern Tools with Spiritual Wisdom ",
+          "subTitle": "Innovation in Service of Spirit",
+          "title": "Aligning Modern Tools with Spiritual Wisdom",
           "text": "Advanced technologies provide seekers with the means to explore spiritual truth through modern innovation.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Tech Meets Transcendence ",
+          "subTitle": "Tech Meets Transcendence",
           "title": "Modern Solutions for<br/> Eternal Questions",
-          "text": "By integrating advanced technologies, seekers uncover deeper<br/> spiritual insights and universal harmony.  ",
+          "text": "By integrating advanced technologies, seekers uncover deeper<br/> spiritual insights and universal harmony.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Tools for Spiritual Evolution ",
-          "title": "Expanding Consciousness<br/> Through Innovation   ",
-          "text": "Advanced technologies empower seekers to explore spiritual <br/>dimensions and unlock hidden truths ",
+          "subTitle": "Tools for Spiritual Evolution",
+          "title": "Expanding Consciousness<br/> Through Innovation",
+          "text": "Advanced technologies empower seekers to explore spiritual <br/>dimensions and unlock hidden truths",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         }
@@ -107,6 +107,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-05-29T00:00:00.000Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }

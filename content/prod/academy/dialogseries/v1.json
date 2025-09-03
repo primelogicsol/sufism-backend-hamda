@@ -42,7 +42,7 @@
       "type": "sectionHeader",
       "tagline": "Dialog Series",
       "title": "Where Truth Faces Challenge and Wisdom Meets Courage",
-      "html": "Step into a realm where conventional beliefs about Sufism are tested through groundbreaking, bold conversations."
+      "html": "Step into a realm where conventional beliefs about Sufism are tested through groundbreaking, bold conversations. In this extraordinary series, the curious seeker boldly confronts the seasoned master, the skeptic fearlessly challenges sacred doctrines, and the experienced scholar dares to question established truths. Each dialog peels back layers of tradition, exploring the core of spiritual authenticity with unmatched depth and sincerity. Prepare yourself for a transformative encounter, one that not only questions but illuminates, awakening your inner journey toward profound enlightenment."
     },
     {
       "type": "sidebar",
@@ -50,14 +50,14 @@
       "categories": [
         {
           "label": "Dialog Series",
-          "href": "/academy/dialogseries",
+          "href": "/dialogseries",
           "active": true
         },
-        { "label": "Hard Talk", "href": "/academy/hardtalk" },
-        { "label": "Sufi Professions", "href": "/academy/sacredprofessions" },
+        { "label": "Hard Talk", "href": "/hardtalk" },
+        { "label": "Sacred Professions", "href": "/sacredprofessions" },
         {
           "label": "Inspiring Interviews",
-          "href": "/academy/inspiringinterview"
+          "href": "/inspiringinterview"
         }
       ]
     },
@@ -65,10 +65,6 @@
       "type": "listToolbar",
       "showingText": "Showing 1–3 results",
       "sortOptions": ["Sort by popular", "Sort by Ratings"]
-    },
-    {
-      "type": "richText",
-      "html": "<p>Step into a realm where conventional beliefs about Sufism are tested through groundbreaking, bold conversations. In this extraordinary series, the curious seeker boldly confronts the seasoned master, the skeptic fearlessly challenges sacred doctrines, and the experienced scholar dares to question established truths. Each dialog peels back layers of tradition, exploring the core of spiritual authenticity with unmatched depth and sincerity. Prepare yourself for a transformative encounter, one that not only questions but illuminates, awakening your inner journey toward profound enlightenment.</p>"
     },
     {
       "type": "cardGrid",
@@ -91,6 +87,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-05-29T00:00:00.000Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }

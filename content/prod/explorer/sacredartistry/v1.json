@@ -9,36 +9,36 @@
       "slides": [
         {
           "subTitle": "Crafting the Divine Expression",
-          "title": "Art as a Sacred Path ",
-          "text": "Sacred artistry reveals the spiritual power of creative expression,<br/> guiding seekers toward divine truth. ",
+          "title": "Art as a Sacred Path",
+          "text": "Sacred artistry reveals the spiritual power of creative expression,<br/> guiding seekers toward divine truth.",
           "buttonText": "Read More",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Creativity as Spiritual Devotion ",
-          "title": "Expressing the Sacred<br/> Through Art  ",
-          "text": " Sacred artistry reflects the divine order, helping seekers align <br/>with higher truth through creativity.   ",
+          "subTitle": "Creativity as Spiritual Devotion",
+          "title": "Expressing the Sacred<br/> Through Art",
+          "text": "Sacred artistry reflects the divine order, helping seekers align <br/>with higher truth through creativity.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "The Divine in Creative Form  ",
+          "subTitle": "The Divine in Creative Form",
           "title": "Unlocking the Power<br/> of Sacred Art",
           "text": "Sacred artistry provides seekers with a path to<br/> spiritual truth through creative expression.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": " Spiritual Truth Through Creativity ",
-          "title": "Crafting the Divine ",
-          "text": "Sacred artistry allows seekers to express spiritual truth and<br/> align with divine creativity.  ",
+          "subTitle": "Spiritual Truth Through Creativity",
+          "title": "Crafting the Divine",
+          "text": "Sacred artistry allows seekers to express spiritual truth and<br/> align with divine creativity.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Creativity as a Sacred Act  ",
-          "title": "Discovering the Power <br/>of Art  ",
-          "text": " Through sacred artistry, seekers connect with<br/> divine truth and spiritual expression.",
+          "subTitle": "Creativity as a Sacred Act",
+          "title": "Discovering the Power <br/>of Art",
+          "text": "Through sacred artistry, seekers connect with<br/> divine truth and spiritual expression.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         }
@@ -60,7 +60,7 @@
         { "text": "Bridging Sufi Aesthetics with Metaphysical Science" },
         { "text": "Understanding the Art in Transmission & Transformation" },
         { "text": "Exploring the Vibrational Effects of Sacred Design" },
-        { "text": "Developing Art as a Tool for Divine Connection " }
+        { "text": "Developing Art as a Tool for Divine Connection" }
       ]
     },
     {
@@ -75,6 +75,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-05-29T00:00:00.000Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }

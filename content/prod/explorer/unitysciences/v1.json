@@ -10,35 +10,35 @@
         {
           "subTitle": "Merging Spirit and Existence",
           "title": "Exploring the Science<br/> of Oneness",
-          "text": "Unity sciences reveal the sacred connection between all existence,<br/> guiding seekers toward wholeness and harmony.  ",
+          "text": "Unity sciences reveal the sacred connection between all existence,<br/> guiding seekers toward wholeness and harmony.",
           "buttonText": "Read More",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Paths to Sacred Unity ",
-          "title": "Understanding the Oneness <br/>of Creation ",
-          "text": "Through unity sciences, seekers uncover the hidden bonds connecting all<br/> of existence and spiritual truth. ",
+          "subTitle": "Paths to Sacred Unity",
+          "title": "Understanding the Oneness <br/>of Creation",
+          "text": "Through unity sciences, seekers uncover the hidden bonds connecting all<br/> of existence and spiritual truth.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": " Oneness Through Sacred Knowledge ",
-          "title": " Unlocking the Science<br/> of Unity ",
-          "text": "Unity sciences provide seekers with insight into the interconnectedness<br/> of existence and spiritual harmony.  ",
+          "subTitle": "Oneness Through Sacred Knowledge",
+          "title": "Unlocking the Science<br/> of Unity",
+          "text": "Unity sciences provide seekers with insight into the interconnectedness<br/> of existence and spiritual harmony.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": " Merging with the Whole ",
+          "subTitle": "Merging with the Whole",
           "title": "Spiritual Truth <br/>Through Unity",
-          "text": "Unity sciences guide seekers toward the realization of<br/> Oneness with creation and spiritual awakening. ",
+          "text": "Unity sciences guide seekers toward the realization of<br/> Oneness with creation and spiritual awakening.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         },
         {
-          "subTitle": "Awakening to Universal Connection ",
-          "title": "Discovering the Science<br/> of Unity  ",
-          "text": " By understanding unity sciences, seekers align with <br/>the sacred interconnectedness of existence.  ",
+          "subTitle": "Awakening to Universal Connection",
+          "title": "Discovering the Science<br/> of Unity",
+          "text": "By understanding unity sciences, seekers align with <br/>the sacred interconnectedness of existence.",
           "buttonText": "Join Now",
           "buttonLink": "/membership"
         }
@@ -60,7 +60,7 @@
         { "text": "Bridging Sufi Mysticism & Scientific Inquiry into Oneness" },
         { "text": "Exploring the Hidden Science of Divine Order & Multiplicity" },
         { "text": "The Mechanics of Separation & Reunification" },
-        { "text": " Developing Practical Techniques for Unity Consciousness" }
+        { "text": "Developing Practical Techniques for Unity Consciousness" }
       ]
     },
     {
@@ -75,6 +75,6 @@
       ]
     }
   ],
-  "version": 1,
-  "updatedAt": "2025-05-29T00:00:00.000Z"
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
 }
