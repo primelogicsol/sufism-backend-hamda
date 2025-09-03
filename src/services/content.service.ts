@@ -60,20 +60,67 @@ export class ContentService {
   }
 
   static async getItem(section: string, slug: string): Promise<ContentItem> {
-    const filePath = this.getItemPath(section, slug, 1);
+    // First, try to find the latest version by checking the directory
+    const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug);
+    let latestVersion = 1;
+
+    try {
+      const files = await fs.readdir(baseDir);
+      const versionFiles = files
+        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
+        .map((file) => {
+          const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
+          return isNaN(version) ? 0 : version;
+        })
+        .filter((version) => version > 0);
+
+      if (versionFiles.length > 0) {
+        latestVersion = Math.max(...versionFiles);
+      }
+    } catch (error) {
+      // If directory doesn't exist or can't be read, fall back to version 1
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn("content.getItem.versionDetection", { section, slug, error: errorMessage });
+    }
+
+    return this.getItemByVersion(section, slug, latestVersion);
+  }
+
+  static async getItemByVersion(section: string, slug: string, version: number): Promise<ContentItem> {
+    const filePath = this.getItemPath(section, slug, version);
     let raw: string;
     if (USE_S3) {
       try {
         raw = await s3Get(filePath);
       } catch {
         // Fallback to local content if S3 object missing
-        raw = await fs.readFile(path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v1.json`), "utf-8");
+        raw = await fs.readFile(path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v${version}.json`), "utf-8");
       }
     } else {
       raw = await fs.readFile(filePath, "utf-8");
     }
     const parsed: unknown = JSON.parse(raw);
     return ContentItemSchema.parse(parsed);
+  }
+
+  static async getAvailableVersions(section: string, slug: string): Promise<number[]> {
+    const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug);
+    try {
+      const files = await fs.readdir(baseDir);
+      const versionFiles = files
+        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
+        .map((file) => {
+          const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
+          return isNaN(version) ? 0 : version;
+        })
+        .filter((version) => version > 0)
+        .sort((a, b) => a - b); // Sort versions in ascending order
+
+      return versionFiles;
+    } catch (error) {
+      logger.warn("content.getAvailableVersions", { section, slug, error: String(error) });
+      return [];
+    }
   }
 
   static async upsertItem(section: string, slug: string, payload: unknown): Promise<ContentItem> {
