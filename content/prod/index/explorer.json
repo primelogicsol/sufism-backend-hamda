@@ -64,16 +64,6 @@
       "slug": "advancedtechnologies",
       "title": "Advanced Technologies",
       "path": "prod/explorer/advancedtechnologies/v1.json"
-    },
-    {
-      "slug": "explorer-sample-all-blocks-2",
-      "title": "Explorer Sample 2 (All Blocks)",
-      "path": "prod/explorer/explorer-sample-all-blocks-2/v1.json"
-    },
-    {
-      "slug": "explorer-sample-all-blocks-1",
-      "title": "Explorer Sample 1 (All Blocks)",
-      "path": "prod/explorer/explorer-sample-all-blocks-1/v1.json"
     }
   ]
 }

@@ -19,11 +19,6 @@
       "slug": "inspiringinterview",
       "title": "Inspiring Interviews",
       "path": "prod/academy/inspiringinterview/v1.json"
-    },
-    {
-      "slug": "academy-sample-all-blocks",
-      "title": "Academy Sample (All Blocks)",
-      "path": "prod/academy/academy-sample-all-blocks/v1.json"
     }
   ]
 }
