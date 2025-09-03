@@ -17,6 +17,23 @@ const getItem = asyncHandler(async (req: Request, res: Response) => {
   return httpResponse(req, res, 200, "ok", data);
 });
 
+const getItemByVersion = asyncHandler(async (req: Request, res: Response) => {
+  const { section, slug, version } = req.params as { section: string; slug: string; version: string };
+  const versionNum = parseInt(version);
+  if (isNaN(versionNum) || versionNum < 1) {
+    return httpResponse(req, res, 400, "Invalid version number", null);
+  }
+  const data = await ContentService.getItemByVersion(section, slug, versionNum);
+  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
+  return httpResponse(req, res, 200, "ok", data);
+});
+
+const getAvailableVersions = asyncHandler(async (req: Request, res: Response) => {
+  const { section, slug } = req.params as { section: string; slug: string };
+  const versions = await ContentService.getAvailableVersions(section, slug);
+  return httpResponse(req, res, 200, "ok", { versions });
+});
+
 const putItem = asyncHandler(async (req: Request, res: Response) => {
   const { section, slug } = req.params as { section: string; slug: string };
   const data = await ContentService.upsertItem(section, slug, req.body);
@@ -44,4 +61,4 @@ const bulkSave = asyncHandler(async (req: Request, res: Response) => {
   return httpResponse(req, res, 200, "saved", { count: saved.length });
 });
 
-export default { getList, getItem, putItem, validateItem, bulkSave };
+export default { getList, getItem, getItemByVersion, getAvailableVersions, putItem, validateItem, bulkSave };
