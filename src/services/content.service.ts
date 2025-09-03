@@ -63,17 +63,17 @@ export class ContentService {
     // First, try to find the latest version by checking the directory
     const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug);
     let latestVersion = 1;
-    
+
     try {
       const files = await fs.readdir(baseDir);
       const versionFiles = files
-        .filter(file => file.startsWith('v') && file.endsWith('.json'))
-        .map(file => {
+        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
+        .map((file) => {
           const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
           return isNaN(version) ? 0 : version;
         })
-        .filter(version => version > 0);
-      
+        .filter((version) => version > 0);
+
       if (versionFiles.length > 0) {
         latestVersion = Math.max(...versionFiles);
       }
@@ -82,7 +82,7 @@ export class ContentService {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn("content.getItem.versionDetection", { section, slug, error: errorMessage });
     }
-    
+
     return this.getItemByVersion(section, slug, latestVersion);
   }
 
@@ -108,14 +108,14 @@ export class ContentService {
     try {
       const files = await fs.readdir(baseDir);
       const versionFiles = files
-        .filter(file => file.startsWith('v') && file.endsWith('.json'))
-        .map(file => {
+        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
+        .map((file) => {
           const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
           return isNaN(version) ? 0 : version;
         })
-        .filter(version => version > 0)
+        .filter((version) => version > 0)
         .sort((a, b) => a - b); // Sort versions in ascending order
-      
+
       return versionFiles;
     } catch (error) {
       logger.warn("content.getAvailableVersions", { section, slug, error: String(error) });
