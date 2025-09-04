@@ -239,8 +239,16 @@ export const productSchema = z.object({
   deliveryTime: z.string().optional(),
   note: z.string().optional(),
   isAvailable: z.boolean().optional(),
-  returnPolicy: z.string().optional()
+  returnPolicy: z.string().optional(),
+  isDelete: z.string().optional()
 });
+
+export const couponSchema = z.object({
+  code: z.string({ message: "Code must be a string" }),
+  discount: z.string({ message: "Discount is required" }),
+  expiresAt: z.string({ message: "Expiration must be valid date string" }).optional()
+});
+
 // For Digital Book
 export const bookSchema = z.object({
   title: z.string({ message: "Title must be a string" }),

@@ -47,7 +47,6 @@ export default {
         where: { id: req.userFromToken?.id }
       });
       //  logger.info(files);
-      logger.info("_______");
       if (!user || user.role !== "vendor") {
         return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
       }

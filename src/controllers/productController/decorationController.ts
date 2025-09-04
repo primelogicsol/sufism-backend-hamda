@@ -9,89 +9,6 @@ import logger from "../../utils/loggerUtils.js";
 type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
-  // Add this method to the existing controller
-  bulkCreate: asyncHandler(async (req: _Request, res) => {
-    const user = await db.user.findFirst({
-      where: { id: req.userFromToken?.id }
-    });
-
-    // Authorization check
-    if (!user || user.role !== "vendor") {
-      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
-    }
-
-    // Get uploaded file
-    const file = req.file;
-    if (!file) {
-      return httpResponse(req, res, reshttp.badRequestCode, "No file uploaded");
-    }
-
-    // Parse JSON content
-    let items: T_ITEM[];
-    try {
-      const content = file.buffer.toString("utf-8");
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      items = JSON.parse(content);
-
-      if (!Array.isArray(items)) {
-        throw new Error("Uploaded JSON must contain an array of decorations");
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      logger.error(`Bulk import JSON parsing failed: ${error}`);
-      return httpResponse(req, res, reshttp.badRequestCode, "Invalid JSON format: " + error);
-    }
-
-    // Validate items
-    if (items.length === 0) {
-      return httpResponse(req, res, reshttp.badRequestCode, "No decorations found in file");
-    }
-
-    // Check for duplicate SKUs in request
-    const skus = items.map((item) => item.sku);
-    const duplicateSkus = skus.filter((sku, index) => skus.indexOf(sku) !== index);
-
-    if (duplicateSkus.length > 0) {
-      return httpResponse(req, res, reshttp.conflictCode, `Duplicate SKUs found in request: ${duplicateSkus.join(", ")}`);
-    }
-
-    // Check existing SKUs in database
-    const existingDecorations = await db.decoration.findMany({
-      where: { sku: { in: skus } }
-    });
-
-    if (existingDecorations.length > 0) {
-      const existingSkus = existingDecorations.map((d) => d.sku);
-      return httpResponse(req, res, reshttp.conflictCode, `SKUs already exist: ${existingSkus.join(", ")}`);
-    }
-
-    // Prepare data for bulk create
-    const decorationsData = items.map((item) => ({
-      title: item.title,
-      description: item.description || "",
-      price: Number(item.price),
-      tags: item.tags || [],
-      sku: item.sku,
-      stock: Number(item.stock) || 0,
-      images: [] // Bulk import doesn't support images
-    }));
-
-    // Create decorations in transaction
-    try {
-      const transaction = await db.$transaction(decorationsData.map((data) => db.decoration.create({ data })));
-
-      logger.info(`Bulk import created ${transaction.length} decorations`);
-      return httpResponse(req, res, reshttp.createdCode, `${transaction.length} decorations imported successfully`, transaction);
-    } catch (error) {
-      if (error instanceof Error) {
-        logger.error(`Bulk import failed: ${error.message}`);
-      } else {
-        logger.error(`Bulk import failed: ${String(error)}`);
-      }
-      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create decorations");
-    }
-  }),
-
   // Create Decoration
   create: asyncHandler(async (req: _Request, res) => {
     const images = req.files as MulterFiles;
@@ -107,7 +24,7 @@ export default {
 
     // Check for existing SKU
     const existingDecoration = await db.decoration.findFirst({
-      where: { sku: data.sku, isDelete: false }
+      where: { sku: data.sku, isDelete: false, userId: user.id }
     });
 
     if (existingDecoration) {
@@ -119,6 +36,7 @@ export default {
         title: data.title,
         description: data.description,
         price: Number(data.price),
+        userId: user.id,
         tags: data.tags || [],
         sku: data.sku,
         stock: Number(data.stock) || 0,
@@ -147,14 +65,16 @@ export default {
 
     const orderBy = { [sortBy]: sortOrder };
 
-    const where: Prisma.DecorationWhereInput = search
-      ? {
-          title: {
-            contains: search,
-            mode: "insensitive"
-          }
-        }
-      : {};
+    const where: Prisma.DecorationWhereInput = {};
+    if (search) {
+      where.title = {
+        contains: search,
+        mode: "insensitive"
+      };
+    }
+    if (user.role == "vendor") {
+      where.userId = user.id;
+    }
 
     const total = await db.decoration.count({ where });
 
@@ -243,7 +163,7 @@ export default {
 
     // Check if decoration exists
     const existingDecoration = await db.decoration.findFirst({
-      where: { id: Number(id), isDelete: false }
+      where: { id: Number(id), isDelete: false, userId: user.id }
     });
 
     if (!existingDecoration) {
@@ -305,7 +225,7 @@ export default {
     }
 
     const decoration = await db.decoration.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!decoration) {

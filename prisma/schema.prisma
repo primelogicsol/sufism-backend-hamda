@@ -51,6 +51,12 @@ model User {
   orderPlace Order[]
   digitalBoook DigitalBook[]
   music Music[]
+  redemptions Coupon[]
+  accessories Accessories[]
+  fashion Fashion[]
+  homeLiving HomeAndLiving[]
+  decoration Decoration[]
+  meditation Meditation[]
   createdAt      DateTime       @default(now())
 
   @@map("users")
@@ -82,6 +88,24 @@ model Member {
 
   @@map("members")
 }
+
+model Coupon {
+  id         String   @id @default(cuid()) // unique coupon ID
+  code       String   @unique              // coupon code, must be unique
+  expiresAt  DateTime?                     // optional expiration date
+  isActive   Boolean  @default(true)       // active/inactive flag
+  createdAt  DateTime @default(now())      // timestamp of creation
+  updatedAt  DateTime @updatedAt           // timestamp of last update
+  price      Float    @default(0)                    // base price before discount 💰
+  discount   Float     @default(0)        // discount as % or fixed amount
+  // Relation with User (creator/owner of coupon)
+  createdBy  String
+  isPaid     Boolean  @default(false)
+  user       User     @relation(fields: [createdBy], references: [id])
+
+  @@map("coupons") // map to table name
+}
+
 
 model Donation {
   id        Int           @id @default(autoincrement())
@@ -164,7 +188,8 @@ model Accessories {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
-
+  userId    String
+  user        User        @relation(fields: [userId], references: [id])
   @@map("accessories")
 }
 
@@ -183,7 +208,8 @@ model Decoration {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
-
+  userId    String
+  user        User        @relation(fields: [userId], references: [id])
   @@map("decorations")
 }
 
@@ -202,7 +228,8 @@ model HomeAndLiving {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
-
+  userId    String
+  user        User        @relation(fields: [userId], references: [id])
   @@map("homeAndLiving")
 }
 
@@ -221,7 +248,8 @@ model Fashion {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
-
+  userId    String
+  user        User        @relation(fields: [userId], references: [id])
   @@map("fashion")
 }
 
@@ -240,11 +268,14 @@ model Meditation {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
+  userId    String
+  user        User        @relation(fields: [userId], references: [id])
 }
 
 model DigitalBook {
-  userId    String
+  
   id             Int        @id @default(autoincrement())
+  userId    String
   author         String?
   user        User        @relation(fields: [userId], references: [id])
   title         String    @default("")
@@ -555,4 +586,18 @@ enum SUFI_PATH_STATUS {
   EXPLORATION
   ADVANCING
   DEEPENING
+}
+
+enum CouponType {
+PERCENT // e.g., 10% off
+FIXED // e.g., 500 PKR off
+}
+enum CouponStatus {
+ACTIVE
+INACTIVE
+ARCHIVED
+}
+enum DiscountScope {
+ORDER // discount applies to the whole order
+ITEM // discount applies only to eligible items
 }

@@ -210,3 +210,21 @@ export interface ReviewData {
   rating: number;
   content: string;
 }
+export type TCREATE_COUPON = {
+  code: string;
+  discount: number;
+  expiresAt?: Date | string;
+  price: number;
+};
+
+export type TAPPLY_COUPON = {
+  code: string;
+};
+
+export type TUPDATE_COUPON = {
+  code?: string;
+  discount?: number;
+  price?: number;
+  expiresAt?: Date;
+  isActive?: boolean | string;
+};

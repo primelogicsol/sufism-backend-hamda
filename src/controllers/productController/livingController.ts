@@ -24,7 +24,7 @@ export default {
 
     // Check for existing SKU
     const existingItem = await db.homeAndLiving.findFirst({
-      where: { sku: data.sku }
+      where: { sku: data.sku, userId: user.id, isDelete: false }
     });
 
     if (existingItem) {
@@ -34,6 +34,7 @@ export default {
     const homeAndLivingItem = await db.homeAndLiving.create({
       data: {
         title: data.title,
+        userId: user.id,
         description: data.description,
         price: Number(data.price),
         tags: data.tags || [],
@@ -62,11 +63,13 @@ export default {
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.HomeAndLivingWhereInput = {};
+    const where: Prisma.HomeAndLivingWhereInput = { isDelete: false };
     if (search) {
       where.title = { contains: search, mode: "insensitive" };
     }
-
+    if (user.role === "vendor") {
+      where.userId = user.id;
+    }
     const orderBy = { [sortBy]: sortOrder };
 
     const total = await db.homeAndLiving.count({ where });
@@ -155,11 +158,11 @@ export default {
 
     // Check if item exists
     const existingItem = await db.homeAndLiving.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!existingItem) {
-      return httpResponse(req, res, reshttp.notFoundCode, "Home and Living item not found");
+      return httpResponse(req, res, reshttp.notFoundCode, "Item not found");
     }
 
     // Check SKU uniqueness if updating SKU
@@ -218,7 +221,7 @@ export default {
     }
 
     const homeAndLivingItem = await db.homeAndLiving.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!homeAndLivingItem) {

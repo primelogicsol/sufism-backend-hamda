@@ -23,7 +23,7 @@ export default {
 
     // Check for existing SKU
     const existingfashion = await db.fashion.findFirst({
-      where: { sku: data.sku, isDelete: false }
+      where: { sku: data.sku, isDelete: false, userId: user.id }
     });
 
     if (existingfashion) {
@@ -37,6 +37,7 @@ export default {
         price: Number(data.price),
         tags: data.tags || [],
         sku: data.sku,
+        userId: user.id,
         stock: Number(data.stock) || 0,
         images: images.images?.map((file) => file.path) || []
       }
@@ -61,11 +62,14 @@ export default {
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.FashionWhereInput = {};
+    const where: Prisma.FashionWhereInput = { isDelete: false };
     if (search) {
       where.title = { contains: search, mode: "insensitive" };
     }
 
+    if (user.role == "vendor") {
+      where.userId = user.id;
+    }
     const orderBy = { [sortBy]: sortOrder };
 
     const total = await db.fashion.count({ where });
@@ -153,7 +157,7 @@ export default {
 
     // Check if fashion exists
     const existingfashion = await db.fashion.findFirst({
-      where: { id: Number(id), isDelete: false }
+      where: { id: Number(id), isDelete: false, userId: user.id }
     });
 
     if (!existingfashion) {
@@ -216,7 +220,7 @@ export default {
     }
 
     const fashion = await db.fashion.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!fashion) {

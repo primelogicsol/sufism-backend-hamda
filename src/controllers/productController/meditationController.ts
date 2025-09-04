@@ -23,7 +23,7 @@ export default {
 
     // Check for existing SKU
     const existingItem = await db.meditation.findFirst({
-      where: { sku: data.sku }
+      where: { sku: data.sku, userId: user.id, isDelete: false }
     });
 
     if (existingItem) {
@@ -38,6 +38,7 @@ export default {
         tags: data.tags || [],
         sku: data.sku,
         stock: Number(data.stock) || 0,
+        userId: user.id,
         images: images.images?.map((file) => file.path) || []
       }
     });
@@ -60,9 +61,12 @@ export default {
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.MeditationWhereInput = {};
+    const where: Prisma.MeditationWhereInput = { isDelete: false };
     if (search) {
       where.title = { contains: search, mode: "insensitive" };
+    }
+    if (user.role == "vendor") {
+      where.userId = user.id;
     }
 
     const orderBy = { [sortBy]: sortOrder };
@@ -151,7 +155,7 @@ export default {
 
     // Check if item exists
     const existingItem = await db.meditation.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!existingItem) {
@@ -213,7 +217,7 @@ export default {
     }
 
     const meditations = await db.meditation.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!meditations) {

@@ -80,3 +80,5 @@ productRouter.route("/audio").get(authMiddleware.checkToken, audioController.get
 productRouter.route("/audio/:id").get(authMiddleware.checkToken, audioController.getById);
 
 productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);
+productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);
+productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);

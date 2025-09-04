@@ -37,7 +37,7 @@ export default {
 
     // Check for existing SKU
     const existingAccessory = await db.accessories.findFirst({
-      where: { sku: data.sku }
+      where: { sku: data.sku, userId: user.id, isDelete: false }
     });
 
     if (existingAccessory) {
@@ -47,6 +47,7 @@ export default {
     const accessory = await db.accessories.create({
       data: {
         title: data.title,
+        userId: user.id, //vendor Id
         description: data.description,
         price: Number(data.price),
         tags: data.tags || [],
@@ -71,18 +72,26 @@ export default {
     }
 
     const { page = "1", limit = "10", search = "", sortBy = "createdAt", sortOrder = "desc" } = req.query as SearchQuery;
+
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.AccessoriesWhereInput = {};
+    // build where condition
+    const where: Prisma.AccessoriesWhereInput = { isDelete: false };
+
     if (search) {
       where.title = { contains: search, mode: "insensitive" };
+    }
+
+    if (user.role === "vendor") {
+      where.userId = user.id;
     }
 
     const orderBy = { [sortBy]: sortOrder };
 
     const total = await db.accessories.count({ where });
+
     const accessories = await db.accessories.findMany({
       where,
       skip,
@@ -115,7 +124,6 @@ export default {
       }
     });
   }),
-
   // Get single accessory
   getById: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
@@ -168,7 +176,7 @@ export default {
 
     // Check if accessory exists
     const existingAccessory = await db.accessories.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!existingAccessory) {
@@ -231,7 +239,7 @@ export default {
     }
 
     const accessory = await db.accessories.findFirst({
-      where: { id: Number(id) }
+      where: { id: Number(id), userId: user.id }
     });
 
     if (!accessory) {
