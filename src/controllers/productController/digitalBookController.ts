@@ -70,7 +70,7 @@ export default {
         data: {
           userId: user.id,
           title: data.title,
-          descritpion: data.description,
+          description: data.description,
           author: data.author,
           genre: data.genre,
           price: Number(data.price),
@@ -273,8 +273,8 @@ export default {
       const updateData: Prisma.DigitalBookUpdateInput = {};
 
       if (data.author) updateData.author = data.author;
-      if (data.title) updateData.title = data.title;
       if (data.genre) updateData.genre = data.genre;
+      if (data.description) updateData.description = data.description;
       if (data.releaseDate) updateData.releaseDate = releaseDate;
       if (files?.document?.length) updateData.url = files.document[0].path;
       if (files?.overviewImages?.length) updateData.overviewImages = files.overviewImages.map((file) => file.path);

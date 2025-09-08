@@ -172,6 +172,7 @@ enum TPOOL {
   PRESERVE_ART_AND_CRAFT
   SPONSOR_EVENTS
 }
+// accesories done
 
 model Accessories {
   id          Int        @id @default(autoincrement())
@@ -279,7 +280,7 @@ model DigitalBook {
   author         String?
   user        User        @relation(fields: [userId], references: [id])
   title         String    @default("")
-  descritpion         String    @default("")
+  description         String    @default("")
   genre          String?
   releaseDate    DateTime?
   url            String?
