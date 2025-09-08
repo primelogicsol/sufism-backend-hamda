@@ -6,14 +6,18 @@ import { ContentService, ContentItemSchema } from "../../services/content.servic
 const getList = asyncHandler(async (req: Request, res: Response) => {
   const { section } = req.params as { section: string };
   const data: unknown = await ContentService.getList(section);
-  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=600");
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   return httpResponse(req, res, 200, "ok", data);
 });
 
 const getItem = asyncHandler(async (req: Request, res: Response) => {
   const { section, slug } = req.params as { section: string; slug: string };
   const data = await ContentService.getItem(section, slug);
-  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   return httpResponse(req, res, 200, "ok", data);
 });
 
@@ -24,13 +28,18 @@ const getItemByVersion = asyncHandler(async (req: Request, res: Response) => {
     return httpResponse(req, res, 400, "Invalid version number", null);
   }
   const data = await ContentService.getItemByVersion(section, slug, versionNum);
-  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   return httpResponse(req, res, 200, "ok", data);
 });
 
 const getAvailableVersions = asyncHandler(async (req: Request, res: Response) => {
   const { section, slug } = req.params as { section: string; slug: string };
   const versions = await ContentService.getAvailableVersions(section, slug);
+  res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   return httpResponse(req, res, 200, "ok", { versions });
 });
 

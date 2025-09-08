@@ -1,0 +1,202 @@
+{
+  "items": [
+    {
+      "slug": "hard-talk-1",
+      "title": "Hard Talk 1: This path bleeds, ask those who vanished in fire, not those who watched dancing",
+      "path": "prod/academy-details/hardtalk/hard-talk-1/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-2",
+      "title": "Hard Talk 2",
+      "path": "prod/academy-details/hardtalk/hard-talk-2/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-3",
+      "title": "Hard Talk 3",
+      "path": "prod/academy-details/hardtalk/hard-talk-3/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-4",
+      "title": "Hard Talk 4",
+      "path": "prod/academy-details/hardtalk/hard-talk-4/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-5",
+      "title": "Hard Talk 5",
+      "path": "prod/academy-details/hardtalk/hard-talk-5/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-6",
+      "title": "Hard Talk 6",
+      "path": "prod/academy-details/hardtalk/hard-talk-6/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-7",
+      "title": "Hard Talk 7",
+      "path": "prod/academy-details/hardtalk/hard-talk-7/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-8",
+      "title": "Hard Talk 8",
+      "path": "prod/academy-details/hardtalk/hard-talk-8/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "hard-talk-9",
+      "title": "Hard Talk 9",
+      "path": "prod/academy-details/hardtalk/hard-talk-9/v1.json",
+      "category": "hardtalk"
+    },
+    {
+      "slug": "the-curious-seeker",
+      "title": "The Curious Seeker",
+      "path": "prod/academy-details/dialogseries/the-curious-seeker/v1.json",
+      "category": "dialogseries"
+    },
+    {
+      "slug": "the-sufism-challenger",
+      "title": "The Sufism Challenger",
+      "path": "prod/academy-details/dialogseries/the-sufism-challenger/v1.json",
+      "category": "dialogseries"
+    },
+    {
+      "slug": "the-sufi-scholar",
+      "title": "The Sufi Scholar",
+      "path": "prod/academy-details/dialogseries/the-sufi-scholar/v1.json",
+      "category": "dialogseries"
+    },
+    {
+      "slug": "dusk-became-divine",
+      "title": "Dusk became divine",
+      "path": "prod/academy-details/inspiringinterview/dusk-became-divine/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "feather-touched-fire",
+      "title": "Feather touched fire",
+      "path": "prod/academy-details/inspiringinterview/feather-touched-fire/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "silence-led-me-home",
+      "title": "Silence led me Home",
+      "path": "prod/academy-details/inspiringinterview/silence-led-me-home/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "name-turned-light",
+      "title": "Name turned light",
+      "path": "prod/academy-details/inspiringinterview/name-turned-light/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "unseen-yet-so-near",
+      "title": "Unseen, Yet so Near",
+      "path": "prod/academy-details/inspiringinterview/unseen-yet-so-near/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "he-found-me-disappearing",
+      "title": "He found me disappearing",
+      "path": "prod/academy-details/inspiringinterview/he-found-me-disappearing/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "veils-fell-light-spoke",
+      "title": "Veils fell, Light spoke",
+      "path": "prod/academy-details/inspiringinterview/veils-fell-light-spoke/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "the-path-wrote-me",
+      "title": "The path wrote me",
+      "path": "prod/academy-details/inspiringinterview/the-path-wrote-me/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "breath-from-rhythm",
+      "title": "Breath from rhythm",
+      "path": "prod/academy-details/inspiringinterview/breath-from-rhythm/v1.json",
+      "category": "inspiringinterview"
+    },
+    {
+      "slug": "the-statesman",
+      "title": "The Statesman",
+      "path": "prod/academy-details/sacredprofessions/the-statesman/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-administrator",
+      "title": "The Administrator",
+      "path": "prod/academy-details/sacredprofessions/the-administrator/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-court",
+      "title": "The Court",
+      "path": "prod/academy-details/sacredprofessions/the-court/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-businessman",
+      "title": "The Businessman",
+      "path": "prod/academy-details/sacredprofessions/the-businessman/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-ecologist",
+      "title": "The Ecologist",
+      "path": "prod/academy-details/sacredprofessions/the-ecologist/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-developer",
+      "title": "The Developer",
+      "path": "prod/academy-details/sacredprofessions/the-developer/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-witness",
+      "title": "The Witness",
+      "path": "prod/academy-details/sacredprofessions/the-witness/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-physician",
+      "title": "The Physician",
+      "path": "prod/academy-details/sacredprofessions/the-physician/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-police-officer",
+      "title": "The Police Officer",
+      "path": "prod/academy-details/sacredprofessions/the-police-officer/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-teacher",
+      "title": "The Teacher",
+      "path": "prod/academy-details/sacredprofessions/the-teacher/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-student",
+      "title": "The Student",
+      "path": "prod/academy-details/sacredprofessions/the-student/v1.json",
+      "category": "sacredprofessions"
+    },
+    {
+      "slug": "the-architect",
+      "title": "The Architect",
+      "path": "prod/academy-details/sacredprofessions/the-architect/v1.json",
+      "category": "sacredprofessions"
+    }
+  ]
+}

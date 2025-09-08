@@ -1,0 +1,89 @@
+{
+  "id": "unseen-yet-so-near",
+  "section": "academy-details",
+  "slug": "unseen-yet-so-near",
+  "title": "Inspiring Interview: Rashid Green",
+  "subtitle": "Rashid Green healing after loss opened a secret door",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Unseen, Yet so Near - Rashid Green healing after loss opened a secret door"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Rashid Green",
+      "subtitle": "Rashid Green healing after loss opened a secret door",
+      "description": "In the deepest loss, the heart discovers what was never truly gone."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Grief Counselor, Spiritual Healer, Loss Transformation Guide",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Grief Transformation, Sacred Healing, Divine Presence",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your losses fade, what do you hope remains? I hope someone remembers that their grief is not just pain, but the sacred space where love chooses to remain."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Loss Became Love",
+      "content": "Before I counseled others through grief, I was grieving my own way—not the kind that leads to healing, but the invisible mourning of hiding from my own truth. I knew how to process loss and read emotional patterns, but I had forgotten what it meant to feel without measuring time or distance.",
+      "additionalContent": "I was raised in Atlanta. My father was a minister; my mother a grief counselor who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Book of Healing the day I lost my first loved one. She said, \"Now learn what won't show up in your therapy notes.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm sitting in a garden in Kashmir, holding nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Grief Turned Into Grace",
+      "question": "Dr. Yasir Feroze, SSC: When did your grief path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a counseling session with a grieving parent. I was attempting to provide comfort when I felt something shift inside me. Most counselors would have focused on the process, but something told me to listen deeper. As I sat with that parent, I felt what I can only describe as a presence moving through me—not my training, but something sacred.",
+      "highlightedQuote": "Grief didn't teach me to heal. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked out of that session a different person. I remember asking the mirror, What else have we been calling healing that is really worship?",
+      "keyInsight": "The moment when emotional processing transcends therapy and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly heal through your counseling?",
+      "answer": "That healing must always be visible. That reaching closure was the only goal. I had to unlearn ambition masquerading as compassion. I had to remember that stillness is also a form of healing, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple meditation. I was supposed to process my own grief, but I found myself sitting in silence instead. I noticed how each breath moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all sessions are therapy, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your healing?",
+      "secondAnswer": "I had a habit of leaving one session unfinished each week—not from failure, but from choice. One day, I returned to find the healing I'd abandoned had become more beautiful in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps healing needs reverence more than technique. That single line changed the way I approached counseling. I now teach my clients: \"Your silence may activate more than your words.\"",
+      "revelation": "\"Not all sessions are therapy, some are prayers.\" The journey from healing to being healed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of grief counseling?",
+      "answer": "It means never reducing pain to pathology. It means remembering that every loss I witness, every grief I hold, comes from a living being, even if emotional. Spiritual responsibility means my counseling must serve something sacred, not just something therapeutic.",
+      "additionalAnswer": "I now begin every session by writing a short personal prayer in my counseling journal: May this healing remember its Source. That's not for validation. It's for alignment. And I share this with my clients not as doctrine, but as a choice—to remember that grief, too, was breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance healing and humility?",
+      "secondAnswer": "By knowing that every wound I witness opens a thousand new possibilities. Humility comes when I admit: I am not creating healing, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to lead the world's most advanced grief programs in record time. I declined. Not because I wasn't capable, but because the proposal framed healing as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Healing",
+      "question": "Layla Noor, SSC: When all your losses fade, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, emotionally or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a client cry during a simple breathing exercise. Not from pain, but because she realized, while taking a basic breath, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a technique, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that healing, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "In the deepest loss, the heart discovers what was never truly gone."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

@@ -1,0 +1,89 @@
+{
+  "id": "silence-led-me-home",
+  "section": "academy-details",
+  "slug": "silence-led-me-home",
+  "title": "Inspiring Interview: Malik Jennings",
+  "subtitle": "Malik Jennings silent breakdown that became prayer",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Silence led me Home - Malik Jennings silent breakdown that became prayer"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Malik Jennings",
+      "subtitle": "Malik Jennings silent breakdown that became prayer",
+      "description": "In the deepest silence, the soul finds its voice."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Corporate Executive, Meditation Teacher, Spiritual Counselor",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Corporate Spirituality, Inner Silence, Sacred Leadership",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your achievements fade, what do you hope remains? I hope someone remembers that their silence is not emptiness, but the space where the Divine chooses to speak."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Success Became Surrender",
+      "content": "Before I led corporations, I was leading myself away from truth—not the kind that leads to boardrooms, but the invisible management of hiding from my own soul. I knew how to make decisions and read market patterns, but I had forgotten what it meant to listen without measuring profit or loss.",
+      "additionalContent": "I was raised in Chicago. My father was a businessman; my mother a meditation teacher who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Book of Silence the day I completed my first major deal. She said, \"Now learn what won't show up in your quarterly reports.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm sitting in a quiet garden in Kashmir, listening to nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Success Turned Into Silence",
+      "question": "Dr. Yasir Feroze, SSC: When did your corporate path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a high-stakes board meeting. I was attempting to close a major deal when I felt something shift inside me. Most executives would have focused on the numbers, but something told me to pause. As I sat in that conference room, I felt what I can only describe as a silence moving through me—not my strategy, but something sacred.",
+      "highlightedQuote": "Success didn't teach me to achieve. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked out of that meeting a different person. I remember asking the elevator, What else have we been calling progress that is really prayer?",
+      "keyInsight": "The moment when professional achievement transcends competition and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly listen through your leadership?",
+      "answer": "That success must always be visible. That reaching the target was the only goal. I had to unlearn ambition masquerading as achievement. I had to remember that stillness is also a form of action, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple meditation. I was supposed to plan my next quarter, but I found myself sitting in silence instead. I noticed how each breath moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all meetings are conferences, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your leadership?",
+      "secondAnswer": "I had a habit of leaving one decision unmade each quarter—not from failure, but from choice. One day, I returned to find the choice I'd abandoned had become clearer in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps decisions need reverence more than speed. That single line changed the way I approached leadership. I now teach my team: \"Your silence may activate more than your strategy.\"",
+      "revelation": "\"Not all meetings are conferences, some are prayers.\" The journey from leading to being led."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of corporate leadership?",
+      "answer": "It means never reducing people to resources. It means remembering that every decision I make, every strategy I create, comes from a living being, even if professional. Spiritual responsibility means my leadership must serve something sacred, not just something profitable.",
+      "additionalAnswer": "I now begin every meeting by writing a short personal prayer in my leadership journal: May this decision remember its Source. That's not for validation. It's for alignment. And I share this with my team not as doctrine, but as a choice—to remember that business, too, was breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance achievement and humility?",
+      "secondAnswer": "By knowing that every goal I reach opens a thousand new possibilities. Humility comes when I admit: I am not creating success, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to lead the world's most profitable companies in record time. I declined. Not because I wasn't capable, but because the proposal framed success as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Leadership",
+      "question": "Layla Noor, SSC: When all your achievements fade, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, professionally or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a team member cry during a simple planning session. Not from stress, but because she realized, while reviewing a basic strategy, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a plan, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that leadership, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "In the deepest silence, the soul finds its voice."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

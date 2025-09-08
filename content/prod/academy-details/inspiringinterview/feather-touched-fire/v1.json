@@ -1,0 +1,89 @@
+{
+  "id": "feather-touched-fire",
+  "section": "academy-details",
+  "slug": "feather-touched-fire",
+  "title": "Inspiring Interview: Layla Sabreen",
+  "subtitle": "Layla Sabreen's journey from dance to divine surrender",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Feather touched fire - Layla Sabreen's journey from dance to divine surrender"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Layla Sabreen",
+      "subtitle": "Layla Sabreen's journey from dance to divine surrender",
+      "description": "When movement becomes prayer, the body remembers what the mind forgot."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Contemporary Dancer, Movement Therapist, Spiritual Guide",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Sacred Movement, Body Wisdom, Divine Expression",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your performances fade, what do you hope remains? I hope someone remembers that their body is not just a vessel, but a sacred instrument through which the Divine chooses to move."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Dance Became Devotion",
+      "content": "Before I danced for audiences, I was dancing away from myself—not the kind that leads to stages, but the invisible choreography of hiding from my own truth. I knew how to move with precision and grace, but I had forgotten what it meant to be moved by something greater than applause.",
+      "additionalContent": "I was raised in New York. My father was a jazz musician; my mother a yoga teacher who whispered Hafiz's poetry before dawn. It was she who gave me a copy of The Dance of the Soul the day I completed my first major performance. She said, \"Now learn what won't show up in your reviews.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm dancing in a moonlit garden in Kashmir, moving with nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Movement Turned Into Prayer",
+      "question": "Dr. Yasir Feroze, SSC: When did your dance path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a solo performance in a small theater. I was attempting a challenging piece when I felt something shift inside me. Most dancers would have focused on technique, but something told me to let go. As I moved across the stage, I felt what I can only describe as a presence moving through me—not my choreography, but something sacred.",
+      "highlightedQuote": "Dance didn't teach me to perform. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked off that stage a different person. I remember asking the mirror, What else have we been calling art that is really worship?",
+      "keyInsight": "The moment when physical expression transcends performance and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly move from your soul?",
+      "answer": "That perfection must always be visible. That reaching the audience was the only goal. I had to unlearn ambition masquerading as artistry. I had to remember that stillness is also a form of movement, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple warm-up. I was supposed to practice my routine, but I found myself moving to the rhythm of my own breath instead. I noticed how each movement flowed not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all performances are shows, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your movement?",
+      "secondAnswer": "I had a habit of leaving one dance unfinished each season—not from failure, but from choice. One day, I returned to find the movement I'd abandoned had become more beautiful in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps movement needs reverence more than perfection. That single line changed the way I approached dance. I now teach my students: \"Your stillness may activate more than your technique.\"",
+      "revelation": "\"Not all performances are shows, some are prayers.\" The journey from performing to being performed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of dance and movement?",
+      "answer": "It means never reducing the body to a machine. It means remembering that every movement I make, every gesture I create, comes from a living being, even if artistic. Spiritual responsibility means my performances must serve something sacred, not just something entertaining.",
+      "additionalAnswer": "I now begin every dance by writing a short personal prayer in my movement journal: May this expression remember its Source. That's not for validation. It's for alignment. And I share this with my students not as doctrine, but as a choice—to remember that bodies, too, were breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance expression and humility?",
+      "secondAnswer": "By knowing that every movement I create opens a thousand new possibilities. Humility comes when I admit: I am not creating beauty, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a contract to perform the world's most challenging pieces in record time. I declined. Not because I wasn't capable, but because the proposal framed movement as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Movement",
+      "question": "Layla Noor, SSC: When all your performances fade, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, physically or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a student cry during a simple movement exercise. Not from exhaustion, but because she realized, while moving her arms in a basic circle, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a routine, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that dance, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "When movement becomes prayer, the body remembers what the mind forgot."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

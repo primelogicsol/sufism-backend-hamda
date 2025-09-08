@@ -80,32 +80,32 @@
         {
           "title": "Knowledge Preservation",
           "image": "/assets/images/blog/preservation.png",
-          "href": "/details"
+          "href": "/explore/details/knowledge-preservation"
         },
         {
           "title": "Silsila Dynamics",
           "image": "/assets/images/blog/silsila.png",
-          "href": "/details"
+          "href": "/explore/details/silsila-dynamics"
         },
         {
           "title": "Lineage Integration",
           "image": "/assets/images/blog/lineage.png",
-          "href": "/details"
+          "href": "/explore/details/lineage-integration"
         },
         {
           "title": "Prophetic Inheritance",
           "image": "/assets/images/blog/inheritance.png",
-          "href": "/details"
+          "href": "/explore/details/prophetic-inheritance"
         },
         {
           "title": "Sacred Transmission",
           "image": "/assets/images/blog/transmission.png",
-          "href": "/details"
+          "href": "/explore/details/sacred-transmission"
         },
         {
           "title": "Wisdom Activation",
           "image": "/assets/images/blog/activation.png",
-          "href": "/details"
+          "href": "/explore/details/wisdom-activation"
         }
       ]
     }

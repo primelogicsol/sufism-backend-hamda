@@ -1,0 +1,89 @@
+{
+  "id": "he-found-me-disappearing",
+  "section": "academy-details",
+  "slug": "he-found-me-disappearing",
+  "title": "Inspiring Interview: Iman Rivera",
+  "subtitle": "Iman Rivera moment of surrender in the forests of oregon",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "He found me disappearing - Iman Rivera moment of surrender in the forests of oregon"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Iman Rivera",
+      "subtitle": "Iman Rivera moment of surrender in the forests of oregon",
+      "description": "In the deepest wilderness, the soul finds its way home."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Forest Guide, Nature Therapist, Wilderness Spiritual Guide",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Nature Spirituality, Wilderness Awakening, Sacred Surrender",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your paths fade, what do you hope remains? I hope someone remembers that their wilderness is not just a place, but the sacred space where the Divine chooses to find them."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Wilderness Became Wisdom",
+      "content": "Before I guided others through forests, I was lost in my own wilderness—not the kind that leads to trails, but the invisible wandering of hiding from my own truth. I knew how to navigate terrain and read natural signs, but I had forgotten what it meant to walk without measuring distance or destination.",
+      "additionalContent": "I was raised in Oregon. My father was a park ranger; my mother a nature teacher who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Book of Wilderness the day I completed my first solo hike. She said, \"Now learn what won't show up on your trail map.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm walking through a forest in Kashmir, following nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Hiking Turned Into Surrender",
+      "question": "Dr. Yasir Feroze, SSC: When did your wilderness path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a solo hike in the Oregon forests. I was attempting to reach a summit when I felt something shift inside me. Most hikers would have focused on the trail, but something told me to stop. As I stood in that ancient forest, I felt what I can only describe as a presence moving through me—not my navigation, but something sacred.",
+      "highlightedQuote": "Wilderness didn't teach me to conquer. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked out of that forest a different person. I remember asking the trees, What else have we been calling adventure that is really prayer?",
+      "keyInsight": "The moment when physical exploration transcends achievement and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly walk through your wilderness?",
+      "answer": "That progress must always be visible. That reaching the destination was the only goal. I had to unlearn ambition masquerading as adventure. I had to remember that stillness is also a form of movement, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple forest walk. I was supposed to reach a viewpoint by noon, but I found myself sitting by a stream instead. I noticed how each leaf moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all hikes are journeys, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your wilderness?",
+      "secondAnswer": "I had a habit of leaving one trail unfinished each season—not from failure, but from choice. One day, I returned to find the path I'd abandoned had become more beautiful in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps trails need reverence more than completion. That single line changed the way I approached wilderness. I now teach my clients: \"Your stillness may activate more than your gear.\"",
+      "revelation": "\"Not all hikes are journeys, some are prayers.\" The journey from exploring to being explored."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of wilderness guiding?",
+      "answer": "It means never reducing nature to a playground. It means remembering that every trail I walk, every tree I touch, comes from a living being, even if natural. Spiritual responsibility means my guiding must serve something sacred, not just something recreational.",
+      "additionalAnswer": "I now begin every hike by writing a short personal prayer in my wilderness journal: May this journey remember its Source. That's not for validation. It's for alignment. And I share this with my clients not as doctrine, but as a choice—to remember that nature, too, was breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance exploration and humility?",
+      "secondAnswer": "By knowing that every trail I walk opens a thousand new possibilities. Humility comes when I admit: I am not conquering wilderness, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to guide the world's most challenging wilderness expeditions in record time. I declined. Not because I wasn't capable, but because the proposal framed nature as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Wilderness",
+      "question": "Layla Noor, SSC: When all your paths fade, what do you hope remains?",
+      "answer": "I hope someone walks into a wilderness I shaped, physically or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a client cry during a simple forest walk. Not from exhaustion, but because she realized, while walking a basic trail, that she too was once just a whisper of earth becoming form. That's what I want to leave behind. Not a route, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that wilderness, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "In the deepest wilderness, the soul finds its way home."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

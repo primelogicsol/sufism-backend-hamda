@@ -80,32 +80,32 @@
         {
           "title": "Subtle Development",
           "image": "/assets/images/blog/subtle.png",
-          "href": "/details"
+          "href": "/explore/details/subtle-development"
         },
         {
           "title": "Inner Sight",
           "image": "/assets/images/blog/sight.png",
-          "href": "/details"
+          "href": "/explore/details/inner-sight"
         },
         {
           "title": "Spiritual Hearing",
           "image": "/assets/images/blog/hearing.png",
-          "href": "/details"
+          "href": "/explore/details/spiritual-hearing"
         },
         {
           "title": "Divine Taste",
           "image": "/assets/images/blog/taste.png",
-          "href": "/details"
+          "href": "/explore/details/divine-taste"
         },
         {
           "title": "Sacred Touch",
           "image": "/assets/images/blog/touch.png",
-          "href": "/details"
+          "href": "/explore/details/sacred-touch"
         },
         {
           "title": "Transcendent Smell",
           "image": "/assets/images/blog/smell.png",
-          "href": "/details"
+          "href": "/explore/details/transcendent-smell"
         }
       ]
     }
