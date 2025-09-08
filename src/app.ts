@@ -3,13 +3,14 @@ import express, { type Application } from "express";
 import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
+// import { STRIPE_SK } from "./configs/config.js";
 import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
 import PerformanceController from "./controllers/performanceController/performanceController.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { defaultRouter } from "./routers/defaultRouter.js";
 export const app: Application = express();
-
+// const stripe = require("stripe")(STRIPE_SK);
 //  * Default Middlewares
 app.use(express.json());
 app.set("trust proxy", 1);

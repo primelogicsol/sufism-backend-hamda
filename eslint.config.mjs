@@ -18,6 +18,7 @@ export default tseslint.config({
     quotes: ["error", "double", { allowTemplateLiterals: true }],
     eqeqeq: "off",
     "no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
     "@typescript-eslint/consistent-type-imports": [
       "error",
       {
