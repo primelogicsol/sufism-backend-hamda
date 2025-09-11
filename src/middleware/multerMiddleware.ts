@@ -1,60 +1,46 @@
+/* eslint-disable camelcase */
+import { v2 as cloudinary } from "cloudinary";
 import { type RequestHandler } from "express";
 import multer from "multer";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import logger from "../utils/loggerUtils.js";
 
+// --- Cloudinary Config ---
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
+
+// --- Supported MIME types ---
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-export const supportedDocTypes = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // docx
-];
+export const supportedDocTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+export const supportedMusicTypes = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"];
+export const supportedVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const supportedMusicTypes = [
-  "audio/mpeg", // mp3
-  "audio/mp3", // mp3
-  "audio/wav", // wav (optional)
-  "audio/ogg" // ogg (optional)
-];
+// --- Cloudinary Storage ---
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: (_req, file) => {
+    // choose folder based on mimetype
+    let folder = "uploads/others";
+    if (supportedImageTypes.includes(file.mimetype)) folder = "uploads/images";
+    else if (supportedDocTypes.includes(file.mimetype)) folder = "uploads/docs";
+    else if (supportedMusicTypes.includes(file.mimetype)) folder = "uploads/music";
+    else if (supportedVideoTypes.includes(file.mimetype)) folder = "uploads/videos";
 
-export const supportedVideoTypes = [
-  "video/mp4", // mp4
-  "video/webm", // webm (optional)
-  "video/ogg" // ogv (optional)
-];
-const uploadDir = path.resolve(__dirname, "../../public/uploads/productImages");
-
-// Create directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  logger.info(`Upload directory created at: ${uploadDir}`);
-} else {
-  logger.info(`Upload directory exists: ${uploadDir}`);
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    logger.debug("Storing file in:", uploadDir);
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    try {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const ext = path.extname(file.originalname);
-      const fileName = `image-${uniqueSuffix}${ext}`;
-      logger.debug(`Generated filename for upload: ${fileName}`);
-      cb(null, fileName);
-    } catch (err) {
-      logger.error("Error generating filename:", err);
-      cb(err as Error, "");
-    }
+    return {
+      folder,
+      // keep original extension (jpg, png, etc.)
+      format: undefined,
+      // unique public_id
+      public_id: `${Date.now()}-${file.originalname.split(".")[0]}`
+    };
   }
 });
 
+// --- File Filter ---
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (
     !supportedImageTypes.includes(file.mimetype) &&
@@ -62,7 +48,7 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
     !supportedMusicTypes.includes(file.mimetype) &&
     !supportedVideoTypes.includes(file.mimetype)
   ) {
-    const errorMsg = `Unsupported file type: ${file.mimetype}. Allowed types: ${[...supportedImageTypes, ...supportedDocTypes, ...supportedMusicTypes, ...supportedVideoTypes].join(", ")}`;
+    const errorMsg = `Unsupported file type: ${file.mimetype}`;
     logger.warn(errorMsg);
     return cb(new Error(errorMsg));
   }
@@ -70,16 +56,14 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
   cb(null, true);
 };
 
+// --- Multer Instance ---
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
-    files: 5
-  },
+  limits: { fileSize: 5 * 1024 * 1024, files: 5 }, // 5MB per file, max 5 files per field
   fileFilter
 });
 
-// Middleware with error logging
+// --- Middleware ---
 const fileUploader: RequestHandler = async (req, res, next) => {
   const uploader = upload.fields([
     { name: "thumbnail", maxCount: 1 },
@@ -90,7 +74,7 @@ const fileUploader: RequestHandler = async (req, res, next) => {
     { name: "video", maxCount: 2 }
   ]);
 
-  await uploader(req, res, (err: unknown) => {
+  await uploader(req, res, (err?) => {
     if (err) {
       logger.error("Multer upload error:", err);
       return res.status(400).json({ error: (err as Error).message });

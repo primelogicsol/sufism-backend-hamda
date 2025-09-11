@@ -16,7 +16,7 @@ const uploadOnCloudinary = async (localFilePath: string, fileName: string, forma
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "raw",
       filename_override: fileName,
-      folder: "b2b",
+      folder: "sufism",
       format: format
     });
     fs.unlinkSync(localFilePath);
@@ -42,4 +42,4 @@ const deleteFromCloudinary = async (publicId: string) => {
     else throw (reshttp.internalServerErrorCode, `Error while uploading files:: ${error as string}`);
   }
 };
-export { uploadOnCloudinary, deleteFromCloudinary };
+export { deleteFromCloudinary, uploadOnCloudinary };
