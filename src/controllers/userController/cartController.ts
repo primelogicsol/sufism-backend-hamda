@@ -32,6 +32,7 @@ export default {
       qty?: number;
     };
 
+    // 🔒 Ensure user exists
     const user = await db.user.findFirst({ where: { id: req.userFromToken?.id } });
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -39,6 +40,37 @@ export default {
 
     const field = categoryFieldMap[category];
 
+    // 🔎 Ensure product exists
+    let product: unknown = null;
+    switch (category) {
+      case "music":
+        product = await db.music.findUnique({ where: { id: productId } });
+        break;
+      case "book":
+        product = await db.digitalBook.findUnique({ where: { id: productId } });
+        break;
+      case "fashion":
+        product = await db.fashion.findUnique({ where: { id: productId } });
+        break;
+      case "meditation":
+        product = await db.meditation.findUnique({ where: { id: productId } });
+        break;
+      case "decoration":
+        product = await db.decoration.findUnique({ where: { id: productId } });
+        break;
+      case "living":
+        product = await db.homeAndLiving.findUnique({ where: { id: productId } });
+        break;
+      case "accessories":
+        product = await db.accessories.findUnique({ where: { id: productId } });
+        break;
+    }
+
+    if (!product) {
+      return httpResponse(req, res, reshttp.notFoundCode, "Product not found");
+    }
+
+    // 🛑 Prevent duplicates in cart
     const existingItem = await db.cart.findFirst({
       where: {
         userId: user.id,
@@ -49,7 +81,6 @@ export default {
     if (existingItem) {
       return httpResponse(req, res, reshttp.badRequestCode, "Already in cart");
     }
-
     const cartItem = await db.cart.create({
       data: {
         userId: user.id,
