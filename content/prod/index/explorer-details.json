@@ -1,0 +1,394 @@
+{
+  "items": [
+    {
+      "slug": "spiritual-foundations",
+      "title": "Spiritual Foundations",
+      "path": "prod/explorer-details/spiritual-foundations/v1.json"
+    },
+    {
+      "slug": "mystical-cosmology",
+      "title": "Foundational Matrices - Mystical Cosmology",
+      "path": "prod/explorer-details/mystical-cosmology/v1.json"
+    },
+    {
+      "slug": "divine-numerology",
+      "title": "Divine Numerology",
+      "path": "prod/explorer-details/divine-numerology/v1.json"
+    },
+    {
+      "slug": "attribute-studies",
+      "title": "Attribute Studies",
+      "path": "prod/explorer-details/attribute-studies/v1.json"
+    },
+    {
+      "slug": "soul-psychology",
+      "title": "Soul Psychology",
+      "path": "prod/explorer-details/soul-psychology/v1.json"
+    },
+    {
+      "slug": "unity-laboratory",
+      "title": "Unity Laboratory",
+      "path": "prod/explorer-details/unity-laboratory/v1.json"
+    },
+    {
+      "slug": "awareness-cartography",
+      "title": "Awareness Cartography",
+      "path": "prod/explorer-details/awareness-cartography/v1.json"
+    },
+    {
+      "slug": "quantum-integration",
+      "title": "Quantum Integration",
+      "path": "prod/explorer-details/quantum-integration/v1.json"
+    },
+    {
+      "slug": "non-local-studies",
+      "title": "Non-Local Studies",
+      "path": "prod/explorer-details/non-local-studies/v1.json"
+    },
+    {
+      "slug": "dimensional-perception",
+      "title": "Dimensional Perception",
+      "path": "prod/explorer-details/dimensional-perception/v1.json"
+    },
+    {
+      "slug": "temporal-folding",
+      "title": "Temporal Folding",
+      "path": "prod/explorer-details/temporal-folding/v1.json"
+    },
+    {
+      "slug": "field-navigation",
+      "title": "Field Navigation",
+      "path": "prod/explorer-details/field-navigation/v1.json"
+    },
+    {
+      "slug": "celestial-navigation",
+      "title": "Celestial Navigation",
+      "path": "prod/explorer-details/celestial-navigation/v1.json"
+    },
+    {
+      "slug": "sacred-time",
+      "title": "Sacred Time",
+      "path": "prod/explorer-details/sacred-time/v1.json"
+    },
+    {
+      "slug": "quantum-entanglement",
+      "title": "Quantum Entanglement",
+      "path": "prod/explorer-details/quantum-entanglement/v1.json"
+    },
+    {
+      "slug": "divine-light",
+      "title": "Divine Light",
+      "path": "prod/explorer-details/divine-light/v1.json"
+    },
+    {
+      "slug": "vibrational-cosmology",
+      "title": "Vibrational Cosmology",
+      "path": "prod/explorer-details/vibrational-cosmology/v1.json"
+    },
+    {
+      "slug": "stellar-wisdom",
+      "title": "Stellar Wisdom",
+      "path": "prod/explorer-details/stellar-wisdom/v1.json"
+    },
+    {
+      "slug": "sacred-ecology",
+      "title": "Sacred Ecology",
+      "path": "prod/explorer-details/sacred-ecology/v1.json"
+    },
+    {
+      "slug": "divine-balance",
+      "title": "Divine Balance",
+      "path": "prod/explorer-details/divine-balance/v1.json"
+    },
+    {
+      "slug": "creation-stewardship",
+      "title": "Creation Stewardship",
+      "path": "prod/explorer-details/creation-stewardship/v1.json"
+    },
+    {
+      "slug": "natural-communication",
+      "title": "Natural Communication",
+      "path": "prod/explorer-details/natural-communication/v1.json"
+    },
+    {
+      "slug": "ecosystem-mapping",
+      "title": "Ecosystem Mapping",
+      "path": "prod/explorer-details/ecosystem-mapping/v1.json"
+    },
+    {
+      "slug": "earth-resonance",
+      "title": "Earth Resonance",
+      "path": "prod/explorer-details/earth-resonance/v1.json"
+    },
+    {
+      "slug": "circulation-systems",
+      "title": "Circulation Systems",
+      "path": "prod/explorer-details/circulation-systems/v1.json"
+    },
+    {
+      "slug": "force-amplification",
+      "title": "Force Amplification",
+      "path": "prod/explorer-details/force-amplification/v1.json"
+    },
+    {
+      "slug": "purification-science",
+      "title": "Purification Science",
+      "path": "prod/explorer-details/purification-science/v1.json"
+    },
+    {
+      "slug": "spiritual-nutrition",
+      "title": "Spiritual Nutrition",
+      "path": "prod/explorer-details/spiritual-nutrition/v1.json"
+    },
+    {
+      "slug": "cellular-consciousness",
+      "title": "Cellular Consciousness",
+      "path": "prod/explorer-details/cellular-consciousness/v1.json"
+    },
+    {
+      "slug": "bioenergetic-fields",
+      "title": "Bioenergetic Fields",
+      "path": "prod/explorer-details/bioenergetic-fields/v1.json"
+    },
+    {
+      "slug": "prophetic-medicine",
+      "title": "Prophetic Medicine",
+      "path": "prod/explorer-details/prophetic-medicine/v1.json"
+    },
+    {
+      "slug": "interdimensional-protocols",
+      "title": "Interdimensional Protocols",
+      "path": "prod/explorer-details/interdimensional-protocols/v1.json"
+    },
+    {
+      "slug": "biofield-measurement",
+      "title": "Biofield Measurement",
+      "path": "prod/explorer-details/biofield-measurement/v1.json"
+    },
+    {
+      "slug": "epigenetic-influence",
+      "title": "Epigenetic Influence",
+      "path": "prod/explorer-details/epigenetic-influence/v1.json"
+    },
+    {
+      "slug": "heart-intelligence",
+      "title": "Heart Intelligence",
+      "path": "prod/explorer-details/heart-intelligence/v1.json"
+    },
+    {
+      "slug": "regenerative-wisdom",
+      "title": "Regenerative Wisdom",
+      "path": "prod/explorer-details/regenerative-wisdom/v1.json"
+    },
+    {
+      "slug": "subtle-development",
+      "title": "Subtle Development",
+      "path": "prod/explorer-details/subtle-development/v1.json"
+    },
+    {
+      "slug": "inner-sight",
+      "title": "Inner Sight",
+      "path": "prod/explorer-details/inner-sight/v1.json"
+    },
+    {
+      "slug": "spiritual-hearing",
+      "title": "Spiritual Hearing",
+      "path": "prod/explorer-details/spiritual-hearing/v1.json"
+    },
+    {
+      "slug": "divine-taste",
+      "title": "Divine Taste",
+      "path": "prod/explorer-details/divine-taste/v1.json"
+    },
+    {
+      "slug": "sacred-touch",
+      "title": "Sacred Touch",
+      "path": "prod/explorer-details/sacred-touch/v1.json"
+    },
+    {
+      "slug": "transcendent-smell",
+      "title": "Transcendent Smell",
+      "path": "prod/explorer-details/transcendent-smell/v1.json"
+    },
+    {
+      "slug": "quantum-dynamics",
+      "title": "Quantum Dynamics",
+      "path": "prod/explorer-details/quantum-dynamics/v1.json"
+    },
+    {
+      "slug": "holographic-science",
+      "title": "Holographic Science",
+      "path": "prod/explorer-details/holographic-science/v1.json"
+    },
+    {
+      "slug": "multiversal-exploration",
+      "title": "Multiversal Exploration",
+      "path": "prod/explorer-details/multiversal-exploration/v1.json"
+    },
+    {
+      "slug": "information-mysticism",
+      "title": "Information Mysticism",
+      "path": "prod/explorer-details/information-mysticism/v1.json"
+    },
+    {
+      "slug": "electromagnetic-spirituality",
+      "title": "Electromagnetic Spirituality",
+      "path": "prod/explorer-details/electromagnetic-spirituality/v1.json"
+    },
+    {
+      "slug": "gravitational-mysteries",
+      "title": "Gravitational Mysteries",
+      "path": "prod/explorer-details/gravitational-mysteries/v1.json"
+    },
+    {
+      "slug": "geometric-harmonics",
+      "title": "Geometric Harmonics",
+      "path": "prod/explorer-details/geometric-harmonics/v1.json"
+    },
+    {
+      "slug": "illuminated-calligraphy",
+      "title": "Illuminated Calligraphy",
+      "path": "prod/explorer-details/illuminated-calligraphy/v1.json"
+    },
+    {
+      "slug": "movement-practices",
+      "title": "Movement Practices",
+      "path": "prod/explorer-details/movement-practices/v1.json"
+    },
+    {
+      "slug": "wisdom-poetry",
+      "title": "Wisdom Poetry",
+      "path": "prod/explorer-details/wisdom-poetry/v1.json"
+    },
+    {
+      "slug": "acoustical-engineering",
+      "title": "Acoustical Engineering",
+      "path": "prod/explorer-details/acoustical-engineering/v1.json"
+    },
+    {
+      "slug": "symbolic-expression",
+      "title": "Symbolic Expression",
+      "path": "prod/explorer-details/symbolic-expression/v1.json"
+    },
+    {
+      "slug": "multiplicity-studies",
+      "title": "Multiplicity Studies",
+      "path": "prod/explorer-details/multiplicity-studies/v1.json"
+    },
+    {
+      "slug": "oneness-dynamics",
+      "title": "Oneness Dynamics",
+      "path": "prod/explorer-details/oneness-dynamics/v1.json"
+    },
+    {
+      "slug": "names-manifestation",
+      "title": "Names Manifestation",
+      "path": "prod/explorer-details/names-manifestation/v1.json"
+    },
+    {
+      "slug": "separation-mechanics",
+      "title": "Separation Mechanics",
+      "path": "prod/explorer-details/separation-mechanics/v1.json"
+    },
+    {
+      "slug": "unity-technology",
+      "title": "Unity Technology",
+      "path": "prod/explorer-details/unity-technology/v1.json"
+    },
+    {
+      "slug": "divine-expression",
+      "title": "Divine Expression",
+      "path": "prod/explorer-details/divine-expression/v1.json"
+    },
+    {
+      "slug": "knowledge-preservation",
+      "title": "Knowledge Preservation",
+      "path": "prod/explorer-details/knowledge-preservation/v1.json"
+    },
+    {
+      "slug": "silsila-dynamics",
+      "title": "Silsila Dynamics",
+      "path": "prod/explorer-details/silsila-dynamics/v1.json"
+    },
+    {
+      "slug": "lineage-integration",
+      "title": "Lineage Integration",
+      "path": "prod/explorer-details/lineage-integration/v1.json"
+    },
+    {
+      "slug": "prophetic-inheritance",
+      "title": "Prophetic Inheritance",
+      "path": "prod/explorer-details/prophetic-inheritance/v1.json"
+    },
+    {
+      "slug": "sacred-transmission",
+      "title": "Sacred Transmission",
+      "path": "prod/explorer-details/sacred-transmission/v1.json"
+    },
+    {
+      "slug": "wisdom-activation",
+      "title": "Wisdom Activation",
+      "path": "prod/explorer-details/wisdom-activation/v1.json"
+    },
+    {
+      "slug": "energy-systems",
+      "title": "Energy Systems",
+      "path": "prod/explorer-details/energy-systems/v1.json"
+    },
+    {
+      "slug": "luminous-activation",
+      "title": "Luminous Activation",
+      "path": "prod/explorer-details/luminous-activation/v1.json"
+    },
+    {
+      "slug": "energy-crystallography",
+      "title": "Energy Crystallography",
+      "path": "prod/explorer-details/energy-crystallography/v1.json"
+    },
+    {
+      "slug": "vibrational-science",
+      "title": "Vibrational Science",
+      "path": "prod/explorer-details/vibrational-science/v1.json"
+    },
+    {
+      "slug": "particle-physics",
+      "title": "Particle Physics",
+      "path": "prod/explorer-details/particle-physics/v1.json"
+    },
+    {
+      "slug": "symmetry-patterning",
+      "title": "Symmetry Patterning",
+      "path": "prod/explorer-details/symmetry-patterning/v1.json"
+    },
+    {
+      "slug": "transcendent-ethics",
+      "title": "Transcendent Ethics",
+      "path": "prod/explorer-details/transcendent-ethics/v1.json"
+    },
+    {
+      "slug": "divine-engineering",
+      "title": "Divine Engineering",
+      "path": "prod/explorer-details/divine-engineering/v1.json"
+    },
+    {
+      "slug": "sacred-embodiment",
+      "title": "Sacred Embodiment",
+      "path": "prod/explorer-details/sacred-embodiment/v1.json"
+    },
+    {
+      "slug": "virtue-cultivation",
+      "title": "Virtue Cultivation",
+      "path": "prod/explorer-details/virtue-cultivation/v1.json"
+    },
+    {
+      "slug": "justice-mechanics",
+      "title": "Justice Mechanics",
+      "path": "prod/explorer-details/justice-mechanics/v1.json"
+    },
+    {
+      "slug": "compassionate-action",
+      "title": "Compassionate Action",
+      "path": "prod/explorer-details/compassionate-action/v1.json"
+    }
+  ]
+}

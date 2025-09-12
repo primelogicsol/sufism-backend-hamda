@@ -1,0 +1,89 @@
+{
+  "id": "breath-from-rhythm",
+  "section": "academy-details",
+  "slug": "breath-from-rhythm",
+  "title": "Inspiring Interview: Jasmine Rahma",
+  "subtitle": "Jasmine Rahma learns that dhikr lives in science",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Breath from rhythm - Jasmine Rahma learns that dhikr lives in science"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Jasmine Rahma",
+      "subtitle": "Jasmine Rahma learns that dhikr lives in science",
+      "description": "When science meets spirit, the breath becomes the bridge between worlds."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Research Scientist, Breathwork Therapist, Spiritual Researcher",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Sacred Science, Breath Spirituality, Divine Research",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your research fades, what do you hope remains? I hope someone remembers that their breath is not just a function, but the sacred rhythm through which the Divine chooses to move."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Science Became Sacred",
+      "content": "Before I researched breath patterns, I was analyzing data—not the kind that leads to wisdom, but the invisible measurement of hiding from my own truth. I knew how to study phenomena and interpret results, but I had forgotten what it meant to observe without measuring efficiency or outcome.",
+      "additionalContent": "I was raised in Boston. My father was a physicist; my mother a spiritual teacher who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Book of Breath the day I completed my first research paper. She said, \"Now learn what won't show up in your data.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm studying in a laboratory in Kashmir, measuring nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Research Turned Into Revelation",
+      "question": "Dr. Yasir Feroze, SSC: When did your scientific path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a breath analysis study. I was attempting to measure respiratory patterns when I felt something shift inside me. Most scientists would have focused on the data, but something told me to observe deeper. As I watched those breathing patterns, I felt what I can only describe as a rhythm moving through me—not my research, but something sacred.",
+      "highlightedQuote": "Science didn't teach me to measure. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked away from that study a different person. I remember asking the data, What else have we been calling research that is really worship?",
+      "keyInsight": "The moment when scientific observation transcends measurement and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly observe through your research?",
+      "answer": "That knowledge must always be measurable. That reaching the conclusion was the only goal. I had to unlearn ambition masquerading as understanding. I had to remember that stillness is also a form of observation, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple breathing exercise. I was supposed to analyze the patterns, but I found myself breathing with the rhythm instead. I noticed how each breath moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all studies are research, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your science?",
+      "secondAnswer": "I had a habit of leaving one study unfinished each semester—not from failure, but from choice. One day, I returned to find the research I'd abandoned had become clearer in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps research needs reverence more than results. That single line changed the way I approached science. I now teach my students: \"Your silence may activate more than your analysis.\"",
+      "revelation": "\"Not all studies are research, some are prayers.\" The journey from observing to being observed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of scientific research?",
+      "answer": "It means never reducing life to data. It means remembering that every breath I study, every pattern I observe, comes from a living being, even if biological. Spiritual responsibility means my research must serve something sacred, not just something publishable.",
+      "additionalAnswer": "I now begin every study by writing a short personal prayer in my research journal: May this knowledge remember its Source. That's not for validation. It's for alignment. And I share this with my students not as doctrine, but as a choice—to remember that science, too, was breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance knowledge and humility?",
+      "secondAnswer": "By knowing that every answer I find opens a thousand new questions. Humility comes when I admit: I am not creating understanding, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to lead the world's most advanced research programs in record time. I declined. Not because I wasn't capable, but because the proposal framed knowledge as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Research",
+      "question": "Layla Noor, SSC: When all your research fades, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, scientifically or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a student cry during a simple breathing exercise. Not from confusion, but because she realized, while taking a basic breath, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a study, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that science, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "When science meets spirit, the breath becomes the bridge between worlds."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

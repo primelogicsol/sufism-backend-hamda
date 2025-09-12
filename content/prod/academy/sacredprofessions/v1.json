@@ -78,73 +78,73 @@
           "title": "The Statesman",
           "text": "I don't rule by power,I serve where Divine Justice writes the laws unseen",
           "image": "/assets/images/professions/1.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-statesman"
         },
         {
           "title": "The Administrator",
           "text": "I govern the unseen, where divine order flows through systems, not just signatures",
           "image": "/assets/images/professions/2.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-administrator"
         },
         {
           "title": "The Court",
           "text": "I don't argue cases,I defend truth where voices break, and justice breathes",
           "image": "/assets/images/professions/3.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-court"
         },
         {
           "title": "The Businessman",
           "text": "I walk the marketplace as mosque, every transaction a test, every profit a prayer",
           "image": "/assets/images/professions/4.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-businessman"
         },
         {
           "title": "The Ecologist",
           "text": "I don't just heal the earth, I remember it as a living breath of the Divine",
           "image": "/assets/images/professions/5.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-ecologist"
         },
         {
           "title": "The Developer",
           "text": "I don't build apps, I script realities where Divine Will runs every backend",
           "image": "/assets/images/professions/6.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-developer"
         },
         {
           "title": "The Witness",
           "text": "Report with reverence, when truth is sacred, every word becomes a mirror of God",
           "image": "/assets/images/professions/7.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-witness"
         },
         {
           "title": "The Physician",
           "text": "My hands touch flesh, my gaze sees spirit. I heal in God's name",
           "image": "/assets/images/professions/8.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-physician"
         },
         {
           "title": "The Police Officer",
           "text": "I wear no badge but conscience, my authority flows from Light, not law alone",
           "image": "/assets/images/professions/9.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-police-officer"
         },
         {
           "title": "The Teacher",
           "text": "My chalk is dhikr, each word drawn to stir the soul's forgotten script",
           "image": "/assets/images/professions/10.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-teacher"
         },
         {
           "title": "The Student",
           "text": "I don't collect knowledge, I empty myself, so Truth may pour in freely",
           "image": "/assets/images/professions/11.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-student"
         },
         {
           "title": "The Architect",
           "text": "I carve the unseen into form, where geometry bows before the Beloved's rhythm",
           "image": "/assets/images/professions/12.png",
-          "href": "/professionsdetails"
+          "href": "/academy/details/sacredprofessions/the-architect"
         }
       ]
     }

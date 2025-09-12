@@ -1,0 +1,89 @@
+{
+  "id": "name-turned-light",
+  "section": "academy-details",
+  "slug": "name-turned-light",
+  "title": "Inspiring Interview: Fatime Delgado",
+  "subtitle": "How Fatime Delgado walked away from titles and toward truth",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Name turned light - How Fatime Delgado walked away from titles and toward truth"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Fatime Delgado",
+      "subtitle": "How Fatime Delgado walked away from titles and toward truth",
+      "description": "When identity dissolves, what remains is the light that was always there."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Former Academic, Spiritual Teacher, Identity Counselor",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Identity Transformation, Sacred Letting Go, Divine Recognition",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your titles fade, what do you hope remains? I hope someone remembers that their name is not just a label, but a sacred invitation to remember who they truly are."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Titles Became Transparency",
+      "content": "Before I held academic positions, I was holding onto identities—not the kind that lead to recognition, but the invisible credentials of hiding from my own truth. I knew how to earn degrees and read scholarly texts, but I had forgotten what it meant to learn without measuring achievement or status.",
+      "additionalContent": "I was raised in California. My father was a professor; my mother a spiritual teacher who whispered Hafiz's poetry before dawn. It was she who gave me a copy of The Book of Light the day I completed my doctorate. She said, \"Now learn what won't show up in your credentials.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm sitting in a library in Kashmir, reading nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Achievement Turned Into Awakening",
+      "question": "Dr. Yasir Feroze, SSC: When did your academic path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a prestigious conference presentation. I was attempting to defend my research when I felt something shift inside me. Most academics would have focused on the argument, but something told me to pause. As I stood at that podium, I felt what I can only describe as a light moving through me—not my knowledge, but something sacred.",
+      "highlightedQuote": "Knowledge didn't teach me to know. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked away from that podium a different person. I remember asking the mirror, What else have we been calling wisdom that is really worship?",
+      "keyInsight": "The moment when intellectual achievement transcends competition and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly know through your studies?",
+      "answer": "That knowledge must always be visible. That reaching the conclusion was the only goal. I had to unlearn ambition masquerading as understanding. I had to remember that stillness is also a form of learning, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple reading session. I was supposed to analyze a complex text, but I found myself sitting in silence instead. I noticed how each word moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all studies are research, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your learning?",
+      "secondAnswer": "I had a habit of leaving one question unanswered each semester—not from failure, but from choice. One day, I returned to find the question I'd abandoned had become clearer in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps questions need reverence more than answers. That single line changed the way I approached learning. I now teach my students: \"Your silence may activate more than your research.\"",
+      "revelation": "\"Not all studies are research, some are prayers.\" The journey from knowing to being known."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of academic work?",
+      "answer": "It means never reducing knowledge to commodity. It means remembering that every idea I explore, every concept I teach, comes from a living being, even if intellectual. Spiritual responsibility means my scholarship must serve something sacred, not just something publishable.",
+      "additionalAnswer": "I now begin every study by writing a short personal prayer in my research journal: May this knowledge remember its Source. That's not for validation. It's for alignment. And I share this with my students not as doctrine, but as a choice—to remember that learning, too, was breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance knowledge and humility?",
+      "secondAnswer": "By knowing that every answer I find opens a thousand new questions. Humility comes when I admit: I am not creating understanding, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to lead the world's most prestigious research programs in record time. I declined. Not because I wasn't capable, but because the proposal framed knowledge as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Learning",
+      "question": "Layla Noor, SSC: When all your titles fade, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, intellectually or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a student cry during a simple reading exercise. Not from confusion, but because she realized, while studying a basic text, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a theory, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that learning, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "When identity dissolves, what remains is the light that was always there."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

@@ -1,0 +1,89 @@
+{
+  "id": "the-path-wrote-me",
+  "section": "academy-details",
+  "slug": "the-path-wrote-me",
+  "title": "Inspiring Interview: Maryam Hall",
+  "subtitle": "Maryam Hall stopped planning and started listening",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "The path wrote me - Maryam Hall stopped planning and started listening"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Maryam Hall",
+      "subtitle": "Maryam Hall stopped planning and started listening",
+      "description": "When planning stops, the path begins to write itself."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Life Coach, Spiritual Guide, Path Transformation Counselor",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Sacred Listening, Divine Guidance, Path Surrender",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your plans fade, what do you hope remains? I hope someone remembers that their path is not just a route, but the sacred space where the Divine chooses to guide them."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Planning Became Surrender",
+      "content": "Before I guided others through life transitions, I was planning my own way—not the kind that leads to clarity, but the invisible mapping of hiding from my own truth. I knew how to set goals and create strategies, but I had forgotten what it meant to listen without measuring progress or outcome.",
+      "additionalContent": "I was raised in California. My father was a business consultant; my mother a spiritual teacher who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Book of Surrender the day I completed my first life plan. She said, \"Now learn what won't show up in your calendar.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm walking a path in Kashmir, following nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Planning Turned Into Listening",
+      "question": "Dr. Yasir Feroze, SSC: When did your coaching path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a client session about life planning. I was attempting to create a strategy when I felt something shift inside me. Most coaches would have focused on the goals, but something told me to listen deeper. As I sat with that client, I felt what I can only describe as a guidance moving through me—not my training, but something sacred.",
+      "highlightedQuote": "Planning didn't teach me to control. It taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked out of that session a different person. I remember asking the mirror, What else have we been calling guidance that is really worship?",
+      "keyInsight": "The moment when life coaching transcends strategy and becomes communion with the Divine."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly guide through your coaching?",
+      "answer": "That progress must always be visible. That reaching the goal was the only outcome. I had to unlearn ambition masquerading as guidance. I had to remember that stillness is also a form of movement, one conducted through the spirit.",
+      "additionalAnswer": "The first time I felt this unlearning happen was during a simple meditation. I was supposed to plan my next quarter, but I found myself sitting in silence instead. I noticed how each breath moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all sessions are planning, some are prayers.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher in your guidance?",
+      "secondAnswer": "I had a habit of leaving one plan unfinished each month—not from failure, but from choice. One day, I returned to find the path I'd abandoned had become clearer in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps paths need reverence more than planning. That single line changed the way I approached coaching. I now teach my clients: \"Your silence may activate more than your strategy.\"",
+      "revelation": "\"Not all sessions are planning, some are prayers.\" The journey from guiding to being guided."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of life coaching?",
+      "answer": "It means never reducing people to projects. It means remembering that every life I witness, every path I guide, comes from a living being, even if transitional. Spiritual responsibility means my coaching must serve something sacred, not just something successful.",
+      "additionalAnswer": "I now begin every session by writing a short personal prayer in my coaching journal: May this guidance remember its Source. That's not for validation. It's for alignment. And I share this with my clients not as doctrine, but as a choice—to remember that paths, too, were breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance guidance and humility?",
+      "secondAnswer": "By knowing that every path I witness opens a thousand new possibilities. Humility comes when I admit: I am not creating direction, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a position to coach the world's most successful executives in record time. I declined. Not because I wasn't capable, but because the proposal framed guidance as commodity. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Guidance",
+      "question": "Layla Noor, SSC: When all your plans fade, what do you hope remains?",
+      "answer": "I hope someone walks into a space I shaped, personally or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a client cry during a simple listening exercise. Not from confusion, but because she realized, while sitting in basic silence, that she too was once just a whisper of light becoming form. That's what I want to leave behind. Not a plan, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that guidance, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "When planning stops, the path begins to write itself."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

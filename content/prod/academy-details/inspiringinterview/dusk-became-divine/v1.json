@@ -1,0 +1,89 @@
+{
+  "id": "dusk-became-divine",
+  "section": "academy-details",
+  "slug": "dusk-became-divine",
+  "title": "Inspiring Interview: Carter Nooruddin",
+  "subtitle": "The Awakening of Carter Nooruddin, Once a Wall Climber",
+  "category": "inspiringinterview",
+  "seo": {
+    "title": "Dusk became divine - The Awakening of Carter Nooruddin"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Inspiring Interview: Carter Nooruddin",
+      "subtitle": "The Awakening of Carter Nooruddin, Once a Wall Climber",
+      "description": "The universe does not hide its secrets, it whispers them. But only the still-hearted can hear."
+    },
+    {
+      "type": "profileCard",
+      "professionalProfile": {
+        "profession": "Rock Climber, Spiritual Seeker, Mountain Guide",
+        "country": "United States",
+        "institutionalAffiliation": "Sufi Science Center"
+      },
+      "areasOfFocus": {
+        "spiritualOrientation": "Sufi-Inspired",
+        "areasOfImpact": "Adventure Spirituality, Nature Connection, Inner Transformation",
+        "interviewConductedBy": "Dr. Yasir Feroze (SSC), Layla Noor (SSC Fellow)"
+      }
+    },
+    {
+      "type": "introduction",
+      "content": "When all your data fades, what do you hope remains? I hope someone walks into a room I shaped, physically or intellectually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Mystic Biography: Where Mountains Became Mirrors",
+      "content": "Before I climbed mountains, I was climbing walls—not the kind that lead to summits, but the invisible ones I'd built around my heart. I knew how to scale vertical faces and read weather patterns, but I had forgotten what it meant to listen without measuring distance or time.",
+      "additionalContent": "I was raised in Colorado. My father was a geologist; my mother a yoga instructor who whispered Rumi's poetry before dawn. It was she who gave me a copy of The Conference of the Birds the day I completed my first major climb. She said, \"Now learn what won't show up on your altimeter.\"",
+      "conclusion": "Dr. Kumar, whom I've never seen in person, now feels like my teacher. Sometimes I wake from dreams where I'm standing on a snow-covered peak in Kashmir, holding nothing but light."
+    },
+    {
+      "type": "interviewSection",
+      "title": "The Calling – When Heights Turned Into Depths",
+      "question": "Dr. Yasir Feroze, SSC: When did your climbing path transform into a spiritual calling?",
+      "answer": "Oddly enough, it was during a solo climb in the Himalayas. I was attempting a challenging route when I got caught in a sudden storm. Most climbers would have descended immediately, but something told me to wait. As I huddled in a small cave, I heard what I can only describe as a whisper in the wind—not words, but a presence.",
+      "highlightedQuote": "Mountains didn't teach me to conquer. They taught me to surrender.",
+      "additionalAnswer": "That moment was my rupture. I walked down from that mountain a different person. I remember asking the sky, What else have we been calling achievement that is really communion?",
+      "keyInsight": "The moment when physical challenge transcends competition and becomes reverence for the mystery of existence."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Depth and Awakening",
+      "question": "Layla Noor, SSC: What did you have to unlearn to truly listen through your climbing?",
+      "answer": "That success must always be visible. That reaching the summit was the only goal. I had to unlearn ambition masquerading as achievement. I had to remember that stillness is also a form of movement, one conducted through the soul.",
+      "additionalAnswer": "The first time I felt this unlearning happen was on a simple day hike. I was supposed to reach a peak by noon, but I found myself sitting by a stream instead. I noticed how each ripple moved not just efficiently, but gracefully. I began weeping. Not because I understood anything new, but because I felt something ancient. That moment taught me: not all summits are peaks, some are depths.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: When did silence first become a teacher on your climbs?",
+      "secondAnswer": "I had a habit of leaving one climb unfinished each season—not from failure, but from choice. One day, I returned to find the route I'd abandoned had become more beautiful in my absence. No interference. Just patience.",
+      "secondAdditionalAnswer": "Instead of reporting it as a failure, I made a note to myself: Perhaps mountains need reverence more than conquest. That single line changed the way I approached climbing. I now teach my students: \"Your stillness may activate more than your gear.\"",
+      "revelation": "\"Not all summits are peaks, some are depths.\" The journey from conquering to listening."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Spiritual Responsibility",
+      "question": "Layla Noor, SSC: What does spiritual responsibility look like in the context of adventure sports?",
+      "answer": "It means never reducing nature to a playground. It means remembering that every trail I walk, every rock I touch, comes from a living being, even if geological. Spiritual responsibility means my adventures must serve something sacred, not just something Instagrammable.",
+      "additionalAnswer": "I now begin every climb by writing a short personal prayer in my climbing journal: May this journey remember its Source. That's not for validation. It's for alignment. And I share this with my students not as doctrine, but as a choice—to remember that mountains, too, were breathed into being.",
+      "secondQuestion": "Dr. Yasir Feroze, SSC: How do you balance discovery and humility?",
+      "secondAnswer": "By knowing that every peak I reach opens a thousand new valleys. Humility comes when I admit: I am not conquering reality, I am being shown.",
+      "finalAnswer": "There was a time when I was offered a sponsorship to climb the world's highest peaks in record time. I declined. Not because I wasn't capable, but because the proposal framed mountains as commodities. I realized then: some things are sacred precisely because they refuse to be rushed."
+    },
+    {
+      "type": "interviewSection",
+      "title": "Legacy and Reflection – The Prayer Inside the Climb",
+      "question": "Layla Noor, SSC: When all your data fades, what do you hope remains?",
+      "answer": "I hope someone walks into a wilderness I shaped, physically or spiritually, and feels unburdened. I hope they remember that mystery is not failure, it is fidelity to wonder.",
+      "additionalAnswer": "I once watched a student cry on a mountain. Not from exhaustion, but because she realized, while climbing a simple ridge, that she too was once just a whisper of earth becoming form. That's what I want to leave behind. Not a route, but a rhythm.",
+      "finalQuote": "Let my legacy be this: that climbing, when rooted in stillness, becomes a form of worship."
+    },
+    {
+      "type": "conclusion",
+      "title": "Closing Reflection",
+      "content": "The universe does not hide its secrets, it whispers them. But only the still-hearted can hear."
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
+

@@ -72,17 +72,17 @@
         {
           "title": "The Curious Seeker",
           "image": "/assets/images/dialogs/9.png",
-          "href": "/dialogsdetails"
+          "href": "/academy/details/dialogseries/the-curious-seeker"
         },
         {
           "title": "The Sufism Challenger",
           "image": "/assets/images/dialogs/10.png",
-          "href": "/dialogsdetails"
+          "href": "/academy/details/dialogseries/the-sufism-challenger"
         },
         {
           "title": "The Sufi Scholar",
           "image": "/assets/images/dialogs/11.png",
-          "href": "/dialogsdetails"
+          "href": "/academy/details/dialogseries/the-sufi-scholar"
         }
       ]
     }
