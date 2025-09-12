@@ -12,6 +12,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true
 });
+logger.info("Cloudinary Env Check", {
+  CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "✅ SET" : "❌ MISSING"
+})
 
 // --- Supported MIME types ---
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -35,6 +40,7 @@ const storage = new CloudinaryStorage({
       // keep original extension (jpg, png, etc.)
       format: undefined,
       // unique public_id
+      upload_preset: "ml_default",
       public_id: `${Date.now()}-${file.originalname.split(".")[0]}`
     };
   }
@@ -85,3 +91,4 @@ const fileUploader: RequestHandler = async (req, res, next) => {
 };
 
 export default fileUploader;
+
