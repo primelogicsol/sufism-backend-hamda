@@ -61,6 +61,68 @@ model User {
 
   @@map("users")
 }
+model Order {
+  id              Int          @id @default(autoincrement())
+  userId          String
+  status          OrderStatus  @default(PENDING)
+  amount          Float
+  stripeSessionId String?
+  stripePaymentId String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  // transactions Transaction[] // One order can have multiple payment attempts
+  user    User        @relation(fields: [userId], references: [id])
+  items   OrderItem[]
+
+  @@map("orders")
+}
+// schema.prisma
+model Transaction {
+  id           Int        @id @default(autoincrement())
+  orderId      Int
+  amount       Float
+  status       TransactionStatus
+  paymentMethod String
+  stripePaymentIntentId String?
+  stripeClientSecret   String?
+  gatewayData   Json?      // Raw response from Stripe
+  // order        Order       @relation(fields: [orderId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([stripePaymentIntentId])
+}
+
+enum TransactionStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+enum ProductCategory {
+  MUSIC
+  DIGITAL_BOOK
+  MEDITATION
+  FASHION
+  HOME_LIVING
+  DECORATION
+  ACCESSORIES
+}
+
+model OrderItem {
+  id         Int             @id @default(autoincrement())
+  orderId    Int
+  category   ProductCategory
+  productId  Int
+  quantity   Int             @default(1)
+  price      Float
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("order_items")
+}
 
 model Member {
   id      String   @id @default(cuid()) //Todo better to use id
@@ -304,22 +366,6 @@ enum OrderStatus {
   FAILED
   CANCELLED
   REFUNDED
-}
-model Order {
-  id              Int          @id @default(autoincrement())
-  userId          String
-  quantity        Int          @default(1)
-  status          OrderStatus  @default(PENDING)
-  amount          Float
-  stripeSessionId String?
-  stripePaymentId String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  user        User        @relation(fields: [userId], references: [id])
-  productId  Int
-
-  @@map("orders")
 }
 model Music {
   id          Int        @id @default(autoincrement())

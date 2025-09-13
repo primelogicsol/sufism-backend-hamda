@@ -16,7 +16,7 @@ logger.info("Cloudinary Env Check", {
   CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "✅ SET" : "❌ MISSING"
-})
+});
 
 // --- Supported MIME types ---
 export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -91,4 +91,3 @@ const fileUploader: RequestHandler = async (req, res, next) => {
 };
 
 export default fileUploader;
-
