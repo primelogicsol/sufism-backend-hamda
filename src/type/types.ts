@@ -64,6 +64,7 @@ export type TMEMBERSHIPROLE = "volunteer" | "donor" | "collaborator";
 export type TDONORPREFERENCES = "onetime" | "monthly" | "sponsor" | "tools" | "remainAnonymous" | "receiveUpdates";
 export type TCOLABORATORINTENT = "institutional" | "cultural" | "interfaithDialogue" | "programCorrelation";
 export type TSUPPORTAREA = "spiritualProgram" | "communityOutreach" | "culturalPreservation" | "digitalMedia" | "craftsmanship";
+export type  TCategory = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
 
 export interface TMEMBERSHIP {
   phone: string;
@@ -228,3 +229,21 @@ export type TUPDATE_COUPON = {
   expiresAt?: Date;
   isActive?: boolean | string;
 };
+export interface RowData {
+  title?: string;
+  description?: string;
+  descritpion?: string; // schema typo - keeping for DigitalBook compatibility
+  price?: string | number;
+  stock?: string | number;
+  sku?: string;
+  tags?: string;
+  images?: string;
+  userId?: string;
+  author?: string;
+  genre?: string;
+  releaseDate?: string;
+  url?: string;
+  fileType?: string;
+  coverImage?: string;
+  overviewImages?: string;
+}

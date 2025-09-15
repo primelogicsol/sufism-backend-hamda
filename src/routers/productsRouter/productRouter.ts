@@ -1,6 +1,8 @@
 import { Router } from "express";
 import accessoriesController from "../../controllers/productController/accessoriesController.js";
 import audioController from "../../controllers/productController/audioController.js";
+import bulkProductController from "../../controllers/productController/bulkProductController.js";
+import buyerProductsController from "../../controllers/productController/buyerProductsController.js";
 import decorationController from "../../controllers/productController/decorationController.js";
 import digitalBookController from "../../controllers/productController/digitalBookController.js";
 import fashionController from "../../controllers/productController/fashionController.js";
@@ -11,7 +13,6 @@ import authMiddleware from "../../middleware/authMiddleware.js";
 import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
 import { audioSchema, bookSchema, productSchema } from "../../validations/zod.js";
-import buyerProductsController from "../../controllers/productController/buyerProductsController.js";
 
 // const upload = multer({ storage: multer.memoryStorage() });
 
@@ -87,3 +88,5 @@ productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interv
 // Public buyer endpoint
 productRouter.get("/products/:category", buyerProductsController.getByCategory);
 productRouter.get("/products/:category/:id", buyerProductsController.getProductDetails);
+
+productRouter.get("/proucts",fileUploader,bulkProductController.bulkProductUploader)

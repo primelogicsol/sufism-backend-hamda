@@ -23,6 +23,7 @@ export const supportedImageTypes = ["image/jpeg", "image/png", "image/webp", "im
 export const supportedDocTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 export const supportedMusicTypes = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"];
 export const supportedVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
+export const supportedCsvTypes = ["text/csv", "application/vnd.ms-excel"];
 
 // --- Cloudinary Storage ---
 const storage = new CloudinaryStorage({
@@ -34,6 +35,7 @@ const storage = new CloudinaryStorage({
     else if (supportedDocTypes.includes(file.mimetype)) folder = "uploads/docs";
     else if (supportedMusicTypes.includes(file.mimetype)) folder = "uploads/music";
     else if (supportedVideoTypes.includes(file.mimetype)) folder = "uploads/videos";
+    else if (supportedCsvTypes.includes(file.mimetype)) folder = "uploads/csv";
 
     return {
       folder,
@@ -52,7 +54,9 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
     !supportedImageTypes.includes(file.mimetype) &&
     !supportedDocTypes.includes(file.mimetype) &&
     !supportedMusicTypes.includes(file.mimetype) &&
-    !supportedVideoTypes.includes(file.mimetype)
+    !supportedVideoTypes.includes(file.mimetype) &&
+    !supportedCsvTypes.includes(file.mimetype)
+
   ) {
     const errorMsg = `Unsupported file type: ${file.mimetype}`;
     logger.warn(errorMsg);
