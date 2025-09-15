@@ -11,6 +11,7 @@ import authMiddleware from "../../middleware/authMiddleware.js";
 import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
 import { audioSchema, bookSchema, productSchema } from "../../validations/zod.js";
+import buyerProductsController from "../../controllers/productController/buyerProductsController.js";
 
 // const upload = multer({ storage: multer.memoryStorage() });
 
@@ -82,3 +83,7 @@ productRouter.route("/audio/:id").get(authMiddleware.checkToken, audioController
 productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);
 productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);
 productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interviewSlotController.acceptInterview);
+
+// Public buyer endpoint
+productRouter.get("/products/:category", buyerProductsController.getByCategory);
+productRouter.get("/products/:category/:id", buyerProductsController.getProductDetails);
