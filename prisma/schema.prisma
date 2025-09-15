@@ -39,6 +39,7 @@ model User {
   tokenVersion   Int            @default(0)
   authProvider   AuthProvider   @default(credentials)
   member         Member?
+  customer_id String?   // optional
   donation       Donation?
   reviews        Review[]
   carts          Cart[]

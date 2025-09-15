@@ -13,6 +13,7 @@ import { passwordHasher, verifyPassword } from "../../utils/passwordHasherUtils.
 import { setTokensAndCookies } from "../../utils/setTokenAndCookiesUtils.js";
 import { generateOtp } from "../../utils/slugStringGeneratorUtils.js";
 import tokenGeneratorUtils, { type TPAYLOAD } from "../../utils/tokenGeneratorUtils.js";
+import { createStripeCustomer } from "../../utils/stripeCustomerId.js";
 export default {
   register: asyncHandler(async (req, res) => {
     const body = req.body as User;
@@ -81,13 +82,15 @@ export default {
       logger.warn(`Expired OTP attempt for: ${email}`);
       return httpResponse(req, res, reshttp.badRequestCode, "OTP expired. Please try again");
     }
+    const customerId = await createStripeCustomer(user);
     const verifiedUser = await db.user.update({
       where: { email },
       data: {
         isVerified: true,
         OTP: null,
         OTP_EXPIRES_IN: null,
-        tokenVersion: { increment: 1 }
+        tokenVersion: { increment: 1 },
+        customer_id: customerId
       }
     });
 
@@ -124,6 +127,15 @@ export default {
       });
       await gloabalMailMessage(body.email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
       httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
+    }
+    //for existing users if the customer id doesn't exists then create one
+    const customerId = user?.customer_id;
+    if (!customerId && user) {
+      const newCustomerId = await createStripeCustomer({ id: user?.id, email: user?.email, fullName: user?.fullName });
+      await db.user.update({
+        where: { email: user.email },
+        data: { customer_id: newCustomerId }
+      });
     }
     const { accessToken, refreshToken } = setTokensAndCookies(user!, res, true);
     httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { accessToken, refreshToken });

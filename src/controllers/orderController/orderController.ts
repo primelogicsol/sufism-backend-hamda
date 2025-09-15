@@ -6,6 +6,7 @@ import type { _Request } from "../../middleware/authMiddleware.js";
 import stripe from "../../services/payment/stripe.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
+// import type Stripe from "stripe";
 
 export default {
   createOrder: asyncHandler(async (req: _Request, res) => {
@@ -85,20 +86,42 @@ export default {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
+    // 3. Get default payment method for this customer
+    const customerId = user.customer_id;
+    if (typeof customerId !== "string") {
+      throw new Error("Invalid Stripe customer ID");
+    }
+
+    const customer = await stripe.customers.retrieve(customerId, {
+      expand: ["invoice_settings.default_payment_method"]
+    });
+
+    if (customer.deleted) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Customer no longer exists in Stripe");
+    }
+
+    const defaultPm = customer.invoice_settings?.default_payment_method;
+
+    if (!defaultPm) {
+      return res.status(400).json({ error: "No default payment method found" });
+    }
+
     let paymentIntent;
     try {
       paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(totalAmount * 100),
         currency: "usd",
+        customer: customerId,
+        payment_method: typeof defaultPm === "string" ? defaultPm : defaultPm.id,
         metadata: {
           userId: user.id.toString(),
           email: user.email
         },
-        automatic_payment_methods: { enabled: true }
+        off_session: true,
+        confirm: true
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
-
       return httpResponse(req, res, reshttp.badRequestCode, `Stripe payment creation failed: ${msg}`);
     }
 

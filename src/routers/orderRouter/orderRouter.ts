@@ -4,4 +4,4 @@ import authMiddleware from "../../middleware/authMiddleware.js";
 
 export const orderRouter: Router = Router();
 
-orderRouter.route("/order").get(authMiddleware.checkToken, orderController.createOrder);
+orderRouter.route("/order").post(authMiddleware.checkToken, orderController.createOrder);
