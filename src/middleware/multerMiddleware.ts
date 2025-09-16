@@ -56,7 +56,6 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
     !supportedMusicTypes.includes(file.mimetype) &&
     !supportedVideoTypes.includes(file.mimetype) &&
     !supportedCsvTypes.includes(file.mimetype)
-
   ) {
     const errorMsg = `Unsupported file type: ${file.mimetype}`;
     logger.warn(errorMsg);

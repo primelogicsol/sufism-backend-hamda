@@ -1,6 +1,6 @@
 import os from "node:os";
-import { ENV } from "../configs/config.js";
 import process from "node:process";
+import { ENV } from "../configs/config.js";
 class QuickerUtils {
   static getSystemHealth() {
     return {

@@ -64,7 +64,8 @@ export type TMEMBERSHIPROLE = "volunteer" | "donor" | "collaborator";
 export type TDONORPREFERENCES = "onetime" | "monthly" | "sponsor" | "tools" | "remainAnonymous" | "receiveUpdates";
 export type TCOLABORATORINTENT = "institutional" | "cultural" | "interfaithDialogue" | "programCorrelation";
 export type TSUPPORTAREA = "spiritualProgram" | "communityOutreach" | "culturalPreservation" | "digitalMedia" | "craftsmanship";
-export type  TCategory = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
+export type TCategory = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
+export type TPRODUCTCATEGORY = "music" | "book" | "fashion" | "meditation" | "decoration" | "living" | "accessories";
 
 export interface TMEMBERSHIP {
   phone: string;
@@ -246,4 +247,23 @@ export interface RowData {
   fileType?: string;
   coverImage?: string;
   overviewImages?: string;
+}
+// types/vendorTypes.ts
+export interface VendorRegistrationInput {
+  fullName: string;
+  email: string;
+  password: string;
+  businessName?: string;
+  businessType?: string;
+  einNumber?: string;
+  tinNumber?: string;
+  contactPerson?: string;
+  phone?: string;
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  bankAddress?: string;
+  signatoryName?: string;
+  signatureDate?: string;
+  vendoraccepted?: boolean; // <-- boolean in API, not string
 }

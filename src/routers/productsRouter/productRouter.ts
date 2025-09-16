@@ -89,4 +89,4 @@ productRouter.route("interview-book/:id").post(authMiddleware.checkToken, interv
 productRouter.get("/products/:category", buyerProductsController.getByCategory);
 productRouter.get("/products/:category/:id", buyerProductsController.getProductDetails);
 
-productRouter.get("/proucts",fileUploader,bulkProductController.bulkProductUploader)
+productRouter.get("/proucts", fileUploader, bulkProductController.bulkProductUploader);

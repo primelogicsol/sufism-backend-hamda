@@ -25,6 +25,44 @@ export const userRegistrationSchema = z.object({
     .min(6, { message: "password must be at least 6 characters long." })
     .max(50, { message: "password can be at most 50 characters long." })
 });
+export const vendorRegistrationSchema = z.object({
+  fullName: z
+    .string({ message: "fullName is required!!" })
+    .min(1, { message: "fullName is required!!" })
+    .min(3, {
+      message: "Full name must be at least 3 characters long. e.g: John Doe"
+    })
+    .max(50, { message: "Full name can be at most 50 characters long. e.g: John Doe" })
+    .regex(/^[a-zA-Z ]{3,20}$/, {
+      message: "Full name can only contain letters and spaces. e.g: John Doe"
+    }),
+  email: z
+    .string({ message: "email is required!!" })
+    .min(1, { message: "email is required!!" })
+    .min(3, { message: "email must be at least 3 characters long." })
+    .max(150, { message: "email can be at most 150 characters long." })
+    .regex(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/, {
+      message: "Invalid email format. e.g: john.doe@example.com"
+    }),
+  password: z
+    .string({ message: "password is required!!" })
+    .min(1, { message: "password is required!!" })
+    .min(6, { message: "password must be at least 6 characters long." })
+    .max(50, { message: "password can be at most 50 characters long." }),
+  businessName: z.string().max(100).optional(),
+  businessType: z.string().max(50).optional(),
+  einNumber: z.string().max(20).optional(),
+  tinNumber: z.string().max(20).optional(),
+  contactPerson: z.string().max(100).optional(),
+  phoneNumber: z.string().max(20).optional(),
+  bankName: z.string().max(100).optional(),
+  accountNumber: z.string().max(30).optional(),
+  routingNumber: z.string().max(30).optional(),
+  bankAddress: z.string().max(200).optional(),
+  signatoryName: z.string().max(100).optional(),
+  signatureDate: z.string().optional(),
+  accepted: z.boolean().optional()
+});
 
 // ** user login schema
 export const userLoginSchema = z.object({

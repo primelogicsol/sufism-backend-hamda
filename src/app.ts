@@ -7,9 +7,9 @@ import { fileURLToPath } from "url";
 import { corsOptions } from "./constants/constant.js";
 import endPoints from "./constants/endPoints.js";
 import PerformanceController from "./controllers/performanceController/performanceController.js";
+import stripeController from "./controllers/stripeController/stripeController.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { defaultRouter } from "./routers/defaultRouter.js";
-import stripeController from "./controllers/stripeController/stripeController.js";
 export const app: Application = express();
 // const stripe = require("stripe")(STRIPE_SK);
 //  * Default Middlewares
@@ -21,7 +21,7 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 // ⬇️ Webhook route FIRST with express.raw()
-app.use("/v1/stripe/webhook", express.raw({ type: "application/json" }), stripeController.webhook);
+app.use(endPoints.DEFAULT_ENDPOINT + endPoints.WEBHOOK_ENDPOINT, express.raw({ type: "application/json" }), stripeController.webhook);
 
 app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);

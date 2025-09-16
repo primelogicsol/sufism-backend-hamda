@@ -24,6 +24,18 @@ model User {
   fullName       String         @default("")
   role           String         @default("user") //user ,vendor,member
   lastName       String         @default("")
+  businessName   String?        @default("")
+  businessType   String?        @default("")
+  einNumber      String?        @default("")
+  tinNumber      String?        @default("")
+  contactPerson      String?        @default("")
+  bankName       String?        @default("")
+  accountNumber      String?        @default("")
+  routingNumber      String?        @default("")
+  bankAddress      String?        @default("")
+  signatoryName      String?        @default("")
+  signatureDate      String?        @default("")
+  vendoraccepted       Boolean?        @default(false)
   address        String?
   phone          String?
   city           String?
@@ -40,6 +52,7 @@ model User {
   authProvider   AuthProvider   @default(credentials)
   member         Member?
   customer_id String?   // optional
+  accepted       String?        @default("")//@whenever need to run migration remove this
   donation       Donation?
   reviews        Review[]
   carts          Cart[]
@@ -68,6 +81,9 @@ model Order {
   status          OrderStatus  @default(PENDING)
   amount          Float
   stripeSessionId String?
+  country         String?      @default("")
+  firstName       String?      @default("")
+  lastName        String?      @default("")
   stripePaymentId String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
