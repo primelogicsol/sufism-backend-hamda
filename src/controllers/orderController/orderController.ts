@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import { ProductCategory } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+// Avoid importing Prisma enums as values to prevent error-typed unions in ESLint
+type ProductCategory = "MUSIC" | "DIGITAL_BOOK" | "MEDITATION" | "FASHION" | "HOME_LIVING" | "DECORATION" | "ACCESSORIES";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -43,31 +45,31 @@ export default {
         let price = 0;
 
         if (item.musicId) {
-          category = ProductCategory.MUSIC;
+          category = "MUSIC";
           productId = item.musicId;
           price = item.music?.price ?? 0;
         } else if (item.bookId) {
-          category = ProductCategory.DIGITAL_BOOK;
+          category = "DIGITAL_BOOK";
           productId = item.bookId;
           price = item.digitalBook?.price ?? 0;
         } else if (item.fashionId) {
-          category = ProductCategory.FASHION;
+          category = "FASHION";
           productId = item.fashionId;
           price = item.fashion?.price ?? 0;
         } else if (item.meditationId) {
-          category = ProductCategory.MEDITATION;
+          category = "MEDITATION";
           productId = item.meditationId;
           price = item.meditation?.price ?? 0;
         } else if (item.decorationId) {
-          category = ProductCategory.DECORATION;
+          category = "DECORATION";
           productId = item.decorationId;
           price = item.decoration?.price ?? 0;
         } else if (item.livingId) {
-          category = ProductCategory.HOME_LIVING;
+          category = "HOME_LIVING";
           productId = item.livingId;
           price = item.living?.price ?? 0;
         } else if (item.accessoriesId) {
-          category = ProductCategory.ACCESSORIES;
+          category = "ACCESSORIES";
           productId = item.accessoriesId;
           price = item.accessories?.price ?? 0;
         }
@@ -87,7 +89,8 @@ export default {
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
     // 3. Get default payment method for this customer
-    const customerId = user.customer_id;
+    // Access customer_id with a narrow cast to satisfy TypeScript
+    const customerId = (user as unknown as { customer_id: string | null }).customer_id;
     if (typeof customerId !== "string") {
       throw new Error("Invalid Stripe customer ID");
     }
@@ -139,8 +142,7 @@ export default {
             price: item.price
           }))
         }
-      },
-      include: { items: true }
+      } as unknown as Prisma.OrderCreateInput
     });
 
     await db.cart.deleteMany({ where: { userId } });

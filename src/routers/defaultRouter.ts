@@ -6,6 +6,7 @@ import { productRouter } from "./productsRouter/productRouter.js";
 import { authRouter } from "./userRouter/authRouter.js";
 import { userRouter } from "./userRouter/userRouter.js";
 import { stripeRouter } from "./stripe/route.js";
+import uploadRouter from "./bulkuploader/upload.js";
 
 export const defaultRouter: Router = Router();
 
@@ -16,3 +17,4 @@ defaultRouter.use("/", productRouter);
 defaultRouter.use("/", couponRouter);
 defaultRouter.use("/stripe", stripeRouter);
 defaultRouter.use("/content", contentRouter);
+defaultRouter.use("/bulk-uploader", uploadRouter);
