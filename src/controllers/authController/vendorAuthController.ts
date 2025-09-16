@@ -52,7 +52,7 @@ export default {
       return httpResponse(req, res, reshttp.internalServerErrorCode, "We couldn’t send the OTP email at this time. Please try again later.");
     }
 
-    httpResponse(req, res, reshttp.createdCode, "Please veridy email first", {
+    httpResponse(req, res, reshttp.createdCode, "Please verify email first", {
       email: body.email
     });
   })
