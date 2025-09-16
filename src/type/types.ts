@@ -64,7 +64,7 @@ export type TMEMBERSHIPROLE = "volunteer" | "donor" | "collaborator";
 export type TDONORPREFERENCES = "onetime" | "monthly" | "sponsor" | "tools" | "remainAnonymous" | "receiveUpdates";
 export type TCOLABORATORINTENT = "institutional" | "cultural" | "interfaithDialogue" | "programCorrelation";
 export type TSUPPORTAREA = "spiritualProgram" | "communityOutreach" | "culturalPreservation" | "digitalMedia" | "craftsmanship";
-export type  TCategory = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
+export type TCategory = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
 
 export interface TMEMBERSHIP {
   phone: string;

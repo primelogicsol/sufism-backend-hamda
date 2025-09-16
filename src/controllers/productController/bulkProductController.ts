@@ -19,7 +19,6 @@ interface BaseProductData {
   images: string[];
 }
 
-
 const validCategories: TCategory[] = ["accessories", "decorations", "homeAndLiving", "fashion", "meditation", "digitalBooks"];
 
 // Type-safe CSV parser using native fs
@@ -163,140 +162,143 @@ function createDigitalBookData(row: RowData, userId: string): Omit<DigitalBook, 
 }
 
 // POST /upload-bulk
-export default  {
-    bulkProductUploader: asyncHandler(async (req: _Request, res) => {
-  const categoryParam = typeof req.query.category === "string" ? (req.query.category.toLowerCase().replace(/\s+/g, "") as TCategory) : undefined;
+export default {
+  bulkProductUploader: asyncHandler(async (req: _Request, res) => {
+    const categoryParam = typeof req.query.category === "string" ? (req.query.category.toLowerCase().replace(/\s+/g, "") as TCategory) : undefined;
 
-  if (!categoryParam || !validCategories.includes(categoryParam)) {
-    res.status(400).json({
-      error: `Invalid or missing category. Must be one of: ${validCategories.join(", ")}`
-    });
-    return;
-  }
-
-  if (!req.file) {
-    res.status(400).json({ error: "No CSV file uploaded" });
-    return;
-  }
-
-  const filePath = req.file.path;
-
-  try {
-    const rows: RowData[] = await parseCsv(filePath);
-
-    if (rows.length === 0) throw new Error("Empty CSV file");
-
-    const normalizedRows: RowData[] = rows.map((row) =>
-      Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().trim(), typeof value === "string" ? value.trim() : value]))
-    );
-
-    // Debug: Log first row to help troubleshoot
-    if (normalizedRows.length > 0) {
-      logger.info(`First CSV row parsed: ${JSON.stringify(normalizedRows[0], null, 2)}`);
-    }
-
-    const errors: string[] = [];
-    let insertedCount = 0;
-
-    if (!req.userFromToken?.id) {
-    httpResponse(req,res,reshttp.unauthorizedCode,reshttp.unauthorizedMessage)
+    if (!categoryParam || !validCategories.includes(categoryParam)) {
+      res.status(400).json({
+        error: `Invalid or missing category. Must be one of: ${validCategories.join(", ")}`
+      });
       return;
     }
-    for (const [index, row] of normalizedRows.entries()) {
-      // Special validation for digitalBooks (different required fields)
-      if (categoryParam === "digitalBooks") {
-        if (!row.title || row.price === undefined || (typeof row.price === "string" && isNaN(parseFloat(row.price)))) {
-          errors.push(`Row ${index + 2}: Missing/invalid required fields for digitalBooks (title, price)`);
-          continue;
-        }
-        // Always use the authenticated user's id
-        row.userId = req.userFromToken.id;
-      } else {
-        // Validate required fields for other categories
-        if (!row.title || !row.sku || row.price === undefined || (typeof row.price === "string" && isNaN(parseFloat(row.price)))) {
-          errors.push(`Row ${index + 2}: Missing/invalid required fields (title, price, sku)`);
-          continue;
-        }
-      }
 
-      const price = typeof row.price === "string" ? parseFloat(row.price) : row.price;
-      const stock = typeof row.stock === "string" ? parseInt(row.stock, 10) || 0 : row.stock || 0;
-
-      const baseData: BaseProductData = {
-        title: row.title,
-        description: row.description ?? null,
-        price,
-        stock,
-        sku: row.sku || "",
-        tags: parseCommaSeparatedArray(row.tags),
-        images: parseCommaSeparatedArray(row.images)
-      };
-
-      try {
-        // Handle each category with proper typing
-        switch (categoryParam) {
-          case "accessories":
-            await prisma.accessories.create({
-              data: createAccessoriesData(baseData, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          case "decorations":
-            await prisma.decoration.create({
-              data: createDecorationData(baseData, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          case "homeAndLiving":
-            await prisma.homeAndLiving.create({
-              data: createHomeAndLivingData(baseData, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          case "fashion":
-            await prisma.fashion.create({
-              data: createFashionData(baseData, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          case "meditation":
-            await prisma.meditation.create({
-              data: createMeditationData(baseData, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          case "digitalBooks":
-            await prisma.digitalBook.create({
-              data: createDigitalBookData(row, req.userFromToken?.id)
-            });
-            insertedCount++;
-            break;
-          default: {
-            const exhaustiveCheck: never = categoryParam;
-            throw new Error(`Unsupported category: ${String(exhaustiveCheck)}`);
-          }
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        if (errorMessage.includes("Unique constraint")) {
-          if (categoryParam === "digitalBooks") {
-            errors.push(`Row ${index + 2}: Digital book "${row.title}" already exists`);
-          } else {
-            errors.push(`Row ${index + 2}: SKU "${row.sku}" already exists`);
-          }
-        } else {
-          errors.push(`Row ${index + 2}: Error inserting record - ${errorMessage}`);
-        }
-      }
+    if (!req.file) {
+      res.status(400).json({ error: "No CSV file uploaded" });
+      return;
     }
 
-    await fsp.unlink(filePath).catch(() => {});
-   return httpResponse(req,res,reshttp.okCode,`Processed ${categoryParam} CSV`,{totalRows: normalizedRows.length,inserted: insertedCount,errors: errors.length ? errors : null})
-  } catch (err:unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    await fsp.unlink(filePath).catch(() => {});
-    httpResponse(req,res,reshttp.internalServerErrorCode,errorMessage);
-  }
-})
-}
+    const filePath = req.file.path;
 
+    try {
+      const rows: RowData[] = await parseCsv(filePath);
+
+      if (rows.length === 0) throw new Error("Empty CSV file");
+
+      const normalizedRows: RowData[] = rows.map((row) =>
+        Object.fromEntries(Object.entries(row).map(([key, value]) => [key.toLowerCase().trim(), typeof value === "string" ? value.trim() : value]))
+      );
+
+      // Debug: Log first row to help troubleshoot
+      if (normalizedRows.length > 0) {
+        logger.info(`First CSV row parsed: ${JSON.stringify(normalizedRows[0], null, 2)}`);
+      }
+
+      const errors: string[] = [];
+      let insertedCount = 0;
+
+      if (!req.userFromToken?.id) {
+        httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+        return;
+      }
+      for (const [index, row] of normalizedRows.entries()) {
+        // Special validation for digitalBooks (different required fields)
+        if (categoryParam === "digitalBooks") {
+          if (!row.title || row.price === undefined || (typeof row.price === "string" && isNaN(parseFloat(row.price)))) {
+            errors.push(`Row ${index + 2}: Missing/invalid required fields for digitalBooks (title, price)`);
+            continue;
+          }
+          // Always use the authenticated user's id
+          row.userId = req.userFromToken.id;
+        } else {
+          // Validate required fields for other categories
+          if (!row.title || !row.sku || row.price === undefined || (typeof row.price === "string" && isNaN(parseFloat(row.price)))) {
+            errors.push(`Row ${index + 2}: Missing/invalid required fields (title, price, sku)`);
+            continue;
+          }
+        }
+
+        const price = typeof row.price === "string" ? parseFloat(row.price) : row.price;
+        const stock = typeof row.stock === "string" ? parseInt(row.stock, 10) || 0 : row.stock || 0;
+
+        const baseData: BaseProductData = {
+          title: row.title,
+          description: row.description ?? null,
+          price,
+          stock,
+          sku: row.sku || "",
+          tags: parseCommaSeparatedArray(row.tags),
+          images: parseCommaSeparatedArray(row.images)
+        };
+
+        try {
+          // Handle each category with proper typing
+          switch (categoryParam) {
+            case "accessories":
+              await prisma.accessories.create({
+                data: createAccessoriesData(baseData, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            case "decorations":
+              await prisma.decoration.create({
+                data: createDecorationData(baseData, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            case "homeAndLiving":
+              await prisma.homeAndLiving.create({
+                data: createHomeAndLivingData(baseData, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            case "fashion":
+              await prisma.fashion.create({
+                data: createFashionData(baseData, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            case "meditation":
+              await prisma.meditation.create({
+                data: createMeditationData(baseData, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            case "digitalBooks":
+              await prisma.digitalBook.create({
+                data: createDigitalBookData(row, req.userFromToken?.id)
+              });
+              insertedCount++;
+              break;
+            default: {
+              const exhaustiveCheck: never = categoryParam;
+              throw new Error(`Unsupported category: ${String(exhaustiveCheck)}`);
+            }
+          }
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : "Unknown error";
+          if (errorMessage.includes("Unique constraint")) {
+            if (categoryParam === "digitalBooks") {
+              errors.push(`Row ${index + 2}: Digital book "${row.title}" already exists`);
+            } else {
+              errors.push(`Row ${index + 2}: SKU "${row.sku}" already exists`);
+            }
+          } else {
+            errors.push(`Row ${index + 2}: Error inserting record - ${errorMessage}`);
+          }
+        }
+      }
+
+      await fsp.unlink(filePath).catch(() => {});
+      return httpResponse(req, res, reshttp.okCode, `Processed ${categoryParam} CSV`, {
+        totalRows: normalizedRows.length,
+        inserted: insertedCount,
+        errors: errors.length ? errors : null
+      });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      await fsp.unlink(filePath).catch(() => {});
+      httpResponse(req, res, reshttp.internalServerErrorCode, errorMessage);
+    }
+  })
+};

@@ -16,6 +16,51 @@ const categoryMap: Record<string, keyof typeof db> = {
   MEDITATION: "meditation"
 };
 
+type CommonWhere = {
+  isDelete?: boolean;
+  title?: { contains: string; mode?: Prisma.QueryMode };
+  id?: number;
+};
+
+/* eslint-disable no-unused-vars */
+type ModelDelegate = {
+  count: (_args: { where?: CommonWhere }) => Promise<number>;
+  findMany: (_args: {
+    where?: CommonWhere;
+    skip?: number;
+    take?: number;
+    orderBy?: Record<string, "asc" | "desc">;
+    include?: unknown;
+  }) => Promise<unknown[]>;
+  findFirst: (_args: { where: CommonWhere; include?: unknown }) => Promise<unknown>;
+};
+/* eslint-enable no-unused-vars */
+
+function getModelDelegate(modelName: keyof typeof db): ModelDelegate {
+  // Cast the specific Prisma delegates to a safe minimal interface to avoid any
+  switch (modelName) {
+    case "accessories":
+      return db.accessories as unknown as ModelDelegate;
+    case "music":
+      return db.music as unknown as ModelDelegate;
+    case "coupon":
+      return db.coupon as unknown as ModelDelegate;
+    case "decoration":
+      return db.decoration as unknown as ModelDelegate;
+    case "digitalBook":
+      return db.digitalBook as unknown as ModelDelegate;
+    case "fashion":
+      return db.fashion as unknown as ModelDelegate;
+    case "homeAndLiving":
+      return db.homeAndLiving as unknown as ModelDelegate;
+    case "meditation":
+      return db.meditation as unknown as ModelDelegate;
+    default:
+      // Exhaustive guard
+      throw new Error(`Unsupported model: ${String(modelName)}`);
+  }
+}
+
 export default {
   // ✅ Get products by category (public)
   getByCategory: asyncHandler(async (req, res) => {
@@ -39,13 +84,13 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "Invalid category");
     }
 
-    const model = (db as any)[modelName];
+    const model = getModelDelegate(modelName);
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where: Prisma.DecorationWhereInput = { isDelete: false };
+    const where: CommonWhere = { isDelete: false };
 
     if (search) {
       where.title = { contains: search, mode: "insensitive" };
@@ -57,14 +102,14 @@ export default {
       where,
       skip,
       take: limitNumber,
-      orderBy: { [sortBy]: sortOrder },
+      orderBy: { [sortBy]: sortOrder } as Record<string, "asc" | "desc">,
       include: {
         reviews: {
           include: {
             user: { select: { id: true, fullName: true } }
           }
         }
-      }
+      } as unknown
     });
 
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
@@ -88,7 +133,7 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "Invalid category");
     }
 
-    const model = (db as any)[modelName];
+    const model = getModelDelegate(modelName);
 
     const product = await model.findFirst({
       where: { id: Number(id), isDelete: false },
@@ -98,7 +143,7 @@ export default {
             user: { select: { id: true, fullName: true } }
           }
         }
-      }
+      } as unknown
     });
 
     if (!product) {

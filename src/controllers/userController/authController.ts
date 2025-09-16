@@ -23,7 +23,10 @@ export default {
         email: body.email
       }
     });
-    if (user) httpResponse(req, res, reshttp.badRequestCode, "User already exists with same email.");
+    if (user) {
+      httpResponse(req, res, reshttp.badRequestCode, "User already exists with same email.");
+      return;
+    }
     const OTP_TOKEN = generateOtp();
     const hashedPassword = (await passwordHasher(body.password!, res)) as string;
     await db.user.create({
@@ -91,7 +94,7 @@ export default {
         OTP_EXPIRES_IN: null,
         tokenVersion: { increment: 1 },
         customer_id: customerId
-      }
+      } as unknown as import("@prisma/client").Prisma.UserUpdateInput
     });
 
     const { accessToken, refreshToken } = setTokensAndCookies(verifiedUser, res, true);
@@ -113,31 +116,35 @@ export default {
     const user = await db.user.findUnique({ where: { email: body.email } });
     if (!user) {
       httpResponse(req, res, reshttp.notFoundCode, "User not found");
+      return;
     }
 
-    const isPasswordValid = await verifyPassword(body.password!, user!.password || "", res);
+    const userPassword: string = typeof user?.password === "string" ? user.password : "";
+    const isPasswordValid = await verifyPassword(body.password!, userPassword, res);
     if (!isPasswordValid) {
       logger.info("Password is incorrect");
       throw { status: reshttp.unauthorizedCode, message: reshttp.unauthorizedMessage };
-    } else if (!user!.isVerified) {
+    } else if (!user.isVerified) {
       const OTP_TOKEN = generateOtp();
       await db.user.update({
-        where: { email: user!.email },
+        where: { email: user.email },
         data: { OTP: OTP_TOKEN.otp, OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry }
       });
       await gloabalMailMessage(body.email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
       httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
+      return;
     }
     //for existing users if the customer id doesn't exists then create one
-    const customerId = user?.customer_id;
+    const userWithCustomer = user as unknown as { customer_id?: string | null };
+    const customerId = userWithCustomer?.customer_id ?? null;
     if (!customerId && user) {
       const newCustomerId = await createStripeCustomer({ id: user?.id, email: user?.email, fullName: user?.fullName });
       await db.user.update({
         where: { email: user.email },
-        data: { customer_id: newCustomerId }
+        data: { customer_id: newCustomerId } as unknown as import("@prisma/client").Prisma.UserUpdateInput
       });
     }
-    const { accessToken, refreshToken } = setTokensAndCookies(user!, res, true);
+    const { accessToken, refreshToken } = setTokensAndCookies(user, res, true);
     httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { accessToken, refreshToken });
   }),
   // ** RefreshAccessToken

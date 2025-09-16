@@ -2,6 +2,7 @@ export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
     // Custom rules
+
     "type-empty": [2, "never"], // Ensure the type is not empty
     "type-enum": [
       2,
