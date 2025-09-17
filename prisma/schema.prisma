@@ -52,7 +52,6 @@ model User {
   authProvider   AuthProvider   @default(credentials)
   member         Member?
   customer_id String?   // optional
-  accepted       String?        @default("")//@whenever need to run migration remove this
   donation       Donation?
   reviews        Review[]
   carts          Cart[]
