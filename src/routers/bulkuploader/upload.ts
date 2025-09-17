@@ -38,6 +38,11 @@ const imageUpload = multer({
 // CSV row interface
 interface RowData {
   title?: string;
+  name?: string;
+  color?: string;
+  care?: string;
+  material?: string;
+  shippingtime?: string;
   description?: string;
   descritpion?: string; // schema typo - keeping for DigitalBook compatibility
   price?: string | number;
@@ -62,6 +67,11 @@ const validCategories: Category[] = ["accessories", "decorations", "homeAndLivin
 // Base data interface
 interface BaseProductData {
   title: string;
+  name: string | null;
+  color: string | null;
+  care: string | null;
+  material: string | null;
+  shippingTime: string | null;
   description: string | null;
   price: number;
   stock: number;
@@ -272,6 +282,11 @@ uploadRouter.post("/upload-bulk", authMiddleware.checkToken, upload.single("file
 
       const baseData: BaseProductData = {
         title: row.title,
+        name: row.name ?? null,
+        color: row.color ?? null,
+        care: row.care ?? null,
+        material: row.material ?? null,
+        shippingTime: row.shippingtime ?? null,
         description: row.description ?? null,
         price,
         stock,

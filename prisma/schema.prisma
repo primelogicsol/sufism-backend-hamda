@@ -257,6 +257,11 @@ model Accessories {
   id          Int        @id @default(autoincrement())
   stock       Int        @default(0)
   title       String
+  name        String?
+  color       String?
+  care        String?
+  material    String?
+  shippingTime String?
   description String?
   price       Float
   tags        String[]   @default([])
@@ -277,6 +282,11 @@ model Decoration {
   id          Int        @id @default(autoincrement())
   stock       Int        @default(0)
   title       String
+  name        String?
+  color       String?
+  care        String?
+  material    String?
+  shippingTime String?
   description String?
   price       Float
   tags        String[]   @default([])
@@ -297,6 +307,11 @@ model HomeAndLiving {
   id          Int        @id @default(autoincrement())
   stock       Int        @default(0)
   title       String
+  name        String?
+  color       String?
+  care        String?
+  material    String?
+  shippingTime String?
   description String?
   price       Float
   tags        String[]   @default([])
@@ -317,6 +332,11 @@ model Fashion {
   id          Int        @id @default(autoincrement())
   stock       Int        @default(0)
   title       String
+  name        String?
+  color       String?
+  care        String?
+  material    String?
+  shippingTime String?
   description String?
   price       Float
   tags        String[]   @default([])
@@ -337,6 +357,11 @@ model Meditation {
   id          Int        @id @default(autoincrement())
   stock       Int        @default(0)
   title       String
+  name        String?
+  color       String?
+  care        String?
+  material    String?
+  shippingTime String?
   description String?
   price       Float
   tags        String[]   @default([])
