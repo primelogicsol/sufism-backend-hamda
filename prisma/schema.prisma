@@ -52,6 +52,7 @@ model User {
   authProvider   AuthProvider   @default(credentials)
   member         Member?
   customer_id String?   // optional
+  isCompleted  Boolean?         @default(false)
   donation       Donation?
   reviews        Review[]
   carts          Cart[]

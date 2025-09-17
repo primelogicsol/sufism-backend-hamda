@@ -1,7 +1,6 @@
 import { Router } from "express";
 import adminController, { verify as adminVerify } from "../../controllers/adminController/adminController.js";
 import userAuthController from "../../controllers/authController/userAuthController.js";
-import vendorAuthController from "../../controllers/authController/vendorAuthController.js";
 import { adminAuth } from "../../middleware/adminAuthMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
 import {
@@ -9,14 +8,12 @@ import {
   updateForgotPasswordSchema,
   userLoginSchema,
   userRegistrationSchema,
-  vendorRegistrationSchema,
   verifyGoogleLoginSchema,
   verifyOTPSchema,
   verifyUserSchema
 } from "../../validations/zod.js";
 export const authRouter: Router = Router();
 authRouter.route(`/register`).post(validateDataMiddleware(userRegistrationSchema), userAuthController.register);
-authRouter.route(`/vendor-register`).post(validateDataMiddleware(vendorRegistrationSchema), vendorAuthController.register);
 // 2 req per minute from single  ip adress
 authRouter.route(`/verify-account`).post(validateDataMiddleware(verifyOTPSchema), userAuthController.verifyAccount);
 // 5 req per mnute from single  ip adress

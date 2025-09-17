@@ -5,5 +5,8 @@ export default {
   },
   interviewScheduleMessage: () => {
     return "Your interview has been scheduled. We will contact you soon with the next steps. Current status: Pending.";
+  },
+  vendorApprovalMessage: () => {
+    return "Thanks for your vendor approval request! We’ll get back to you soon.";
   }
 };

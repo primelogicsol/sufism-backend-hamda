@@ -275,5 +275,6 @@ export interface VendorRegistrationInput {
   bankAddress?: string;
   signatoryName?: string;
   signatureDate?: string;
+  isCompleted?: boolean;
   vendoraccepted?: boolean; // <-- boolean in API, not string
 }
