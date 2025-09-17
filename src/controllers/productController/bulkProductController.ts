@@ -11,6 +11,11 @@ const prisma = new PrismaClient();
 
 interface BaseProductData {
   title: string;
+  name: string | null;
+  color: string | null;
+  care: string | null;
+  material: string | null;
+  shippingTime: string | null;
   description: string | null;
   price: number;
   stock: number;
@@ -223,6 +228,11 @@ export default {
 
         const baseData: BaseProductData = {
           title: row.title,
+          name: row.name ?? null,
+          color: row.color ?? null,
+          care: row.care ?? null,
+          material: row.material ?? null,
+          shippingTime: row.shippingtime ?? null,
           description: row.description ?? null,
           price,
           stock,

@@ -33,6 +33,11 @@ export default {
     const meditations = await db.meditation.create({
       data: {
         title: data.title,
+        name: data.name,
+        color: data.color,
+        care: data.care,
+        material: data.material,
+        shippingTime: data.shippingTime,
         description: data.description,
         price: Number(data.price),
         tags: data.tags || [],
@@ -174,6 +179,11 @@ export default {
 
     const updateData: Prisma.MeditationUpdateInput = {};
     if (data.title) updateData.title = data.title;
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.color !== undefined) updateData.color = data.color;
+    if (data.care !== undefined) updateData.care = data.care;
+    if (data.material !== undefined) updateData.material = data.material;
+    if (data.shippingTime !== undefined) updateData.shippingTime = data.shippingTime;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.price) updateData.price = Number(data.price);
     if (data.tags) updateData.tags = data.tags;

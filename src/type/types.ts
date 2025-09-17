@@ -191,6 +191,11 @@ export type TCreateSufiChecklistRequest = {
 
 export interface T_ITEM {
   title: string;
+  name?: string;
+  color?: string;
+  care?: string;
+  material?: string;
+  shippingTime?: string;
   description?: string;
   price: number;
   tags?: string[];
@@ -231,6 +236,11 @@ export type TUPDATE_COUPON = {
 };
 export interface RowData {
   title?: string;
+  name?: string;
+  color?: string;
+  care?: string;
+  material?: string;
+  shippingtime?: string;
   description?: string;
   descritpion?: string; // schema typo - keeping for DigitalBook compatibility
   price?: string | number;
