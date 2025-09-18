@@ -4,16 +4,18 @@ import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
 import stripe from "../../services/payment/stripe.js";
+import type { TBillingDetails } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
+import logger from "../../utils/loggerUtils.js";
 // Avoid importing Prisma enums as values to prevent error-typed unions in ESLint
 // import type Stripe from "stripe";
 
 export default {
   createOrder: asyncHandler(async (req: _Request, res) => {
+    const data = req.body as Order;
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
-    const data = req.body as Order;
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
@@ -155,5 +157,29 @@ export default {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id
     });
+  }),
+  billingDetails:asyncHandler(async (req:_Request,res)=>{
+  const data = req.body as TBillingDetails;
+    const user = await db.user.findFirst({ where: { id: req.userFromToken?.id } });
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+   try {
+     if (user.customer_id) {
+      await stripe.customers.update(user.customer_id, {
+        name: data.fullName,
+        phone: data.phone,
+        address: {
+          line1: data.address,
+          postal_code: data.zip,
+          country: data.country??"US",
+        }
+      });
+    }
+      return httpResponse(req, res, reshttp.okCode, "Billing details updated successfully");
+    } catch (error) {
+    logger.error("Billing details error:", error);
+    return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to update billing details");
+  }
   })
 };

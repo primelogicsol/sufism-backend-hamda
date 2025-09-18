@@ -131,8 +131,13 @@ export default {
         where: { email: user.email },
         data: { OTP: OTP_TOKEN.otp, OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry }
       });
-      await gloabalMailMessage(body.email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
-      httpResponse(req, res, reshttp.okCode, "Verification link is sent to you email ");
+      try{
+        await gloabalMailMessage(body.email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
+      }catch(e){
+          logger.error("Error sending email:", e);
+        return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to send email, please try again.");
+      }
+      httpResponse(req, res, reshttp.okCode, "Verification Code is sent to you email ");
       return;
     }
     //for existing users if the customer id doesn't exists then create one

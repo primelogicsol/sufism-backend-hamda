@@ -278,7 +278,7 @@ export interface VendorRegistrationInput {
   isCompleted?: boolean;
   vendoraccepted?: boolean; // <-- boolean in API, not string
 }
-export interface BillingDetails {
+export interface TBillingDetails {
 fullName: string;
 zip:string;
 address:string;

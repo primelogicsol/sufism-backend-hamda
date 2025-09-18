@@ -22,6 +22,24 @@ export default {
         if (!existingUser) {
           return httpResponse(req, res, reshttp.badRequestCode, "Invalid ID");
         }
+        if (body.email) {
+  const emailExists = await db.user.findFirst({
+    where: {
+      email: body.email,
+      NOT: { id } // exclude current user
+    }
+  });
+
+  if (emailExists) {
+    return httpResponse(
+      req,
+      res,
+      reshttp.badRequestCode,
+      "Email is already in use"
+    );
+  }
+}
+
         const updatedUser = await db.user.update({
           where: { id },
           data: {
@@ -43,10 +61,10 @@ export default {
         return httpResponse(req, res, reshttp.okCode, "User updated successfully", { id: updatedUser.id });
       } else if (!body.email) {
         return httpResponse(req, res, reshttp.badRequestCode, reshttp.badRequestMessage);
-      }
+      } 
+
       // Case 2: No ID → check email
       const existingUser = await db.user.findFirst({ where: { email: body.email } });
-
       if (existingUser) {
         // Update user with incoming data
         const updatedUser = await db.user.update({

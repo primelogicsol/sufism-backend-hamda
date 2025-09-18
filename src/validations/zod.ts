@@ -359,27 +359,27 @@ export const userUpdateSchema = z.object({
     .optional(),
   phone: z
     .string({
-      message: "Must be valid address"
+      message: "Must be valid phone"
     })
     .optional(),
   city: z
     .string({
-      message: "Must be valid address"
+      message: "Must be valid city"
     })
     .optional(),
   state: z
     .string({
-      message: "Must be valid address"
+      message: "Must be valid state"
     })
     .optional(),
   zipCode: z
     .string({
-      message: "Must be valid address"
+      message: "Must be valid zipCode"
     })
     .optional(),
   country: z
     .string({
-      message: "Must be valid address"
+      message: "Must be valid country"
     })
     .optional()
 });
@@ -599,3 +599,25 @@ export const blogPostSchema = z.object({
     .min(1, { message: "blogBody is required!!" })
     .min(3, { message: "blogBody must be at least 3 characters long." })
 });
+export const verifyBillingDetails = z.object({
+  email: z
+    .string({ message: "Email is required!!" })
+    .min(1, { message: "Email is required!!" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
+  fullName: z.string({ message: "fullName is required!!" }).min(1, { message: "fullName is required!!" }),
+  address: z.string({message: "Must be valid address"}),
+  zip: z.string({message: "Must be valid Zip"}),
+  country: z.string({message: "Must be valid Country"}).optional(),
+  phone: z.string({message: "Must be valid Phone Number"}).optional(),
+  });
+export const verifyOrderDetails = z.object({
+  email: z
+    .string({ message: "Email is required!!" })
+    .min(1, { message: "Email is required!!" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" }),
+  fullName: z.string({ message: "fullName is required!!" }).min(1, { message: "fullName is required!!" }),
+  shippingAddress: z.string({message: "Must be valid address"}),
+  zip: z.string({message: "Must be valid Zip"}),
+  country: z.string({message: "Must be valid Country"}).optional(),
+  phone: z.string({message: "Must be valid Phone Number"}).optional(),
+  });
