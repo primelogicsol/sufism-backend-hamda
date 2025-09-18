@@ -278,3 +278,10 @@ export interface VendorRegistrationInput {
   isCompleted?: boolean;
   vendoraccepted?: boolean; // <-- boolean in API, not string
 }
+export interface BillingDetails {
+fullName: string;
+zip:string;
+address:string;
+country?:string;
+phone:string;
+}
