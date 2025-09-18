@@ -22,7 +22,6 @@ export default {
         if (!existingUser) {
           return httpResponse(req, res, reshttp.badRequestCode, "Invalid ID");
         }
-
         const updatedUser = await db.user.update({
           where: { id },
           data: {
@@ -32,15 +31,19 @@ export default {
         });
 
         if (body.isCompleted) {
-          await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
-          return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
+          try{
+            await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
+            return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
+          }catch(e){
+            logger.info(e)
+            return httpResponse(req, res, reshttp.okCode, "We will contact you soon");
+          }
         }
 
         return httpResponse(req, res, reshttp.okCode, "User updated successfully", { id: updatedUser.id });
       } else if (!body.email) {
         return httpResponse(req, res, reshttp.badRequestCode, reshttp.badRequestMessage);
       }
-
       // Case 2: No ID → check email
       const existingUser = await db.user.findFirst({ where: { email: body.email } });
 
@@ -55,8 +58,13 @@ export default {
         });
 
         if (body.isCompleted) {
-          await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
-          // return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
+          try{
+            await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
+            return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
+          }catch(e){
+            logger.error(e);
+            return httpResponse(req, res, reshttp.okCode, "We will contact you soon");
+          }
         }
 
         return httpResponse(req, res, reshttp.okCode, "User updated successfully", { id: updatedUser.id });
@@ -89,10 +97,14 @@ export default {
         });
 
         if (body.isCompleted) {
-          await gloabalMailMessage(newUser.email, messageSenderUtils.vendorApprovalMessage());
-          return httpResponse(req, res, reshttp.createdCode, "Mail sent successfully");
+          try{
+            await gloabalMailMessage(newUser.email, messageSenderUtils.vendorApprovalMessage());
+            return httpResponse(req, res, reshttp.createdCode, "Mail sent successfully");
+          }catch(e){
+            logger.info(e);
+            return httpResponse(req,res,reshttp.okCode,"We will contact you soon")
+          }
         }
-
         return httpResponse(req, res, reshttp.createdCode, "User created successfully", { id: newUser.id });
       }
     } catch (e) {
@@ -155,5 +167,5 @@ export default {
     }
 
     return httpResponse(req, res, reshttp.okCode, "User fetched successfully", user);
-  })
+  }),
 };

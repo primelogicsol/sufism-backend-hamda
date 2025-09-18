@@ -48,7 +48,6 @@ export const vendorRegistrationSchema = z.object({
     .optional(),
   password: z.string({ message: "password must be string" }).optional(),
   businessName: z.string().max(100).optional(),
-  isFirstStep: z.boolean().optional(),
   businessType: z.string().max(50).optional(),
   einNumber: z.string().max(20).optional(),
   tinNumber: z.string().max(20).optional(),
@@ -60,7 +59,7 @@ export const vendorRegistrationSchema = z.object({
   bankAddress: z.string().max(200).optional(),
   signatoryName: z.string().max(100).optional(),
   signatureDate: z.string().optional(),
-  accepted: z.boolean().optional(),
+  vendoraccepted: z.boolean().optional(),
   isCompleted: z.boolean().optional()
 });
 
