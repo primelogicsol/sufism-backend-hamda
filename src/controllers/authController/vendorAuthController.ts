@@ -31,11 +31,11 @@ export default {
         });
 
         if (body.isCompleted) {
-          try{
+          try {
             await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
             return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
-          }catch(e){
-            logger.info(e)
+          } catch (e) {
+            logger.info(e);
             return httpResponse(req, res, reshttp.okCode, "We will contact you soon");
           }
         }
@@ -58,10 +58,10 @@ export default {
         });
 
         if (body.isCompleted) {
-          try{
+          try {
             await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
             return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
-          }catch(e){
+          } catch (e) {
             logger.error(e);
             return httpResponse(req, res, reshttp.okCode, "We will contact you soon");
           }
@@ -97,12 +97,12 @@ export default {
         });
 
         if (body.isCompleted) {
-          try{
+          try {
             await gloabalMailMessage(newUser.email, messageSenderUtils.vendorApprovalMessage());
             return httpResponse(req, res, reshttp.createdCode, "Mail sent successfully");
-          }catch(e){
+          } catch (e) {
             logger.info(e);
-            return httpResponse(req,res,reshttp.okCode,"We will contact you soon")
+            return httpResponse(req, res, reshttp.okCode, "We will contact you soon");
           }
         }
         return httpResponse(req, res, reshttp.createdCode, "User created successfully", { id: newUser.id });
@@ -167,5 +167,5 @@ export default {
     }
 
     return httpResponse(req, res, reshttp.okCode, "User fetched successfully", user);
-  }),
+  })
 };

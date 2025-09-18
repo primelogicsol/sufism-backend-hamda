@@ -1,20 +1,19 @@
 /* eslint-disable camelcase */
-import type { Prisma } from "@prisma/client";
-// Avoid importing Prisma enums as values to prevent error-typed unions in ESLint
-type ProductCategory = "MUSIC" | "DIGITAL_BOOK" | "MEDITATION" | "FASHION" | "HOME_LIVING" | "DECORATION" | "ACCESSORIES";
+import type { Order, Prisma, ProductCategory } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
 import stripe from "../../services/payment/stripe.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
+// Avoid importing Prisma enums as values to prevent error-typed unions in ESLint
 // import type Stripe from "stripe";
 
 export default {
   createOrder: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
-
+    const data = req.body as Order;
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
@@ -132,8 +131,7 @@ export default {
       data: {
         userId: user.id,
         amount: totalAmount,
-        status: "PENDING",
-        stripePaymentId: paymentIntent.id,
+        sPaymentIntentId: paymentIntent.id,
         items: {
           create: orderItemsData.map((item) => ({
             category: item.category,
@@ -141,7 +139,12 @@ export default {
             quantity: item.quantity,
             price: item.price
           }))
-        }
+        },
+        zip: data.zip,
+        phone: data.phone,
+        fullName: data.fullName,
+        shippingAddress: data.shippingAddress,
+        country: data.country
       } as unknown as Prisma.OrderCreateInput
     });
 

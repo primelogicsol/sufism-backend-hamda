@@ -78,13 +78,17 @@ model User {
 model Order {
   id              Int          @id @default(autoincrement())
   userId          String
-  status          OrderStatus  @default(PENDING)
   amount          Float
   stripeSessionId String?
+  fullName        String       @default("")
   country         String?      @default("")
-  firstName       String?      @default("")
-  lastName        String?      @default("")
-  stripePaymentId String?
+  email           String?      @default("")
+  sPaymentIntentId String?
+  shippingAddress String       @default("")   
+  zip             String       @default("")
+  phone           String       @default("")
+  status          OrderStatus  @default(PENDING)
+  paymentStatus          PaymentStatus  @default(PENDING)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   // transactions Transaction[] // One order can have multiple payment attempts
@@ -404,6 +408,12 @@ model DigitalBook {
 }
 enum OrderStatus {
   PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+enum PaymentStatus {
+  PENDING
   PAID
   FAILED
   CANCELLED
@@ -473,7 +483,6 @@ model Cart {
   user      User     @relation(fields: [userId], references: [id])
   qty       Int      @default(1)
   createdAt DateTime @default(now())
-
   // Optional foreign keys - only one should be filled at a time
   musicId Int?
   music   Music? @relation(fields: [musicId], references: [id], onDelete: Cascade)
