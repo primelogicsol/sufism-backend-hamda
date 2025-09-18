@@ -56,14 +56,13 @@ export default {
 
         if (body.isCompleted) {
           await gloabalMailMessage(updatedUser.email, messageSenderUtils.vendorApprovalMessage());
-          return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
+          // return httpResponse(req, res, reshttp.okCode, "Mail sent successfully");
         }
 
         return httpResponse(req, res, reshttp.okCode, "User updated successfully", { id: updatedUser.id });
       } else {
         // Create new user
         let hashedPassword: string | undefined;
-
         if (body.password) {
           hashedPassword = (await passwordHasher(body.password, res)) as string;
         }
