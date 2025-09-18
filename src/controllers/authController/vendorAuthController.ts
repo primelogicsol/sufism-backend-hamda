@@ -62,13 +62,16 @@ export default {
         return httpResponse(req, res, reshttp.okCode, "User updated successfully", { id: updatedUser.id });
       } else {
         // Create new user
-        const hashedPassword = (await passwordHasher(body.password, res)) as string;
+        let hashedPassword: string | undefined;
 
+        if (body.password) {
+          hashedPassword = (await passwordHasher(body.password, res)) as string;
+        }
         const newUser = await db.user.create({
           data: {
             fullName: body.fullName,
             email: body.email,
-            password: hashedPassword,
+            ...(hashedPassword && { password: hashedPassword }),
             role: "vendor",
             businessName: body.businessName,
             businessType: body.businessType,

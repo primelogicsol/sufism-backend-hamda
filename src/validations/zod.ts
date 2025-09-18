@@ -46,11 +46,7 @@ export const vendorRegistrationSchema = z.object({
       message: "Invalid email format. e.g: john.doe@example.com"
     })
     .optional(),
-  password: z
-    .string({ message: "password is required!!" })
-    .min(1, { message: "password is required!!" })
-    .min(6, { message: "password must be at least 6 characters long." })
-    .max(50, { message: "password can be at most 50 characters long." }),
+  password: z.string({ message: "password must be string" }).optional(),
   businessName: z.string().max(100).optional(),
   isFirstStep: z.boolean().optional(),
   businessType: z.string().max(50).optional(),
