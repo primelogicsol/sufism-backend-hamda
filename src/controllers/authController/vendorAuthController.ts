@@ -127,15 +127,16 @@ export default {
   }),
   login: asyncHandler(async (req, res) => {
     const body = req.body as User;
-
     const user = await db.user.findUnique({ where: { email: body.email } });
     if (!user) {
       httpResponse(req, res, reshttp.notFoundCode, "User not found");
       return;
     }
-
-    const userPassword: string = typeof user?.password === "string" ? user.password : "";
-    const isPasswordValid = await verifyPassword(body.password!, userPassword, res);
+    if (!user.password) {
+      httpResponse(req, res, reshttp.badRequestCode, "User Password is not set yet");
+      return;
+    }
+    const isPasswordValid = await verifyPassword(body.password!, user.password, res);
     if (!isPasswordValid) {
       logger.info("Password is incorrect");
       throw { status: reshttp.unauthorizedCode, message: reshttp.unauthorizedMessage };
