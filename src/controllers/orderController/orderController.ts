@@ -158,28 +158,28 @@ export default {
       paymentIntentId: paymentIntent.id
     });
   }),
-  billingDetails:asyncHandler(async (req:_Request,res)=>{
-  const data = req.body as TBillingDetails;
+  billingDetails: asyncHandler(async (req: _Request, res) => {
+    const data = req.body as TBillingDetails;
     const user = await db.user.findFirst({ where: { id: req.userFromToken?.id } });
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
-   try {
-     if (user.customer_id) {
-      await stripe.customers.update(user.customer_id, {
-        name: data.fullName,
-        phone: data.phone,
-        address: {
-          line1: data.address,
-          postal_code: data.zip,
-          country: data.country??"US",
-        }
-      });
-    }
+    try {
+      if (user.customer_id) {
+        await stripe.customers.update(user.customer_id, {
+          name: data.fullName,
+          phone: data.phone,
+          address: {
+            line1: data.address,
+            postal_code: data.zip,
+            country: data.country ?? "US"
+          }
+        });
+      }
       return httpResponse(req, res, reshttp.okCode, "Billing details updated successfully");
     } catch (error) {
-    logger.error("Billing details error:", error);
-    return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to update billing details");
-  }
+      logger.error("Billing details error:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to update billing details");
+    }
   })
 };

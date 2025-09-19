@@ -279,9 +279,9 @@ export interface VendorRegistrationInput {
   vendoraccepted?: boolean; // <-- boolean in API, not string
 }
 export interface TBillingDetails {
-fullName: string;
-zip:string;
-address:string;
-country?:string;
-phone:string;
+  fullName: string;
+  zip: string;
+  address: string;
+  country?: string;
+  phone: string;
 }

@@ -119,9 +119,11 @@ export default {
       httpResponse(req, res, reshttp.notFoundCode, "User not found");
       return;
     }
-
-    const userPassword: string = typeof user?.password === "string" ? user.password : "";
-    const isPasswordValid = await verifyPassword(body.password!, userPassword, res);
+    if (!user.password) {
+      httpResponse(req, res, reshttp.badRequestCode, "User Password is not set yet");
+      return;
+    }
+    const isPasswordValid = await verifyPassword(body.password!, user.password ?? "", res);
     if (!isPasswordValid) {
       logger.info("Password is incorrect");
       throw { status: reshttp.unauthorizedCode, message: reshttp.unauthorizedMessage };
@@ -131,10 +133,10 @@ export default {
         where: { email: user.email },
         data: { OTP: OTP_TOKEN.otp, OTP_EXPIRES_IN: OTP_TOKEN.otpExpiry }
       });
-      try{
+      try {
         await gloabalMailMessage(body.email, messageSenderUtils.urlSenderMessage(`${OTP_TOKEN.otp}`, `30m`));
-      }catch(e){
-          logger.error("Error sending email:", e);
+      } catch (e) {
+        logger.error("Error sending email:", e);
         return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to send email, please try again.");
       }
       httpResponse(req, res, reshttp.okCode, "Verification Code is sent to you email ");

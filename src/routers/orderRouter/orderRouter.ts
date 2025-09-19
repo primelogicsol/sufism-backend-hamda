@@ -7,4 +7,4 @@ import { verifyBillingDetails, verifyOrderDetails } from "../../validations/zod.
 export const orderRouter: Router = Router();
 
 orderRouter.route("/order").post(authMiddleware.checkToken, validateDataMiddleware(verifyOrderDetails), orderController.createOrder);
-orderRouter.route("/billing-details").post(authMiddleware.checkToken, validateDataMiddleware(verifyBillingDetails),orderController.billingDetails);
+orderRouter.route("/billing-details").post(authMiddleware.checkToken, validateDataMiddleware(verifyBillingDetails), orderController.billingDetails);
