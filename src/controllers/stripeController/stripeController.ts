@@ -8,6 +8,16 @@ import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import type Stripe from "stripe";
 import { STRIPE_WEBHOOK_SECRET } from "../../configs/config.js";
+// import fs from "fs";
+// import path from "path";
+// import { fileURLToPath } from "url";
+// Get this file’s directory (works in Bun/ESM)
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// Save stripe-logs.log in the same folder as this file
+// const LOG_FILE = path.join(__dirname, "stripe-logs.log");
+
 const endpointSecret = STRIPE_WEBHOOK_SECRET;
 
 export default {
@@ -141,16 +151,40 @@ export default {
 
       // Payment successful
       case "payment_intent.succeeded": {
-        const paymentIntent: Stripe.PaymentIntent = event.data.object;
         // ✅ Mark order/donation as paid in DB using paymentIntent.id or metadata
-        console.log("PaymentIntent succeeded:", paymentIntent.id);
+        const paymentIntent: Stripe.PaymentIntent = event.data.object;
+        const { id, metadata, status } = paymentIntent;
+
+        await db.order.updateMany({
+          where: {
+            userId: metadata.userId,
+            sPaymentIntentId: id
+          },
+          data: {
+            paymentStatus: status === "succeeded" ? "PAID" : "FAILED"
+          }
+        });
+
+        // logStripeEvent(paymentIntent);
         break;
       }
 
       // Payment failed
       case "payment_intent.payment_failed": {
         const paymentIntent: Stripe.PaymentIntent = event.data.object;
-        console.log("PaymentIntent failed:", paymentIntent.id);
+        const { id, metadata, last_payment_error } = paymentIntent;
+        console.log(last_payment_error?.message);
+
+        await db.order.updateMany({
+          where: {
+            userId: metadata.userId,
+            sPaymentIntentId: id
+          },
+          data: {
+            paymentStatus: "FAILED"
+          }
+        });
+        // logStripeEvent(paymentIntent);
         // ❌ Update order status in DB if needed
         break;
       }
@@ -158,7 +192,9 @@ export default {
       // Optional refund handling
       case "charge.refunded": {
         const charge: Stripe.Charge = event.data.object;
-        console.log("Charge refunded:", charge.id);
+        console.log("charge_refund_event", charge);
+
+        // logStripeEvent(charge);
         // 🔄 Update your records
         break;
       }
@@ -170,3 +206,14 @@ export default {
     res.json({ received: true });
   })
 };
+
+// function logStripeEvent(event: unknown) {
+//   const timestamp = new Date().toISOString();
+//   const formatted = `[${timestamp}] ${JSON.stringify(event, null, 2)}\n\n`;
+
+//   // Print to terminal
+//   console.log("🔔 Stripe Event:", formatted);
+
+//   // Save to file
+//   fs.appendFileSync(LOG_FILE, formatted, "utf-8");
+// }
