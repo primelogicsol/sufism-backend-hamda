@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { type THTTPRESPONSE } from "../type/types.js";
+import logger from "./loggerUtils.js";
 const jsonResponse = (
   status: number,
   message: string = "OK",
@@ -28,6 +29,7 @@ const httpResponse = (req: Request, res: Response, statusCode: number, message: 
       method: req.method
     }
   };
+  logger.info("this is called", response);
   // if (ENV && ENV === "production" && response.requestInfo) {
   delete response.requestInfo;
   // }

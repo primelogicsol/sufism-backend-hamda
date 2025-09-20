@@ -1,13 +1,16 @@
 /* eslint-disable camelcase */
-import reshttp from "reshttp";
 import type { Prisma } from "@prisma/client";
+import reshttp from "reshttp";
+import type Stripe from "stripe";
+import { STRIPE_WEBHOOK_SECRET } from "../../configs/config.js";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
+import { gloabalMailMessage } from "../../services/globalEmailMessageService.js";
 import stripe from "../../services/payment/stripe.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
-import type Stripe from "stripe";
-import { STRIPE_WEBHOOK_SECRET } from "../../configs/config.js";
+import logger from "../../utils/loggerUtils.js";
+import messageSenderUtils from "../../utils/messageSenderUtils.js";
 // import fs from "fs";
 // import path from "path";
 // import { fileURLToPath } from "url";
@@ -137,14 +140,17 @@ export default {
           const setupIntent: Stripe.SetupIntent = event.data.object;
           const customerId = setupIntent.customer as string;
           const paymentMethodId = setupIntent.payment_method as string;
-
           const customer = (await stripe.customers.retrieve(customerId)) as Stripe.Customer;
-
           if (!customer.invoice_settings.default_payment_method) {
             await stripe.customers.update(customerId, {
               invoice_settings: { default_payment_method: paymentMethodId }
             });
           }
+          //  try {
+          //  await gloabalMailMessage(setupIntent?.metadata.email, messageSenderUtils.orderSuccessMessage(orderId));
+          // } catch (e) {
+          //     logger.error(e);
+          //  }
         }
         break;
       }
@@ -184,8 +190,12 @@ export default {
             paymentStatus: "FAILED"
           }
         });
+        try {
+          await gloabalMailMessage(metadata.email, messageSenderUtils.orderFailureMessage(last_payment_error?.message ?? "Unknown payment error"));
+        } catch (e) {
+          logger.error(e);
+        }
         // logStripeEvent(paymentIntent);
-        // ❌ Update order status in DB if needed
         break;
       }
 

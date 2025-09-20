@@ -49,10 +49,11 @@ model User {
   OTP_EXPIRES_IN DateTime?
   isVerified     Boolean        @default(false)
   tokenVersion   Int            @default(0)
+  customer_id String?   // optional
+  vendorNic   String?              
+  isCompleted  Boolean?         @default(false)
   authProvider   AuthProvider   @default(credentials)
   member         Member?
-  customer_id String?   // optional
-  isCompleted  Boolean?         @default(false)
   donation       Donation?
   reviews        Review[]
   carts          Cart[]
@@ -139,7 +140,7 @@ model OrderItem {
   productId  Int
   quantity   Int             @default(1)
   price      Float
-
+  status          OrderStatus  @default(PENDING)//Delivery status of the item
   order Order @relation(fields: [orderId], references: [id])
 
   @@map("order_items")

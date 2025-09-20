@@ -44,7 +44,7 @@ userRouter.route("/donation").delete(authMiddleware.checkToken, donationControll
 userRouter.route("/donation").patch(authMiddleware.checkToken, validateDataMiddleware(donationSchemaU), donationController.updateDonation);
 
 userRouter.route("/cart").post(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.addToCart);
-userRouter.route("/cart/:id").delete(authMiddleware.checkToken, cartController.deleteCartItem);
+userRouter.route("/cart/:id").delete(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.deleteCartItem);
 userRouter.route("/cart").delete(authMiddleware.checkToken, cartController.clearCart);
 userRouter.route("/cart").get(authMiddleware.checkToken, cartController.viewCart);
 userRouter.route("/cart").patch(authMiddleware.checkToken, validateDataMiddleware(cartSchema), cartController.updateCartItem);
