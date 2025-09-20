@@ -113,8 +113,11 @@ export default {
   // ** login user through password after the verification of his/her account
   login: asyncHandler(async (req, res) => {
     const body = req.body as User;
+    console.log(body);
 
     const user = await db.user.findUnique({ where: { email: body.email } });
+    console.log(user);
+
     if (!user) {
       httpResponse(req, res, reshttp.notFoundCode, "User not found");
       return;

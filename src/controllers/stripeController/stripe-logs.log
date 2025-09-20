@@ -1,0 +1,189 @@
+[2025-09-20T09:42:05.904Z] {
+  "id": "pi_3S9NIwI9FlUtxdNw0mbxQ4PR",
+  "object": "payment_intent",
+  "amount": 30000,
+  "amount_capturable": 0,
+  "amount_details": {
+    "tip": {}
+  },
+  "amount_received": 30000,
+  "application": null,
+  "application_fee_amount": null,
+  "automatic_payment_methods": {
+    "allow_redirects": "always",
+    "enabled": true
+  },
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "client_secret": "pi_3S9NIwI9FlUtxdNw0mbxQ4PR_secret_JDzSBnzTqoPOB4X1XJwuFD5Ui",
+  "confirmation_method": "automatic",
+  "created": 1758361326,
+  "currency": "usd",
+  "customer": "cus_T5W29KUsgtSDZ6",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "invoice": null,
+  "last_payment_error": null,
+  "latest_charge": "ch_3S9NIwI9FlUtxdNw0uD36Kyn",
+  "livemode": false,
+  "metadata": {
+    "email": "adil@gmail.com",
+    "userId": "cmfpvxp5w0000tw4gbrwxmumb"
+  },
+  "next_action": null,
+  "on_behalf_of": null,
+  "payment_method": "pm_1S9LjEI9FlUtxdNwJ2mehm90",
+  "payment_method_configuration_details": {
+    "id": "pmc_1QRcOKI9FlUtxdNwQ3grD72A",
+    "parent": null
+  },
+  "payment_method_options": {
+    "card": {
+      "installments": null,
+      "mandate_options": null,
+      "network": null,
+      "request_three_d_secure": "automatic"
+    },
+    "cashapp": {},
+    "link": {
+      "persistent_token": null
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "link",
+    "cashapp"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "review": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "statement_descriptor": null,
+  "statement_descriptor_suffix": null,
+  "status": "succeeded",
+  "transfer_data": null,
+  "transfer_group": null
+}
+
+[2025-09-20T09:55:37.985Z] {
+  "id": "ch_3S9NBZI9FlUtxdNw0jSejeYm",
+  "object": "charge",
+  "amount": 2300,
+  "amount_captured": 2300,
+  "amount_refunded": 2300,
+  "application": null,
+  "application_fee": null,
+  "application_fee_amount": null,
+  "balance_transaction": "txn_3S9NBZI9FlUtxdNw0q40L5AV",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "PK",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "adil@gmail.com",
+    "name": null,
+    "phone": null,
+    "tax_id": null
+  },
+  "calculated_statement_descriptor": "Stripe",
+  "captured": true,
+  "created": 1758360870,
+  "currency": "usd",
+  "customer": "cus_T5W29KUsgtSDZ6",
+  "description": null,
+  "destination": null,
+  "dispute": null,
+  "disputed": false,
+  "failure_balance_transaction": null,
+  "failure_code": null,
+  "failure_message": null,
+  "fraud_details": {},
+  "invoice": null,
+  "livemode": false,
+  "metadata": {
+    "email": "adil@gmail.com",
+    "userId": "cmfpvxp5w0000tw4gbrwxmumb"
+  },
+  "on_behalf_of": null,
+  "order": null,
+  "outcome": {
+    "advice_code": null,
+    "network_advice_code": null,
+    "network_decline_code": null,
+    "network_status": "approved_by_network",
+    "reason": null,
+    "risk_level": "normal",
+    "risk_score": 51,
+    "seller_message": "Payment complete.",
+    "type": "authorized"
+  },
+  "paid": true,
+  "payment_intent": "pi_3S9NBZI9FlUtxdNw0R8o1lCZ",
+  "payment_method": "pm_1S9LjEI9FlUtxdNwJ2mehm90",
+  "payment_method_details": {
+    "card": {
+      "amount_authorized": 2300,
+      "authorization_code": "071252",
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": null,
+        "address_postal_code_check": null,
+        "cvc_check": null
+      },
+      "country": "US",
+      "exp_month": 4,
+      "exp_year": 2026,
+      "extended_authorization": {
+        "status": "disabled"
+      },
+      "fingerprint": "ItxVFznbU96Phi9H",
+      "funding": "credit",
+      "incremental_authorization": {
+        "status": "unavailable"
+      },
+      "installments": null,
+      "last4": "4242",
+      "mandate": null,
+      "multicapture": {
+        "status": "unavailable"
+      },
+      "network": "visa",
+      "network_token": {
+        "used": false
+      },
+      "network_transaction_id": "731161208670122",
+      "overcapture": {
+        "maximum_amount_capturable": 2300,
+        "status": "unavailable"
+      },
+      "regulated_status": "unregulated",
+      "three_d_secure": null,
+      "wallet": null
+    },
+    "type": "card"
+  },
+  "radar_options": {},
+  "receipt_email": null,
+  "receipt_number": null,
+  "receipt_url": "https://pay.stripe.com/receipts/payment/CAcaFwoVYWNjdF8xUGRxNTlJOUZsVXR4ZE53KJv0ucYGMgY5ajItcv86LBZskD9hZ5cdcyAMfxw1CJGPGfxna-2OwZwddxxMz5JNY947iyWPGc0FzdHR",
+  "refunded": true,
+  "review": null,
+  "shipping": null,
+  "source": null,
+  "source_transfer": null,
+  "statement_descriptor": null,
+  "statement_descriptor_suffix": null,
+  "status": "succeeded",
+  "transfer_data": null,
+  "transfer_group": null
+}
+
+
+
