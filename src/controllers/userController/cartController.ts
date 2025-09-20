@@ -75,12 +75,40 @@ export default {
       where: {
         userId: user.id,
         [field]: productId
+      },
+      include: {
+        music: true,
+        digitalBook: true,
+        fashion: true,
+        meditation: true,
+        decoration: true,
+        living: true,
+        accessories: true
       }
     });
 
     if (existingItem) {
-      return httpResponse(req, res, reshttp.badRequestCode, "Already in cart");
+      const newQuantity = existingItem.qty + (qty ?? 1);
+
+      const relatedProduct =
+        existingItem.music ||
+        existingItem.digitalBook ||
+        existingItem.fashion ||
+        existingItem.meditation ||
+        existingItem.decoration ||
+        existingItem.living ||
+        existingItem.accessories;
+      if (relatedProduct && "stock" in relatedProduct && newQuantity > relatedProduct.stock) {
+        return httpResponse(req, res, reshttp.badRequestCode, `Quantity cannot exceed available stock (${relatedProduct.stock})`);
+      }
+
+      const updatedCart = await db.cart.update({
+        where: { id: existingItem.id },
+        data: { qty: newQuantity }
+      });
+      return httpResponse(req, res, reshttp.okCode, "Cart quantity updated", updatedCart);
     }
+
     const cartItem = await db.cart.create({
       data: {
         userId: user.id,

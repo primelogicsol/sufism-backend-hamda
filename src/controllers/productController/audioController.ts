@@ -17,7 +17,17 @@ interface MusicData {
   isAvailable?: boolean;
   price: string;
 }
-type MulterFiles = Record<string, Express.Multer.File[]>;
+interface CloudinaryFile extends Express.Multer.File {
+  path: string; // Cloudinary URL
+  filename: string; // Cloudinary public_id
+  resource_type?: string;
+  duration?: number; // <-- Cloudinary adds this for audio/video
+  bytes?: number;
+  public_id?: string;
+  format?: string;
+}
+
+type MulterFiles = Record<string, CloudinaryFile[]>;
 
 export default {
   // Create Music
@@ -45,7 +55,7 @@ export default {
           stock: Number(data.stock),
           mp3Url: files?.music?.[0]?.path || "",
           mp4Url: files?.video?.[0]?.path || "",
-          duration: data.duration ? Number(data.duration) : null,
+          duration: files?.music?.[0]?.duration ?? files?.video?.[0]?.duration ?? null,
           isAvailable: data.isAvailable ?? false
         }
       });

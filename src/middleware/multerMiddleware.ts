@@ -30,19 +30,22 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: (_req, file) => {
     // choose folder based on mimetype
-    let folder = "uploads/others";
-    if (supportedImageTypes.includes(file.mimetype)) folder = "uploads/images";
-    else if (supportedDocTypes.includes(file.mimetype)) folder = "uploads/docs";
-    else if (supportedMusicTypes.includes(file.mimetype)) folder = "uploads/music";
-    else if (supportedVideoTypes.includes(file.mimetype)) folder = "uploads/videos";
-    else if (supportedCsvTypes.includes(file.mimetype)) folder = "uploads/csv";
-
+    let folder = "sufism/others";
+    if (supportedImageTypes.includes(file.mimetype)) folder = "sufism/images";
+    else if (supportedDocTypes.includes(file.mimetype)) folder = "sufism/docs";
+    else if (supportedMusicTypes.includes(file.mimetype)) folder = "sufism/music";
+    else if (supportedVideoTypes.includes(file.mimetype)) folder = "sufism/videos";
+    else if (supportedCsvTypes.includes(file.mimetype)) folder = "sufism/csv";
     return {
       folder,
-      // keep original extension (jpg, png, etc.)
       format: undefined,
-      // unique public_id
-      upload_preset: "ml_default",
+      resource_type: "auto",
+      unsigned: true,
+      upload_preset: supportedVideoTypes.includes(file.mimetype)
+        ? "video_preset_sufism"
+        : supportedMusicTypes.includes(file.mimetype)
+          ? "audio_preset"
+          : "ml_default",
       public_id: `${Date.now()}-${file.originalname.split(".")[0]}`
     };
   }
