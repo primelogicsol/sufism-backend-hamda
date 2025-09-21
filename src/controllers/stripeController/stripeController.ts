@@ -61,6 +61,58 @@ export default {
     });
   }),
 
+  createEditIntent: asyncHandler(async (req: _Request, res) => {
+    const userId = req.userFromToken?.id;
+    const user = await db.user.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const userWithCustomer = user as unknown as { customer_id?: string | null };
+    const customerId: string | null = userWithCustomer.customer_id ?? null;
+
+    if (!customerId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Stripe customer id missing");
+    }
+
+    // 🔑 Create a new SetupIntent for updating card details
+    const setupIntent = await stripe.setupIntents.create({
+      customer: customerId,
+      payment_method_types: ["card"]
+    });
+
+    return httpResponse(req, res, reshttp.okCode, "Edit setup intent created", {
+      client_secret: setupIntent.client_secret
+    });
+  }),
+
+  deletePaymentMethod: asyncHandler(async (req: _Request, res) => {
+    const userId = req.userFromToken?.id;
+    const { paymentMethodId } = req.body as { paymentMethodId: string };
+
+    if (!paymentMethodId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Payment method id required");
+    }
+
+    const user = await db.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    const userWithCustomer = user as unknown as { customer_id?: string | null; default_payment_method?: string | null };
+    const customerId = userWithCustomer.customer_id;
+
+    if (!customerId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Stripe customer id missing");
+    }
+
+    //  Detach payment method from Stripe
+    await stripe.paymentMethods.detach(paymentMethodId);
+
+    return httpResponse(req, res, reshttp.okCode, "Payment method deleted successfully");
+  }),
+
   // Fetch all saved payment methods for logged-in user
   getPaymentMethods: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;

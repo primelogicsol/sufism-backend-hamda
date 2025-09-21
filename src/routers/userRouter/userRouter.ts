@@ -26,11 +26,18 @@ import {
   userUpdateSchema,
   wishlistSchema
 } from "../../validations/zod.js";
+import vendors from "../../controllers/userController/vendors.js";
 
 export const userRouter: Router = Router();
 
 userRouter.route("/profile").patch(authMiddleware.checkToken, validateDataMiddleware(userUpdateSchema), profileController.updateUserProfile);
 userRouter.route("/profile").get(authMiddleware.checkToken, profileController.viewUserProfile);
+
+//vendors
+userRouter.route("/vendors-list").get(vendors.getVendors);
+userRouter.route("/verify-vendor/:id").patch(vendors.verifyVendor);
+userRouter.route("/delete-vendor/:id").delete(vendors.deleteVendor);
+
 userRouter.route("/membership").post(authMiddleware.checkToken, validateDataMiddleware(membershipSchema), memberShipController.membership);
 userRouter
   .route("/membership")

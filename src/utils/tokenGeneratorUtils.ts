@@ -30,7 +30,7 @@ export default {
   },
   generateRefreshToken: (payload: TPAYLOAD, res: Response): string | Response => {
     try {
-      const token = jwt.sign({ userID: payload.id, tokenVersion: payload.tokenVersion }, JWT_SECRET, { expiresIn: "7d" });
+      const token = jwt.sign({ id: payload.id, tokenVersion: payload.tokenVersion }, JWT_SECRET, { expiresIn: "7d" });
       return `${token}`;
     } catch (error: unknown) {
       if (error instanceof Error)
