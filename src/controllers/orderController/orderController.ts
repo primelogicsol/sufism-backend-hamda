@@ -15,12 +15,13 @@ export default {
   createOrder: asyncHandler(async (req: _Request, res) => {
     const data = req.body as Order;
     const userId = req.userFromToken?.id;
+
     const user = await db.user.findFirst({ where: { id: userId } });
     if (!user) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    // 🔎 Fetch all items from cart
+    // 🔎 Fetch cart
     const cartItems = await db.cart.findMany({
       where: { userId },
       include: {
@@ -38,6 +39,7 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "Cart is empty");
     }
 
+    // 🧮 Calculate total
     let totalAmount = 0;
     const orderItemsData = cartItems
       .map((item) => {
@@ -89,11 +91,10 @@ export default {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    // 3. Get default payment method for this customer
-    // Access customer_id with a narrow cast to satisfy TypeScript
+    // 🔑 Stripe Customer
     const customerId = (user as unknown as { customer_id: string | null }).customer_id;
-    if (typeof customerId !== "string") {
-      throw new Error("Invalid Stripe customer ID");
+    if (!customerId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Missing Stripe customer ID");
     }
 
     const customer = await stripe.customers.retrieve(customerId, {
@@ -105,7 +106,6 @@ export default {
     }
 
     const defaultPm = customer.invoice_settings?.default_payment_method;
-
     if (!defaultPm) {
       return res.status(400).json({ error: "No default payment method found" });
     }
@@ -117,47 +117,70 @@ export default {
         currency: "usd",
         customer: customerId,
         payment_method: typeof defaultPm === "string" ? defaultPm : defaultPm.id,
+        automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+        confirm: true,
         metadata: {
           userId: user.id.toString(),
-          email: user.email
-        },
-        off_session: true,
-        confirm: true
+          email: user.email,
+          cartOrderData: JSON.stringify(orderItemsData),
+          amount: totalAmount,
+          address: JSON.stringify(data)
+        }
       });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      return httpResponse(req, res, reshttp.badRequestCode, `Stripe payment creation failed: ${msg}`);
+    } catch (err: unknown) {
+      if (err instanceof Error && "type" in err) {
+        switch (err.type) {
+          case "StripeCardError":
+            // Handle card-related errors
+            return httpResponse(req, res, reshttp.badRequestCode, `Payment error: ${err.message}`);
+          case "StripeInvalidRequestError":
+            // Handle invalid request errors
+            return httpResponse(req, res, reshttp.badRequestCode, `Invalid request: ${err.message}`);
+          default:
+            // Handle other types of errors
+            return httpResponse(req, res, reshttp.badRequestCode, `Stripe error: ${err.message}`);
+        }
+      } else {
+        // Handle unexpected errors
+        return httpResponse(req, res, reshttp.badRequestCode, "An unexpected error occurred");
+      }
     }
 
-    const order = await db.order.create({
-      data: {
-        userId: user.id,
-        amount: totalAmount,
-        sPaymentIntentId: paymentIntent.id,
-        items: {
-          create: orderItemsData.map((item) => ({
-            category: item.category,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
-          }))
-        },
-        zip: data.zip,
-        phone: data.phone,
-        fullName: data.fullName,
-        shippingAddress: data.shippingAddress,
-        country: data.country
-      } as unknown as Prisma.OrderCreateInput
-    });
+    // 🛒 Create Order as PENDING
+    if (paymentIntent.status === "succeeded") {
+      await db.order.create({
+        data: {
+          userId: user.id,
+          amount: totalAmount,
+          sPaymentIntentId: paymentIntent.id,
+          paymentStatus: "PENDING", // always pending until webhook flips it
+          items: {
+            create: orderItemsData.map((item) => ({
+              category: item.category,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          },
+          zip: data.zip,
+          phone: data.phone,
+          fullName: data.fullName,
+          shippingAddress: data.shippingAddress,
+          country: data.country
+        } as unknown as Prisma.OrderCreateInput
+      });
 
-    await db.cart.deleteMany({ where: { userId } });
+      // Clear cart
+      await db.cart.deleteMany({ where: { userId } });
+    }
 
-    return httpResponse(req, res, reshttp.okCode, "Order created successfully. Proceed to payment.", {
-      order,
+    // 🎯 Respond with client secret + status
+    return httpResponse(req, res, reshttp.okCode, "Order created. Complete payment if required.", {
       clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id
+      paymentIntentStatus: paymentIntent.status
     });
   }),
+
   billingDetails: asyncHandler(async (req: _Request, res) => {
     const data = req.body as TBillingDetails;
     const user = await db.user.findFirst({ where: { id: req.userFromToken?.id } });
