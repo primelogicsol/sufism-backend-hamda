@@ -9,10 +9,27 @@ import logger from "../../utils/loggerUtils.js";
 import messageSenderUtils from "../../utils/messageSenderUtils.js";
 import { passwordHasher, verifyPassword } from "../../utils/passwordHasherUtils.js";
 import { setTokensAndCookies } from "../../utils/setTokenAndCookiesUtils.js";
+interface CloudinaryFile extends Express.Multer.File {
+  path: string; // Cloudinary URL
+  filename: string; // Cloudinary public_id
+  resource_type?: string;
+  duration?: number;
+  bytes?: number;
+  public_id?: string;
+  format?: string;
+}
+type MulterFiles = Record<string, CloudinaryFile[]>;
 
 export default {
   register: asyncHandler(async (req, res) => {
     const body = req.body as VendorRegistrationInput;
+    const files = req.files as MulterFiles;
+    const uploadedImages =
+      files?.images?.map((img) => ({
+        url: img.path,
+        format: img.format || null,
+        bytes: img.bytes || null
+      })) || [];
     const { id } = req.params;
 
     try {
@@ -39,6 +56,7 @@ export default {
           where: { id },
           data: {
             ...body,
+            vendorNic: uploadedImages[0].url,
             password: body.password ? ((await passwordHasher(body.password, res)) as string) : existingUser.password
           }
         });
@@ -66,6 +84,7 @@ export default {
           where: { email: body.email },
           data: {
             ...body,
+            ...(uploadedImages && { vendorNic: uploadedImages[0].url }),
             password: body.password ? ((await passwordHasher(body.password, res)) as string) : existingUser.password
           }
         });
@@ -105,7 +124,8 @@ export default {
             bankAddress: body.bankAddress,
             signatoryName: body.signatoryName,
             signatureDate: body.signatureDate,
-            vendoraccepted: body.vendoraccepted
+            vendoraccepted: body.vendoraccepted,
+            ...(uploadedImages && { vendorNic: uploadedImages[0].url })
           }
         });
 
