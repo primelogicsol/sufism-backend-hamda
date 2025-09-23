@@ -21,6 +21,21 @@ import messageSenderUtils from "../../utils/messageSenderUtils.js";
 // Save stripe-logs.log in the same folder as this file
 // const LOG_FILE = path.join(__dirname, "stripe-logs.log");
 
+interface OrderItem {
+  category: string;
+  productId: string;
+  quantity: number;
+  price: number;
+}
+
+interface Address {
+  zip: string;
+  phone: string;
+  fullName: string;
+  shippingAddress: string;
+  country: string;
+}
+
 const endpointSecret = STRIPE_WEBHOOK_SECRET;
 
 export default {
@@ -211,17 +226,76 @@ export default {
       case "payment_intent.succeeded": {
         // ✅ Mark order/donation as paid in DB using paymentIntent.id or metadata
         const paymentIntent: Stripe.PaymentIntent = event.data.object;
-        const { id, metadata, status } = paymentIntent;
 
-        await db.order.updateMany({
+        const { id, metadata, status } = paymentIntent;
+        const order = await db.order.findFirst({
           where: {
-            userId: metadata.userId,
             sPaymentIntentId: id
-          },
-          data: {
-            paymentStatus: status === "succeeded" ? "PAID" : "FAILED"
           }
         });
+
+        if (order) {
+          await db.order.updateMany({
+            where: {
+              userId: metadata.userId,
+              sPaymentIntentId: id
+            },
+            data: {
+              paymentStatus: status === "succeeded" ? "PAID" : "FAILED"
+            }
+          });
+          try {
+            await gloabalMailMessage(
+              metadata.email,
+              messageSenderUtils.orderSuccessMessage(order.id.toString(), (paymentIntent.amount / 100).toFixed(2))
+            );
+          } catch (e) {
+            logger.error(e);
+          }
+        } else {
+          const orderData = JSON.parse(metadata.cartOrderData) as OrderItem[];
+          const address = JSON.parse(metadata.address) as Address;
+
+          try {
+            const newOrder = await db.order.create({
+              data: {
+                userId: metadata.userId,
+                amount: Number((paymentIntent.amount / 100).toFixed(2)),
+                sPaymentIntentId: paymentIntent.id,
+                paymentStatus: "PAID", // always pending until webhook flips it
+                items: {
+                  create: orderData.map((item: OrderItem) => ({
+                    category: item.category,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price
+                  }))
+                },
+                zip: address.zip,
+                phone: address.phone,
+                fullName: address.fullName,
+                shippingAddress: address.shippingAddress,
+                country: address.country
+              } as unknown as Prisma.OrderCreateInput
+            });
+
+            console.log("<><><odd", newOrder.id);
+            await db.cart.deleteMany({ where: { userId: metadata.userId } });
+            try {
+              await gloabalMailMessage(
+                metadata.email,
+                messageSenderUtils.orderSuccessMessage(newOrder.id.toString(), (paymentIntent.amount / 100).toFixed(2))
+              );
+            } catch (e) {
+              logger.error(e);
+            }
+          } catch (error) {
+            logger.error(error);
+            console.log(error);
+          }
+
+          // Clear cart
+        }
 
         // logStripeEvent(paymentIntent);
         break;
