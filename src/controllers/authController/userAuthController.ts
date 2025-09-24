@@ -242,6 +242,17 @@ export default {
         }
       });
 
+      const customerId = await createStripeCustomer(user);
+
+      await db.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          customer_id: customerId
+        }
+      });
+
       logger.info(`New user created via Google Auth: ${body.email}`);
     } else {
       if (user.authProvider === "credentials" && !user.isVerified) {
@@ -259,6 +270,16 @@ export default {
           `Hi, ${user.fullName}`
         );
         return httpResponse(req, res, reshttp.unauthorizedCode, "Email verification required");
+      }
+
+      if (!user.customer_id) {
+        const newCustomerId = await createStripeCustomer(user);
+        user = await db.user.update({
+          where: { email: body.email },
+          data: {
+            customer_id: newCustomerId
+          }
+        });
       }
 
       if (user.isVerified && user.authProvider !== "google") {

@@ -5,6 +5,7 @@ import stripeController from "../../controllers/stripeController/stripeControlle
 export const stripeRouter: Router = Router();
 
 stripeRouter.route("/setup-intent").get(authMiddleware.checkToken, stripeController.createSetupIntent);
+stripeRouter.route("/donation-intent").post(authMiddleware.checkToken, stripeController.createDonationIntent);
 stripeRouter.route("/update-payment-method").get(authMiddleware.checkToken, stripeController.createEditIntent);
 stripeRouter.route("/delete-payment-method").delete(authMiddleware.checkToken, stripeController.deletePaymentMethod);
 stripeRouter.route("/payment-methods").get(authMiddleware.checkToken, stripeController.getPaymentMethods);

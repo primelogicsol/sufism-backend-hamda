@@ -76,6 +76,39 @@ export default {
     });
   }),
 
+  createDonationIntent: asyncHandler(async (req: _Request, res) => {
+    const { amount, pool, donorType } = req.body;
+    const userId = req.userFromToken?.id;
+    if (!amount || !userId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Amount and userId are required");
+    }
+
+    // validate user exists
+    const user = await db.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      return httpResponse(req, res, reshttp.notFoundCode, "User not found");
+    }
+
+    // create payment intent (no customer ID, just direct payment)
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(Number(amount) * 100), // convert to cents
+      currency: "usd",
+      automatic_payment_methods: { enabled: true },
+      description: `Donation by ${user.fullName}`,
+      metadata: {
+        userId: user.id,
+        donorName: user.fullName,
+        donorEmail: user.email,
+        donorType: donorType || "ONE_TIME",
+        pool: Array.isArray(pool) ? pool.join(",") : pool || "SUFI_SCIENCE_CENTER"
+      }
+    });
+
+    return httpResponse(req, res, reshttp.okCode, "Donation payment intent created", {
+      client_secret: paymentIntent.client_secret
+    });
+  }),
+
   createEditIntent: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
     const user = await db.user.findFirst({ where: { id: userId } });
