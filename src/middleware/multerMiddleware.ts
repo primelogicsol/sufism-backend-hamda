@@ -29,23 +29,21 @@ export const supportedCsvTypes = ["text/csv", "application/vnd.ms-excel"];
 const storage = new CloudinaryStorage({
   cloudinary,
   params: (_req, file) => {
-    // choose folder based on mimetype
     let folder = "sufism/others";
-    if (supportedImageTypes.includes(file.mimetype)) folder = "sufism/images";
+
+    if (file.fieldname === "vendorNic" && supportedImageTypes.includes(file.mimetype)) {
+      folder = "sufism/vendorNic"; // 👈 special folder for NIC
+    } else if (supportedImageTypes.includes(file.mimetype)) folder = "sufism/images";
     else if (supportedDocTypes.includes(file.mimetype)) folder = "sufism/docs";
     else if (supportedMusicTypes.includes(file.mimetype)) folder = "sufism/music";
     else if (supportedVideoTypes.includes(file.mimetype)) folder = "sufism/videos";
     else if (supportedCsvTypes.includes(file.mimetype)) folder = "sufism/csv";
+
     return {
       folder,
-      format: undefined,
       resource_type: "auto",
-      unsigned: true,
-      upload_preset: supportedVideoTypes.includes(file.mimetype)
-        ? "video_preset_sufism"
-        : supportedMusicTypes.includes(file.mimetype)
-          ? "audio_preset"
-          : "ml_default",
+      // unsigned: true,
+      upload_preset: "ml_default",
       public_id: `${Date.now()}-${file.originalname.split(".")[0]}`
     };
   }
@@ -53,7 +51,13 @@ const storage = new CloudinaryStorage({
 
 // --- File Filter ---
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  if (
+  if (file.fieldname === "vendorNic") {
+    if (!supportedImageTypes.includes(file.mimetype)) {
+      const errorMsg = `Vendor NIC must be an image. Got: ${file.mimetype}`;
+      logger.warn(errorMsg);
+      return cb(new Error(errorMsg));
+    }
+  } else if (
     !supportedImageTypes.includes(file.mimetype) &&
     !supportedDocTypes.includes(file.mimetype) &&
     !supportedMusicTypes.includes(file.mimetype) &&
@@ -64,6 +68,7 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
     logger.warn(errorMsg);
     return cb(new Error(errorMsg));
   }
+
   logger.debug(`File accepted: ${file.originalname} (${file.mimetype})`);
   cb(null, true);
 };
@@ -83,7 +88,8 @@ const fileUploader: RequestHandler = async (req, res, next) => {
     { name: "images", maxCount: 5 },
     { name: "document", maxCount: 1 },
     { name: "music", maxCount: 3 },
-    { name: "video", maxCount: 2 }
+    { name: "video", maxCount: 2 },
+    { name: "vendorNic", maxCount: 2 } //  yeh naya add kiya
   ]);
 
   await uploader(req, res, (err?) => {

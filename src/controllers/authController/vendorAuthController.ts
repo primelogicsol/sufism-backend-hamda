@@ -17,15 +17,17 @@ interface CloudinaryFile extends Express.Multer.File {
   bytes?: number;
   public_id?: string;
   format?: string;
+  secure_url?: string;
 }
 type MulterFiles = Record<string, CloudinaryFile[]>;
 
 export default {
   register: asyncHandler(async (req, res) => {
+    logger.info("register api is called");
     const body = req.body as VendorRegistrationInput;
     const files = req.files as MulterFiles;
     const uploadedImages =
-      files?.images?.map((img) => ({
+      files?.vendorNic?.map((img) => ({
         url: img.path,
         format: img.format || null,
         bytes: img.bytes || null
