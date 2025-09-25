@@ -82,6 +82,9 @@ export default {
 
       // Case 2: No ID → check email
       const existingUser = await db.user.findFirst({ where: { email: body.email } });
+      if (existingUser && !id) {
+        return httpResponse(req, res, reshttp.badRequestCode, "User with the same email already exists");
+      }
       if (existingUser) {
         // Update user with incoming data
         const updatedUser = await db.user.update({
@@ -110,6 +113,7 @@ export default {
         if (body.password) {
           hashedPassword = (await passwordHasher(body.password, res)) as string;
         }
+
         const newUser = await db.user.create({
           data: {
             fullName: body.fullName,
