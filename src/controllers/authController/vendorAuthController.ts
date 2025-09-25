@@ -118,8 +118,8 @@ export default {
           data: {
             fullName: body.fullName,
             email: body.email,
-            ...(hashedPassword && { password: hashedPassword })
-            // role: "vendor",
+            ...(hashedPassword && { password: hashedPassword }),
+            role: "vendor",
             // businessName: body.businessName,
             // businessType: body.businessType,
             // einNumber: body.einNumber,
