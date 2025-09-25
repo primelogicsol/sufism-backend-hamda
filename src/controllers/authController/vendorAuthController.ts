@@ -58,7 +58,9 @@ export default {
           where: { id },
           data: {
             ...body,
-            vendorNic: uploadedImages[0].url,
+            ...(typeof body.isCompleted !== "undefined" && { isCompleted: Boolean(body.isCompleted) }),
+            ...(typeof body.vendoraccepted !== "undefined" && { vendoraccepted: Boolean(body.vendoraccepted) }),
+            vendorNic: body.isCompleted && uploadedImages.length ? uploadedImages[0].url : existingUser.vendorNic || null,
             password: body.password ? ((await passwordHasher(body.password, res)) as string) : existingUser.password
           }
         });
@@ -112,22 +114,22 @@ export default {
           data: {
             fullName: body.fullName,
             email: body.email,
-            ...(hashedPassword && { password: hashedPassword }),
-            role: "vendor",
-            businessName: body.businessName,
-            businessType: body.businessType,
-            einNumber: body.einNumber,
-            tinNumber: body.tinNumber,
-            contactPerson: body.contactPerson,
-            phone: body.phone,
-            bankName: body.bankName,
-            accountNumber: body.accountNumber,
-            routingNumber: body.routingNumber,
-            bankAddress: body.bankAddress,
-            signatoryName: body.signatoryName,
-            signatureDate: body.signatureDate,
-            vendoraccepted: body.vendoraccepted,
-            ...(uploadedImages && { vendorNic: uploadedImages[0].url })
+            ...(hashedPassword && { password: hashedPassword })
+            // role: "vendor",
+            // businessName: body.businessName,
+            // businessType: body.businessType,
+            // einNumber: body.einNumber,
+            // tinNumber: body.tinNumber,
+            // contactPerson: body.contactPerson,
+            // phone: body.phone,
+            // bankName: body.bankName,
+            // accountNumber: body.accountNumber,
+            // routingNumber: body.routingNumber,
+            // bankAddress: body.bankAddress,
+            // signatoryName: body.signatoryName,
+            // signatureDate: body.signatureDate,
+            // vendoraccepted: body.vendoraccepted,
+            // ...(uploadedImages && { vendorNic: uploadedImages[0].url })
           }
         });
 
@@ -194,7 +196,8 @@ export default {
         signatureDate: true,
         vendoraccepted: true,
         isCompleted: true,
-        createdAt: true
+        createdAt: true,
+        isVerified: true
       }
     });
 

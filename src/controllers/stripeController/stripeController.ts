@@ -77,7 +77,11 @@ export default {
   }),
 
   createDonationIntent: asyncHandler(async (req: _Request, res) => {
-    const { amount, pool, donorType }: { amount: string; pool: string[]; donorType: string } = req.body;
+    const { amount, pool, donorType }: { amount: string; pool: string[]; donorType: string } = req.body as {
+      amount: string;
+      pool: string[];
+      donorType: string;
+    };
     const userId = req.userFromToken?.id;
     if (!amount || !userId) {
       return httpResponse(req, res, reshttp.badRequestCode, "Amount and userId are required");
