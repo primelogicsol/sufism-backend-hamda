@@ -15,6 +15,7 @@ const config = {
     ? process.env.CLOUDINARY_API_SECRET
     : "Unable to fetch CLOUDINARY_API_SECRET from .env file",
   STRIPE_SK: process.env.STRIPE_SK as string,
+  BASE_URL: (process.env.BASE_URL as string) || "Unable to fetch BASE_URL from .env file",
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
   CLOUDINARY_NAME: process.env.CLOUDINARY_NAME ? process.env.CLOUDINARY_NAME : "Unable to fetch CLOUDINARY_NAME from .env file",
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? process.env.CLOUDINARY_API_KEY : "Unable to fetch CLOUDINARY_API_KEY from .env file"
@@ -34,5 +35,6 @@ export const {
   CLOUDINARY_NAME,
   STRIPE_SK,
   STRIPE_WEBHOOK_SECRET,
-  CLOUDINARY_API_KEY
+  CLOUDINARY_API_KEY,
+  BASE_URL
 } = config;
