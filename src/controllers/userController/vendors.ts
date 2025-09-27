@@ -20,8 +20,8 @@ export default {
 
       // ✅ Strongly typed filter
       const where: Prisma.UserWhereInput = {
-        role: "vendor",
-        isCompleted: true
+        role: "vendor"
+        // isCompleted: true
       };
 
       if (search) {
