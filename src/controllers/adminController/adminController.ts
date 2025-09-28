@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { ADMIN_PASSWORD, ADMIN_USERNAME, JWT_SECRET } from "../../configs/config.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
-import { ADMIN_PASSWORD, ADMIN_USERNAME, JWT_SECRET } from "../../configs/config.js";
 
 const login = asyncHandler(async (req: Request, res: Response) => {
   const { username, password } = req.body as { username: string; password: string };
@@ -21,7 +21,7 @@ const login = asyncHandler(async (req: Request, res: Response) => {
 export default { login };
 
 // Verify handler (exported separately for router composition)
-export const verify = asyncHandler(async (req: Request, res: Response) => {
+export const adminVerify = asyncHandler(async (req: Request, res: Response) => {
   // No-op; adminAuth in router ensures validity
   await Promise.resolve();
   return httpResponse(req, res, 200, "ok", { valid: true });

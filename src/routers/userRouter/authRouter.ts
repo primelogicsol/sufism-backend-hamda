@@ -1,5 +1,5 @@
 import { Router } from "express";
-import adminController, { verify as adminVerify } from "../../controllers/adminController/adminController.js";
+import adminController, { adminVerify } from "../../controllers/adminController/adminController.js";
 import userAuthController from "../../controllers/authController/userAuthController.js";
 import { adminAuth } from "../../middleware/adminAuthMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";

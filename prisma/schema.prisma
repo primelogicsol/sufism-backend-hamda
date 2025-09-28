@@ -22,7 +22,7 @@ model RateLimiterFlexible {
 model User {
   id             String         @id @default(cuid())
   fullName       String         @default("")
-  role           String         @default("user") //user ,vendor,member
+  role           String         @default("user") //user ,vendor,member,admin
   lastName       String         @default("")
   businessName   String?        @default("")
   businessType   String?        @default("")
@@ -92,7 +92,7 @@ model Order {
   paymentStatus          PaymentStatus  @default(PENDING)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
-  // transactions Transaction[] // One order can have multiple payment attempts
+  transactions Transaction[] // One order can have multiple payment attempts
   user    User        @relation(fields: [userId], references: [id])
   items   OrderItem[]
 
@@ -108,7 +108,7 @@ model Transaction {
   stripePaymentIntentId String?
   stripeClientSecret   String?
   gatewayData   Json?      // Raw response from Stripe
-  // order        Order       @relation(fields: [orderId], references: [id])
+  order        Order?       @relation(fields: [orderId], references: [id])
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
@@ -142,7 +142,8 @@ model OrderItem {
   price      Float
   status          OrderStatus  @default(PENDING)//Delivery status of the item
   order Order @relation(fields: [orderId], references: [id])
-
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime?     @updatedAt
   @@map("order_items")
 }
 
@@ -409,6 +410,7 @@ model DigitalBook {
 }
 enum OrderStatus {
   PENDING
+  DISPATCH
   COMPLETED
   FAILED
   CANCELLED

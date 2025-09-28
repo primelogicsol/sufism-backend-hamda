@@ -62,6 +62,10 @@ export const vendorRegistrationSchema = z.object({
   vendoraccepted: z.boolean().optional(),
   isCompleted: z.boolean().optional()
 });
+//
+export const vendorOrderSchema = z.object({
+  status: z.enum(["PENDING", "DISPATCH", "COMPLETED", "FAILED", "CANCELLED"]).optional()
+});
 
 // ** user login schema
 export const userLoginSchema = z.object({

@@ -9,6 +9,7 @@ import { stripeRouter } from "./stripe/route.js";
 import { authRouter } from "./userRouter/authRouter.js";
 import { userRouter } from "./userRouter/userRouter.js";
 import { vendorPublicRouter } from "./vendorRouter/publicRouter.js";
+import { vendorOrderRouter } from "./vendorRouter/vendorOrderRouter.js";
 
 export const defaultRouter: Router = Router();
 
@@ -18,6 +19,7 @@ defaultRouter.use("/user", orderRouter);
 defaultRouter.use("/user", purchaseRouter);
 defaultRouter.use("/", productRouter);
 defaultRouter.use("/", vendorPublicRouter);
+defaultRouter.use("/", vendorOrderRouter);
 defaultRouter.use("/", couponRouter);
 defaultRouter.use("/stripe", stripeRouter);
 defaultRouter.use("/content", contentRouter);

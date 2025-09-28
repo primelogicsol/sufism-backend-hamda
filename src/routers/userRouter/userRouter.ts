@@ -8,6 +8,7 @@ import interviewSlotController from "../../controllers/userController/interviewS
 import memberShipController from "../../controllers/userController/memberShipController.js";
 import profileController from "../../controllers/userController/profileController.js";
 import sufiCheckListController from "../../controllers/userController/sufiCheckListController.js";
+import vendors from "../../controllers/userController/vendors.js";
 import wishlistController from "../../controllers/userController/wishlistController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
@@ -26,7 +27,6 @@ import {
   userUpdateSchema,
   wishlistSchema
 } from "../../validations/zod.js";
-import vendors from "../../controllers/userController/vendors.js";
 
 export const userRouter: Router = Router();
 

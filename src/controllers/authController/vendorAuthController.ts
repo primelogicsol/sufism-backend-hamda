@@ -119,21 +119,7 @@ export default {
             fullName: body.fullName,
             email: body.email,
             ...(hashedPassword && { password: hashedPassword }),
-            role: "vendor",
-            // businessName: body.businessName,
-            // businessType: body.businessType,
-            // einNumber: body.einNumber,
-            // tinNumber: body.tinNumber,
-            // contactPerson: body.contactPerson,
-            // phone: body.phone,
-            // bankName: body.bankName,
-            // accountNumber: body.accountNumber,
-            // routingNumber: body.routingNumber,
-            // bankAddress: body.bankAddress,
-            // signatoryName: body.signatoryName,
-            // signatureDate: body.signatureDate,
-            // vendoraccepted: body.vendoraccepted,
-            // ...(uploadedImages && { vendorNic: uploadedImages[0].url })
+            role: "vendor"
           }
         });
 
@@ -175,40 +161,90 @@ export default {
 
     const { accessToken, refreshToken } = setTokensAndCookies(user, res, true);
     httpResponse(req, res, reshttp.okCode, reshttp.okMessage, { accessToken, refreshToken });
-  }),
-  getVendor: asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    const user = await db.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        role: true,
-        businessName: true,
-        businessType: true,
-        einNumber: true,
-        tinNumber: true,
-        contactPerson: true,
-        phone: true,
-        bankName: true,
-        accountNumber: true,
-        routingNumber: true,
-        bankAddress: true,
-        signatoryName: true,
-        signatureDate: true,
-        vendoraccepted: true,
-        isCompleted: true,
-        createdAt: true,
-        isVerified: true
-      }
-    });
-
-    if (!user) {
-      return httpResponse(req, res, reshttp.notFoundCode, "User not found");
-    }
-
-    return httpResponse(req, res, reshttp.okCode, "User fetched successfully", user);
   })
+
+  //  registerVendor : asyncHandler(async (req, res) => {
+  //   const { fullName, email, password } = req.body as IREGISTER;
+
+  //   // 1. Hash password if provided
+  //  let hashedPassword: string | undefined;
+  //         if (password) {
+  //           hashedPassword = (await passwordHasher(password, res)) as string;
+  //         }
+  //   // 2. Create Stripe Connected Account
+  //   const account = await stripe.accounts.create({
+  //     type: "express", // "standard" also works, depends on UX
+  //     country: "US",   // can be dynamic based on user input
+  //     email,
+  //     capabilities: {
+  //       card_payments: { requested: true },
+  //       transfers: { requested: true }
+  //     }
+  //   });
+
+  //   // 4. Generate onboarding link
+  //   const accountLink = await stripe.accountLinks.create({
+  //     account: account.id,
+  //     refresh_url: BASE_URL,
+  //     return_url:`${BASE_URL}thank_you`,
+  //     type: "account_onboarding"
+  //   });
+
+  //   // 3. Save user in DB with stripeAccountId
+  //   const newUser = await db.user.create({
+  //     data: {
+  //       fullName,
+  //       email,
+  //       password: hashedPassword,
+  //       stripeMerchantId: account.id
+  //     }
+  //   });
+  //   return httpResponse(req, res, reshttp.createdCode, "Vendor created successfully", {
+  //     id: newUser.id,
+  //     stripeAccountId: account.id,
+  //     onboardingUrl: accountLink.url
+  //   });
+  // }),
+  // onboardVendor: asyncHandler(async (req, res) => {
+  //   const { email } = req.body as LoginInput; // or from JWT session
+
+  //   const user = await db.user.findUnique({ where: { email: email } });
+  //   if (!user) {
+  //     return httpResponse(req, res, reshttp.notFoundCode, "User not found");
+  //   }
+
+  //   let stripeAccountId = user.stripeMerchantId;
+
+  //   // If user has no Stripe account yet → create one
+  //   if (!stripeAccountId) {
+  //     const account = await stripe.accounts.create({
+  //       type: "express",
+  //       country: "US",
+  //       email: user.email,
+  //       capabilities: {
+  //         card_payments: { requested: true },
+  //         transfers: { requested: true }
+  //       }
+  //     });
+
+  //     await db.user.update({
+  //       where: { id: user.id },
+  //       data: { stripeMerchantId: account.id }
+  //     });
+
+  //     stripeAccountId = account.id;
+  //   }
+
+  //   // Always generate onboarding link
+  //   const accountLink = await stripe.accountLinks.create({
+  //     account: stripeAccountId,
+  //     refresh_url: `${BASE_URL}/vendor/reauth`,
+  //     return_url: `${BASE_URL}/vendor/thank_you`,
+  //     type: "account_onboarding"
+  //   });
+
+  //   return httpResponse(req, res, reshttp.okCode, "Stripe onboarding link created", {
+  //     onboardingUrl: accountLink.url
+  //   });
+  // }),
 };

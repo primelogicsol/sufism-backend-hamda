@@ -210,6 +210,9 @@ export interface SearchQuery {
   search?: string;
   sortBy?: string;
   artist?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
   sortOrder?: "asc" | "desc";
 }
 
