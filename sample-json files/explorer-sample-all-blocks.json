@@ -1,0 +1,81 @@
+{
+  "id": "test-file-explorer",
+  "section": "explorer",
+  "slug": "test-file-explorer",
+  "title": "Test File: Explorer",
+  "subtitle": "Blueprint of Spiritual Design",
+  "seo": {
+    "title": "Test File: Explorer",
+    "description": "Discovering the Core of Existence"
+  },
+  "blocks": [
+    {
+      "type": "heroSlider",
+      "slides": [
+        {
+          "subTitle": "Blueprint of Spiritual Design",
+          "title": "Discovering the Core <br/>of Existence",
+          "text": " Foundational matrices reveal the hidden patterns of creation, guiding seekers <br/>toward the universal truth and spiritual balance.  ",
+          "buttonText": "Read More",
+          "buttonLink": "/membership"
+        },
+        {
+          "subTitle": "Patterns of Divine Order ",
+          "title": "Unlocking the Mysteries<br/> of Creation",
+          "text": "Foundational matrices provide a map to understanding existence through<br/> spiritual codes and sacred geometric alignments.  ",
+          "buttonText": "Join Now",
+          "buttonLink": "/membership"
+        }
+      ]
+    },
+    {
+      "type": "imageTextSplit",
+      "tagline": "Foundational Matrices",
+      "html": "<p>The Foundational Matrices serve as a structured framework for exploring the intersection of mysticism, science, and consciousness. Rooted in classical Sufi knowledge yet adapted for the modern seeker, this study unveils the hidden order of existence through mathematical, cosmological, and psychological dimensions.</p>",
+      "image": "/assets/images/resources/matrices.png",
+      "imageAlt": "Foundational Matrices",
+      "imageWidth": 350,
+      "imageHeight": 350,
+      "imagePosition": "right"
+    },
+    {
+      "type": "featureList",
+      "items": [
+        {
+          "text": "Bridging Ancient Knowledge with Modern Inquiry"
+        },
+        {
+          "text": "A Structured Path for Seekers, Thinkers & Practitioners"
+        },
+        {
+          "text": "Integrating Mysticism with Scientific Exploration"
+        },
+        {
+          "text": "Practical Applications for Consciousness & Transformation"
+        }
+      ]
+    },
+    {
+      "type": "cardGrid",
+      "cards": [
+        {
+          "title": "Spiritual Foundations",
+          "image": "/assets/images/blog/spiritual.png",
+          "href": "/explore/details/spiritual-foundations"
+        },
+        {
+          "title": "Explorer Details Sample",
+          "image": "/assets/images/blog/cosmology.png",
+          "href": "/explore/details/test-file-explorer-details"
+        },
+        {
+          "title": "Divine Numerology",
+          "image": "/assets/images/blog/numerology.png",
+          "href": "/explore/details/divine-numerology"
+        }
+      ]
+    }
+  ],
+  "version": 2,
+  "updatedAt": "2025-09-04T00:00:00.000Z"
+}

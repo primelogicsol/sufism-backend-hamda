@@ -1,0 +1,71 @@
+{
+  "id": "test-file-explorer-details",
+  "section": "explorer-details",
+  "slug": "test-file-explorer-details",
+  "title": "Test File: Spiritual Foundations",
+  "category": "foundationalmatrices",
+  "seo": {
+    "title": "Spiritual Foundations - The Bedrock of Mystical Understanding",
+    "description": "Exploring the fundamental principles that underpin spiritual development and mystical practice"
+  },
+  "blocks": [
+    {
+      "type": "heroSection",
+      "title": "Spiritual Foundations",
+      "subtitle": "The Bedrock of Mystical Understanding",
+      "description": "Exploring the fundamental principles that underpin spiritual development and mystical practice",
+      "image": "/assets/images/blog/spiritual.png"
+    },
+    {
+      "type": "richText",
+      "content": "<p>Spiritual foundations represent the essential principles and practices that form the bedrock of mystical understanding. These foundations are not mere theoretical concepts but living realities that guide the seeker's journey toward divine realization.</p>"
+    },
+    {
+      "type": "section",
+      "title": "1. THE PRINCIPLE OF UNITY (TAWHID)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The fundamental principle that all existence emanates from and returns to the One Source. This is not merely intellectual assent but experiential realization of the interconnectedness of all creation.</p>"
+    },
+    {
+      "type": "section",
+      "title": "2. THE PATH OF PURIFICATION (TAZKIYAH)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The systematic process of cleansing the heart and soul from negative traits and cultivating positive virtues. This involves both outer practices and inner transformation.</p>"
+    },
+    {
+      "type": "section",
+      "title": "3. THE PRACTICE OF REMEMBRANCE (DHIKR)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The continuous remembrance of the Divine through various forms of spiritual practice, from silent meditation to vocal recitation, leading to constant awareness of the presence of God.</p>"
+    },
+    {
+      "type": "section",
+      "title": "4. THE CULTIVATION OF LOVE (MAHABBAH)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The development of divine love as the primary motivation for all spiritual practice. This love transforms the seeker's relationship with God, creation, and the self.</p>"
+    },
+    {
+      "type": "section",
+      "title": "5. THE PRACTICE OF CONTEMPLATION (MURAQABAH)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The art of spiritual observation and inner witnessing, developing the capacity to observe one's thoughts, emotions, and spiritual states without attachment or judgment.</p>"
+    },
+    {
+      "type": "section",
+      "title": "6. THE CULTIVATION OF VIRTUES (AKHLAQ)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The development of noble character traits that reflect divine attributes, transforming the seeker into a mirror of divine qualities in human form.</p>"
+    },
+    {
+      "type": "section",
+      "title": "7. THE PRACTICE OF SURRENDER (TASLIM)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The complete submission of the ego to divine will, not as passive resignation but as active participation in the divine plan through conscious choice and alignment.</p>"
+    },
+    {
+      "type": "section",
+      "title": "8. THE CULTIVATION OF WISDOM (HIKMAH)",
+      "content": "<p class=\"mt-4 leading-relaxed text-lg\">The development of spiritual insight and understanding that transcends mere intellectual knowledge, leading to direct perception of divine realities.</p>"
+    },
+    {
+      "type": "conclusion",
+      "title": "The Living Foundation",
+      "content": "<p class=\"font-semibold text-center text-white text-xl\"><span class=\"block mb-4 text-lg\">The Living Foundation:</span><span class=\"italic\">\"These foundations are not static principles but living realities that grow and deepen as the seeker progresses on the spiritual path. They form the bedrock upon which all mystical understanding and practice is built.\"</span></p>"
+    }
+  ],
+  "version": 1,
+  "updatedAt": "2025-01-27T00:00:00.000Z"
+}
