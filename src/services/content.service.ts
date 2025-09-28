@@ -1,9 +1,9 @@
+import { mkdirSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import { z } from "zod";
-import { mkdirSync } from "fs";
-import { s3Get, s3Put } from "./storage/s3.storage.js";
 import logger from "../utils/loggerUtils.js";
+import { s3Get, s3Put } from "./storage/s3.storage.js";
 
 export const ContentItemSchema = z.object({
   id: z.string(),
