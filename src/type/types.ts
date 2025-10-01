@@ -268,6 +268,7 @@ export interface VendorRegistrationInput {
   password: string;
   businessName?: string;
   businessType?: string;
+  businessLegalStructure?: string;
   einNumber?: string;
   tinNumber?: string;
   contactPerson?: string;

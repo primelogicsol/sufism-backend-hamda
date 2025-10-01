@@ -26,6 +26,7 @@ model User {
   lastName       String         @default("")
   businessName   String?        @default("")
   businessType   String?        @default("")
+  businessLegalStructure   String?        @default("")
   einNumber      String?        @default("")
   tinNumber      String?        @default("")
   contactPerson      String?        @default("")

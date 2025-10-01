@@ -49,6 +49,7 @@ export const vendorRegistrationSchema = z.object({
   password: z.string({ message: "password must be string" }).optional(),
   businessName: z.string().max(100).optional(),
   businessType: z.string().max(50).optional(),
+  businessLegalStructure: z.string().max(50).optional(),
   einNumber: z.string().max(20).optional(),
   tinNumber: z.string().max(20).optional(),
   contactPerson: z.string().max(100).optional(),

@@ -14,6 +14,7 @@ export default {
         email: true,
         role: true,
         businessName: true,
+        businessLegalStructure: true,
         businessType: true,
         einNumber: true,
         tinNumber: true,

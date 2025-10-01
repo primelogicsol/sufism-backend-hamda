@@ -11,8 +11,7 @@ export async function getProductDetails(category: ProductCategory, productId: nu
   const selectFields: Prisma.MeditationSelect = {
     id: true,
     title: true,
-    price: true,
-    images: true
+    price: true
   };
 
   try {
@@ -40,31 +39,31 @@ export async function getProductDetails(category: ProductCategory, productId: nu
       case ProductCategory.MEDITATION:
         return await db.meditation.findUnique({
           where: { id: productId },
-          select: selectFields
+          select: { ...selectFields, images: true }
         });
 
       case ProductCategory.FASHION:
         return await db.fashion.findUnique({
           where: { id: productId },
-          select: selectFields
+          select: { ...selectFields, images: true }
         });
 
       case ProductCategory.HOME_LIVING:
         return await db.homeAndLiving.findUnique({
           where: { id: productId },
-          select: selectFields
+          select: { ...selectFields, images: true }
         });
 
       case ProductCategory.DECORATION:
         return await db.decoration.findUnique({
           where: { id: productId },
-          select: selectFields
+          select: { ...selectFields, images: true }
         });
 
       case ProductCategory.ACCESSORIES:
         return await db.accessories.findUnique({
           where: { id: productId },
-          select: selectFields
+          select: { ...selectFields, images: true }
         });
 
       default:
