@@ -1,17 +1,17 @@
 {
-  "id": "spiritual-foundations",
+  "id": "acoustical-engineering",
   "section": "explorer-details",
-  "slug": "spiritual-foundations",
-  "title": "Foundational Matrices - Spiritual Foundations",
-  "subtitle": "Spiritual Foundations",
-  "parentPage": "Foundational Matrices",
-  "cardTitle": "Spiritual Foundations",
+  "slug": "acoustical-engineering",
+  "title": "Sacred Artistry - Acoustical Engineering",
+  "subtitle": "Acoustical Engineering",
+  "parentPage": "Sacred Artistry",
+  "cardTitle": "Acoustical Engineering",
   "seo": {
-    "title": "Spiritual Foundations - Foundational Matrices",
-    "description": "Explore Spiritual Foundations within the framework of Foundational Matrices. Comprehensive study integrating traditional Sufi wisdom with contemporary scientific understanding.",
+    "title": "Acoustical Engineering - Sacred Artistry",
+    "description": "Explore Acoustical Engineering within the framework of Sacred Artistry. Comprehensive study integrating traditional Sufi wisdom with contemporary scientific understanding.",
     "keywords": [
-      "spiritual foundations",
-      "foundational matrices",
+      "acoustical engineering",
+      "sacred artistry",
       "sufi",
       "spiritual",
       "consciousness"
@@ -20,24 +20,7 @@
   "blocks": [
     {
       "type": "richText",
-      "content": "<p>This is a comprehensive exploration of Spiritual Foundations within the framework of Foundational Matrices. This study integrates traditional Sufi wisdom with contemporary scientific understanding to provide seekers with a structured approach to understanding this fundamental aspect of spiritual knowledge.</p><p>At the Kashmir Sufi Science Center, under the Sufi Science Explorer Module, this detailed examination offers both theoretical foundations and practical applications for spiritual development and consciousness expansion.</p>"
-    },
-    {
-      "type": "scriptureSayings",
-      "items": [
-        {
-          "quote": "Islam – \"Actions are judged by intentions.\" (Prophet Muhammad ﷺ)",
-          "explanation": "This emphasizes that the inner dimension of action is what gives it reality, suggesting a consciousness-based reality framework."
-        },
-        {
-          "quote": "Christianity – \"In the beginning was the Word, and the Word was with God, and the Word was God.\" (John 1:1)",
-          "explanation": "The primacy of divine articulation in the formation of existence, hinting at a linguistic structure to reality."
-        },
-        {
-          "quote": "Judaism – \"And God said, 'Let there be light,' and there was light.\" (Genesis 1:3)",
-          "explanation": "The creative force of divine command (Kun Fayakun in Islam) as the initiating principle of reality."
-        }
-      ]
+      "content": "<p>This is a comprehensive exploration of Acoustical Engineering within the framework of Sacred Artistry. This study integrates traditional Sufi wisdom with contemporary scientific understanding to provide seekers with a structured approach to understanding this fundamental aspect of spiritual knowledge.</p><p>At the Kashmir Sufi Science Center, under the Sufi Science Explorer Module, this detailed examination offers both theoretical foundations and practical applications for spiritual development and consciousness expansion.</p>"
     },
     {
       "type": "propheticSayings",
@@ -111,7 +94,7 @@
     },
     {
       "type": "coreConcept",
-      "content": "Spiritual Foundations reveals how the cosmos emanates from the singular Divine Essence and unfolds through successive realms of being. This science maps the journey from absolute unity to manifest multiplicity, showing how each level of reality maintains its connection to the source while expressing unique qualities. The human being stands as a meeting point of all realms, containing within their consciousness the entirety of creation in microcosmic form."
+      "content": "Acoustical Engineering reveals how the cosmos emanates from the singular Divine Essence and unfolds through successive realms of being. This science maps the journey from absolute unity to manifest multiplicity, showing how each level of reality maintains its connection to the source while expressing unique qualities. The human being stands as a meeting point of all realms, containing within their consciousness the entirety of creation in microcosmic form."
     },
     {
       "type": "keyConcepts",
@@ -143,5 +126,5 @@
     }
   ],
   "version": 1,
-  "updatedAt": "2025-09-06T12:43:20.638Z"
+  "updatedAt": "2025-09-06T12:43:20.642Z"
 }
