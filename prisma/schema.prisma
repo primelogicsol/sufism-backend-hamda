@@ -72,6 +72,19 @@ model User {
   homeLiving HomeAndLiving[]
   decoration Decoration[]
   meditation Meditation[]
+  inventoryLogs InventoryLog[]
+  lowStockAlerts LowStockAlert[]
+  stockAdjustments StockAdjustment[]
+  orderNotes OrderNote[]
+  returns Return[]
+  refunds Refund[]
+  storeCredits StoreCredit[]
+  notifications Notification[]
+  notificationPreferences NotificationPreference[]
+  webSocketConnections WebSocketConnection[]
+  reports Report[]
+  dashboards Dashboard[]
+  analyticsEvents AnalyticsEvent[]
   createdAt      DateTime       @default(now())
 
   @@map("users")
@@ -89,12 +102,31 @@ model Order {
   zip             String       @default("")
   phone           String       @default("")
   status          OrderStatus  @default(PENDING)
-  paymentStatus          PaymentStatus  @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  priority        OrderPriority @default(NORMAL)
+  trackingNumber  String?
+  estimatedDelivery DateTime?
+  actualDelivery   DateTime?
+  cancellationReason CancellationReason?
+  cancellationNotes String?
+  cancelledAt     DateTime?
+  cancelledBy     String?
+  shippingMethod  ShippingMethod @default(STANDARD)
+  shippingCost    Float        @default(0)
+  carrier         Carrier?
+  shippingStatus  ShippingStatus @default(PENDING)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
-  transactions Transaction[] // One order can have multiple payment attempts
-  user    User        @relation(fields: [userId], references: [id])
-  items   OrderItem[]
+  transactions    Transaction[]
+  user            User         @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  inventoryLogs   InventoryLog[]
+  orderHistory    OrderHistory[]
+  orderNotes      OrderNote[]
+  shipments       Shipment[]
+  returns         Return[]
+  refunds         Refund[]
+  notifications   Notification[]
 
   @@map("orders")
 }
@@ -140,11 +172,334 @@ model OrderItem {
   productId  Int
   quantity   Int             @default(1)
   price      Float
-  status          OrderStatus  @default(PENDING)//Delivery status of the item
-  order Order @relation(fields: [orderId], references: [id])
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime?     @updatedAt
+  status     OrderStatus     @default(PENDING)
+  trackingNumber String?
+  shippedAt  DateTime?
+  deliveredAt DateTime?
+  order      Order           @relation(fields: [orderId], references: [id])
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime?        @updatedAt
+  
   @@map("order_items")
+}
+
+model OrderHistory {
+  id          Int         @id @default(autoincrement())
+  orderId     Int
+  order       Order       @relation(fields: [orderId], references: [id])
+  status      OrderStatus
+  previousStatus OrderStatus?
+  changedBy   String
+  reason      String?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  
+  @@map("order_history")
+}
+
+model OrderNote {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  note      String
+  isInternal Boolean @default(false)
+  createdAt DateTime @default(now())
+  
+  @@map("order_notes")
+}
+
+model Shipment {
+  id              Int            @id @default(autoincrement())
+  orderId         Int
+  order           Order          @relation(fields: [orderId], references: [id])
+  trackingNumber  String
+  carrier         Carrier
+  shippingMethod  ShippingMethod
+  status          ShippingStatus @default(PENDING)
+  labelUrl        String?
+  trackingUrl     String?
+  estimatedDelivery DateTime?
+  actualDelivery   DateTime?
+  weight          Float?
+  dimensions      String?        // JSON: {length, width, height}
+  cost            Float
+  notes           String?
+  notifications   Notification[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  @@map("shipments")
+}
+
+model Return {
+  id              Int          @id @default(autoincrement())
+  orderId         Int
+  order           Order        @relation(fields: [orderId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  status          ReturnStatus  @default(REQUESTED)
+  reason          ReturnReason
+  description     String
+  requestedAt     DateTime     @default(now())
+  approvedAt      DateTime?
+  approvedBy      String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
+  rejectionReason String?
+  receivedAt      DateTime?
+  processedAt     DateTime?
+  refundAmount    Float?
+  refundMethod    RefundMethod?
+  refundType      RefundType   @default(FULL_REFUND)
+  refundStatus    RefundStatus @default(PENDING)
+  refundId        String?       // External refund ID (Stripe, PayPal, etc.)
+  trackingNumber  String?
+  returnLabelUrl  String?
+  returnWindow    Int          @default(30) // Days
+  returnDeadline  DateTime?
+  isExpedited     Boolean      @default(false)
+  priority        OrderPriority @default(NORMAL)
+  notes           String?
+  internalNotes   String?      // Internal notes for staff
+  items           ReturnItem[]
+  refunds         Refund[]
+  storeCredits    StoreCredit[]
+  notifications   Notification[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@map("returns")
+}
+
+model ReturnItem {
+  id        Int    @id @default(autoincrement())
+  returnId  Int
+  return    Return @relation(fields: [returnId], references: [id])
+  productId Int
+  quantity  Int
+  reason    ReturnReason
+  condition String? // new, used, damaged, etc.
+  notes     String?
+  refundAmount Float? // Individual item refund amount
+  isEligibleForRefund Boolean @default(true)
+  createdAt DateTime @default(now())
+  
+  @@map("return_items")
+}
+
+model Refund {
+  id              Int          @id @default(autoincrement())
+  returnId        Int
+  return          Return       @relation(fields: [returnId], references: [id])
+  orderId         Int
+  order           Order        @relation(fields: [orderId], references: [id])
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  amount          Float
+  refundMethod    RefundMethod
+  refundType      RefundType
+  status          RefundStatus @default(PENDING)
+  externalRefundId String?     // Stripe refund ID, PayPal refund ID, etc.
+  processedAt     DateTime?
+  processedBy     String?
+  failureReason   String?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@map("refunds")
+}
+
+model StoreCredit {
+  id              Int          @id @default(autoincrement())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  amount          Float
+  balance         Float        @default(0)
+  reason          String       // "return_refund", "promotion", "compensation", etc.
+  returnId        Int?
+  return          Return?      @relation(fields: [returnId], references: [id])
+  expiresAt       DateTime?
+  isActive        Boolean      @default(true)
+  usedAt          DateTime?
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@map("store_credits")
+}
+
+model Notification {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  type            NotificationType
+  title            String
+  message          String
+  priority         NotificationPriority @default(NORMAL)
+  status           NotificationStatus @default(PENDING)
+  data             String?          // JSON data for additional context
+  orderId          Int?
+  order            Order?           @relation(fields: [orderId], references: [id])
+  returnId         Int?
+  return           Return?          @relation(fields: [returnId], references: [id])
+  shipmentId       Int?
+  shipment         Shipment?       @relation(fields: [shipmentId], references: [id])
+  isRead           Boolean         @default(false)
+  readAt           DateTime?
+  sentAt           DateTime?
+  deliveredAt      DateTime?
+  expiresAt        DateTime?
+  retryCount       Int             @default(0)
+  maxRetries       Int             @default(3)
+  lastRetryAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id              Int              @id @default(autoincrement())
+  type            NotificationType @unique
+  title            String
+  message          String
+  priority         NotificationPriority @default(NORMAL)
+  isActive         Boolean         @default(true)
+  variables        String?         // JSON array of available variables
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  @@map("notification_templates")
+}
+
+model NotificationPreference {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  type            NotificationType
+  emailEnabled    Boolean          @default(true)
+  pushEnabled      Boolean          @default(true)
+  smsEnabled       Boolean          @default(false)
+  webSocketEnabled Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  @@unique([userId, type])
+  @@map("notification_preferences")
+}
+
+model WebSocketConnection {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  connectionId    String           @unique
+  socketId        String?          // Socket.IO connection ID
+  userAgent       String?
+  ipAddress       String?
+  isActive        Boolean          @default(true)
+  lastPingAt      DateTime?
+  disconnectedAt  DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@map("websocket_connections")
+}
+
+model Report {
+  id              Int          @id @default(autoincrement())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  name            String
+  type            ReportType
+  format          ReportFormat
+  status          ReportStatus @default(PENDING)
+  parameters      String?      // JSON parameters for report generation
+  filters         String?      // JSON filters applied
+  data            String?      // JSON report data
+  fileUrl         String?      // URL to generated report file
+  fileSize        Int?         // File size in bytes
+  expiresAt       DateTime?
+  generatedAt     DateTime?
+  generatedBy     String?
+  errorMessage    String?
+  downloadCount   Int          @default(0)
+  lastDownloadedAt DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@map("reports")
+}
+
+model Dashboard {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  name            String
+  description     String?
+  isDefault       Boolean          @default(false)
+  isPublic        Boolean          @default(false)
+  layout          String?          // JSON layout configuration
+  settings        String?          // JSON dashboard settings
+  widgets         DashboardWidget[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@map("dashboards")
+}
+
+model DashboardWidget {
+  id              Int              @id @default(autoincrement())
+  dashboardId     Int
+  dashboard       Dashboard        @relation(fields: [dashboardId], references: [id])
+  type            DashboardWidgetType
+  title           String
+  description     String?
+  position        Int              // Position in dashboard layout
+  size            String?          // Widget size (small, medium, large)
+  configuration   String?          // JSON widget configuration
+  data            String?          // JSON widget data
+  refreshInterval Int?             // Refresh interval in seconds
+  isVisible       Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@map("dashboard_widgets")
+}
+
+model AnalyticsEvent {
+  id              Int              @id @default(autoincrement())
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id])
+  eventType       String           // e.g., "page_view", "order_created", "product_viewed"
+  eventName       String
+  properties      String?          // JSON event properties
+  sessionId       String?
+  ipAddress       String?
+  userAgent       String?
+  referrer        String?
+  timestamp       DateTime         @default(now())
+  
+  @@map("analytics_events")
+}
+
+model KPI {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String?
+  category        String           // e.g., "sales", "inventory", "customer"
+  formula         String?          // Calculation formula
+  target          Float?
+  currentValue    Float?
+  unit            String?          // e.g., "$", "%", "count"
+  isActive        Boolean          @default(true)
+  lastCalculatedAt DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@map("kpis")
 }
 
 model Member {
@@ -410,17 +765,209 @@ model DigitalBook {
 }
 enum OrderStatus {
   PENDING
-  DISPATCH
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
   COMPLETED
   FAILED
   CANCELLED
+  RETURNED
+  REFUNDED
 }
+
 enum PaymentStatus {
   PENDING
   PAID
   FAILED
   CANCELLED
   REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum CancellationReason {
+  CUSTOMER_REQUEST
+  OUT_OF_STOCK
+  PAYMENT_FAILED
+  VENDOR_CANCELLED
+  SYSTEM_ERROR
+  OTHER
+}
+
+enum OrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+  OVERNIGHT
+  SAME_DAY
+  PICKUP
+}
+
+enum ShippingStatus {
+  PENDING
+  LABEL_CREATED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED_DELIVERY
+  RETURNED_TO_SENDER
+}
+
+enum Carrier {
+  FEDEX
+  UPS
+  DHL
+  USPS
+  CANADA_POST
+  ROYAL_MAIL
+  AUSTRALIA_POST
+  CUSTOM
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  RECEIVED
+  PROCESSING
+  REFUNDED
+  EXCHANGED
+  CANCELLED
+}
+
+enum ReturnReason {
+  DEFECTIVE_PRODUCT
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  DAMAGED_IN_SHIPPING
+  SIZE_ISSUE
+  CHANGE_OF_MIND
+  DUPLICATE_ORDER
+  QUALITY_ISSUE
+  MISSING_PARTS
+  WRONG_COLOR
+  WRONG_SIZE
+  LATE_DELIVERY
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_SELLER
+  OTHER
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  PARTIAL
+}
+
+enum RefundType {
+  FULL_REFUND
+  PARTIAL_REFUND
+  EXCHANGE
+  STORE_CREDIT_ONLY
+  NO_REFUND
+}
+
+enum RefundMethod {
+  ORIGINAL_PAYMENT
+  STORE_CREDIT
+  BANK_TRANSFER
+  CHECK
+  CASH
+  GIFT_CARD
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_UPDATED
+  ORDER_CANCELLED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PAYMENT_REFUNDED
+  INVENTORY_LOW_STOCK
+  INVENTORY_OUT_OF_STOCK
+  RETURN_REQUESTED
+  RETURN_APPROVED
+  RETURN_REJECTED
+  RETURN_PROCESSED
+  REFUND_PROCESSED
+  SHIPMENT_CREATED
+  SHIPMENT_UPDATED
+  SHIPMENT_DELIVERED
+  COUPON_EXPIRED
+  COUPON_CREATED
+  VENDOR_APPROVED
+  VENDOR_REJECTED
+  SYSTEM_MAINTENANCE
+  SECURITY_ALERT
+  GENERAL
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  CANCELLED
+}
+
+enum ReportType {
+  SALES_REPORT
+  INVENTORY_REPORT
+  CUSTOMER_REPORT
+  VENDOR_REPORT
+  ORDER_REPORT
+  RETURN_REPORT
+  PAYMENT_REPORT
+  PERFORMANCE_REPORT
+  CUSTOM
+}
+
+enum ReportFormat {
+  PDF
+  EXCEL
+  CSV
+  JSON
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+enum DashboardWidgetType {
+  SALES_CHART
+  REVENUE_METRIC
+  ORDER_COUNT
+  CUSTOMER_COUNT
+  INVENTORY_ALERT
+  TOP_PRODUCTS
+  RECENT_ORDERS
+  PERFORMANCE_GAUGE
+  CUSTOM_CHART
 }
 model Music {
   id          Int        @id @default(autoincrement())
@@ -701,4 +1248,69 @@ ARCHIVED
 enum DiscountScope {
 ORDER // discount applies to the whole order
 ITEM // discount applies only to eligible items
+}
+
+// Inventory Management Models
+model InventoryLog {
+  id          Int             @id @default(autoincrement())
+  productId   Int
+  productCategory ProductCategory
+  changeType  InventoryChangeType
+  quantityChange Int
+  previousStock Int
+  newStock    Int
+  reason      String?
+  orderId     Int?
+  order       Order?          @relation(fields: [orderId], references: [id])
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  createdAt   DateTime        @default(now())
+  
+  @@map("inventory_logs")
+}
+
+model LowStockAlert {
+  id          Int             @id @default(autoincrement())
+  productId   Int
+  productCategory ProductCategory
+  currentStock Int
+  threshold   Int             @default(10)
+  isResolved  Boolean         @default(false)
+  resolvedAt  DateTime?
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  createdAt   DateTime        @default(now())
+  
+  @@map("low_stock_alerts")
+}
+
+model StockAdjustment {
+  id          Int             @id @default(autoincrement())
+  productId   Int
+  productCategory ProductCategory
+  adjustmentType StockAdjustmentType
+  quantity    Int
+  reason      String
+  notes       String?
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  createdAt   DateTime        @default(now())
+  
+  @@map("stock_adjustments")
+}
+
+enum InventoryChangeType {
+  SALE           // Stock reduced due to sale
+  RETURN         // Stock increased due to return
+  ADJUSTMENT     // Manual stock adjustment
+  RESTOCK        // Stock increased due to restocking
+  DAMAGE         // Stock reduced due to damage
+  THEFT          // Stock reduced due to theft
+  EXPIRED        // Stock reduced due to expiration
+}
+
+enum StockAdjustmentType {
+  INCREASE       // Increase stock
+  DECREASE       // Decrease stock
+  SET            // Set stock to specific value
 }

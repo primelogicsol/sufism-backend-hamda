@@ -1,11 +1,12 @@
 /* eslint-disable camelcase */
-import type { Prisma } from "@prisma/client";
+import type { Prisma, ProductCategory } from "@prisma/client";
 import reshttp from "reshttp";
 import type Stripe from "stripe";
 import { STRIPE_WEBHOOK_SECRET } from "../../configs/config.js";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
 import { gloabalMailMessage } from "../../services/globalEmailMessageService.js";
+import { InventoryService } from "../../services/inventory.service.js";
 import stripe from "../../services/payment/stripe.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
@@ -317,6 +318,23 @@ export default {
             });
 
             console.log("<><><odd", newOrder.id);
+            
+            // 📦 Reserve stock for the confirmed order
+            try {
+              const stockReservationItems = orderData.map((item: OrderItem) => ({
+                productId: parseInt(item.productId),
+                productCategory: item.category.toUpperCase() as ProductCategory,
+                quantity: item.quantity
+              }));
+              
+              const stockReservation = await InventoryService.reserveStock(stockReservationItems, newOrder.id, metadata.userId);
+              if (!stockReservation.success) {
+                logger.error(`Stock reservation failed for order ${newOrder.id}: ${stockReservation.errors.join(", ")}`);
+              }
+            } catch (error) {
+              logger.error(`Error reserving stock for order ${newOrder.id}: ${error}`);
+            }
+            
             await db.cart.deleteMany({ where: { userId: metadata.userId } });
             try {
               await gloabalMailMessage(
@@ -343,6 +361,32 @@ export default {
         const paymentIntent: Stripe.PaymentIntent = event.data.object;
         const { id, metadata, last_payment_error } = paymentIntent;
         console.log(last_payment_error?.message);
+
+        // Find the order to release reserved stock
+        const failedOrder = await db.order.findFirst({
+          where: {
+            userId: metadata.userId,
+            sPaymentIntentId: id
+          },
+          include: {
+            items: true
+          }
+        });
+
+        // Release reserved stock if order exists
+        if (failedOrder) {
+          try {
+            const stockReleaseItems = failedOrder.items.map(item => ({
+              productId: item.productId,
+              productCategory: item.category,
+              quantity: item.quantity
+            }));
+            
+            await InventoryService.releaseStock(stockReleaseItems, failedOrder.id, metadata.userId, "Payment failed");
+          } catch (error) {
+            logger.error(`Error releasing stock for failed order ${failedOrder.id}: ${error}`);
+          }
+        }
 
         await db.order.updateMany({
           where: {
