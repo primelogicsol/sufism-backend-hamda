@@ -3,6 +3,7 @@ import type { Order, Prisma, ProductCategory } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
+import { InventoryService } from "../../services/inventory.service.js";
 import stripe from "../../services/payment/stripe.js";
 import type { TBillingDetails } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
@@ -37,6 +38,45 @@ export default {
 
     if (cartItems.length === 0) {
       return httpResponse(req, res, reshttp.badRequestCode, "Cart is empty");
+    }
+
+    // 🔍 Validate stock availability before processing order
+    const stockValidationItems = cartItems.map(item => {
+      let productId: number | null = null;
+      let productCategory: ProductCategory | null = null;
+
+      if (item.musicId) {
+        productId = item.musicId;
+        productCategory = "MUSIC";
+      } else if (item.bookId) {
+        productId = item.bookId;
+        productCategory = "DIGITAL_BOOK";
+      } else if (item.fashionId) {
+        productId = item.fashionId;
+        productCategory = "FASHION";
+      } else if (item.meditationId) {
+        productId = item.meditationId;
+        productCategory = "MEDITATION";
+      } else if (item.decorationId) {
+        productId = item.decorationId;
+        productCategory = "DECORATION";
+      } else if (item.livingId) {
+        productId = item.livingId;
+        productCategory = "HOME_LIVING";
+      } else if (item.accessoriesId) {
+        productId = item.accessoriesId;
+        productCategory = "ACCESSORIES";
+      }
+
+      return { productId, productCategory, quantity: item.qty };
+    }).filter(item => item.productId && item.productCategory) as Array<{ productId: number; productCategory: ProductCategory; quantity: number }>;
+
+    // Validate stock availability
+    const stockValidation = await InventoryService.validateStockAvailability(stockValidationItems);
+    if (!stockValidation.valid) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Insufficient stock for some items", {
+        errors: stockValidation.errors
+      });
     }
 
     // 🧮 Calculate total
@@ -148,7 +188,7 @@ export default {
 
     // 🛒 Create Order as PENDING
     if (paymentIntent.status === "succeeded") {
-      await db.order.create({
+      const newOrder = await db.order.create({
         data: {
           userId: user.id,
           amount: totalAmount,
@@ -169,6 +209,20 @@ export default {
           country: data.country
         } as unknown as Prisma.OrderCreateInput
       });
+
+      // 📦 Reserve stock for the order
+      try {
+        const stockReservation = await InventoryService.reserveStock(stockValidationItems, newOrder.id, user.id);
+        if (!stockReservation.success) {
+          // If stock reservation fails, we should handle this gracefully
+          logger.error(`Stock reservation failed for order ${newOrder.id}: ${stockReservation.errors.join(", ")}`);
+          // Note: In a production system, you might want to cancel the order or handle this differently
+        }
+      } catch (error) {
+        logger.error(`Error reserving stock for order ${newOrder.id}: ${error}`);
+        // Continue with order creation even if stock reservation fails
+        // This ensures the order is created and can be handled manually if needed
+      }
 
       // Clear cart
       await db.cart.deleteMany({ where: { userId } });
