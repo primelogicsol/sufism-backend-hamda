@@ -25,18 +25,20 @@ export const createReportSchema = z.object({
   name: z.string().min(1, "Report name is required"),
   type: z.nativeEnum(ReportType),
   format: z.nativeEnum(ReportFormat),
-  parameters: z.object({
-    dateFrom: z.string().datetime().optional(),
-    dateTo: z.string().datetime().optional(),
-    userId: z.string().optional(),
-    vendorId: z.string().optional(),
-    productId: z.number().positive().optional(),
-    category: z.string().optional(),
-    status: z.string().optional(),
-    groupBy: z.string().optional(),
-    metrics: z.array(z.string()).optional(),
-    filters: z.record(z.any()).optional()
-  }).optional()
+  parameters: z
+    .object({
+      dateFrom: z.string().datetime().optional(),
+      dateTo: z.string().datetime().optional(),
+      userId: z.string().optional(),
+      vendorId: z.string().optional(),
+      productId: z.number().positive().optional(),
+      category: z.string().optional(),
+      status: z.string().optional(),
+      groupBy: z.string().optional(),
+      metrics: z.array(z.string()).optional(),
+      filters: z.record(z.any()).optional()
+    })
+    .optional()
 });
 
 export const getUserReportsSchema = z.object({
@@ -49,15 +51,19 @@ export const getUserReportsSchema = z.object({
 export const createDashboardSchema = z.object({
   name: z.string().min(1, "Dashboard name is required"),
   description: z.string().optional(),
-  widgets: z.array(z.object({
-    type: z.nativeEnum(DashboardWidgetType),
-    title: z.string().min(1, "Widget title is required"),
-    description: z.string().optional(),
-    position: z.number().int().positive(),
-    size: z.enum(["small", "medium", "large"]).default("medium"),
-    configuration: z.record(z.any()).optional(),
-    refreshInterval: z.number().int().positive().default(300)
-  })).optional()
+  widgets: z
+    .array(
+      z.object({
+        type: z.nativeEnum(DashboardWidgetType),
+        title: z.string().min(1, "Widget title is required"),
+        description: z.string().optional(),
+        position: z.number().int().positive(),
+        size: z.enum(["small", "medium", "large"]).default("medium"),
+        configuration: z.record(z.any()).optional(),
+        refreshInterval: z.number().int().positive().default(300)
+      })
+    )
+    .optional()
 });
 
 export const updateDashboardSchema = z.object({
@@ -65,15 +71,19 @@ export const updateDashboardSchema = z.object({
   description: z.string().optional(),
   layout: z.record(z.any()).optional(),
   settings: z.record(z.any()).optional(),
-  widgets: z.array(z.object({
-    type: z.nativeEnum(DashboardWidgetType),
-    title: z.string().min(1),
-    description: z.string().optional(),
-    position: z.number().int().positive(),
-    size: z.enum(["small", "medium", "large"]).default("medium"),
-    configuration: z.record(z.any()).optional(),
-    refreshInterval: z.number().int().positive().default(300)
-  })).optional()
+  widgets: z
+    .array(
+      z.object({
+        type: z.nativeEnum(DashboardWidgetType),
+        title: z.string().min(1),
+        description: z.string().optional(),
+        position: z.number().int().positive(),
+        size: z.enum(["small", "medium", "large"]).default("medium"),
+        configuration: z.record(z.any()).optional(),
+        refreshInterval: z.number().int().positive().default(300)
+      })
+    )
+    .optional()
 });
 
 export const trackEventSchema = z.object({

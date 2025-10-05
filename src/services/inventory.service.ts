@@ -1,4 +1,5 @@
-import { Prisma, ProductCategory, InventoryChangeType, StockAdjustmentType } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import { ProductCategory, InventoryChangeType, StockAdjustmentType } from "@prisma/client";
 import { db } from "../configs/database.js";
 import logger from "../utils/loggerUtils.js";
 
@@ -34,17 +35,20 @@ export class InventoryService {
   /**
    * Get the current stock of a product
    */
-  static async getProductStock(productId: number, productCategory: ProductCategory): Promise<number> {
+
+  // eslint-disable-next-line no-unused-vars
+  static async getProductStock(productId: number, productCategory: ProductCategory, _args?: unknown): Promise<number> {
     try {
       const model = this.getProductModel(productCategory);
-      const product = await model.findUnique({
+      // eslint-disable-next-line no-unused-vars
+      const product = await (model as { findUnique: (_args: unknown) => Promise<{ stock: number } | null> }).findUnique({
         where: { id: productId },
         select: { stock: true }
       });
-      
+
       return product?.stock || 0;
     } catch (error) {
-      logger.error(`Error getting product stock: ${error}`);
+      logger.error(`Error getting product stock: ${String(error)}`);
       throw error;
     }
   }
@@ -54,7 +58,7 @@ export class InventoryService {
    */
   static async updateStock(params: InventoryUpdateParams): Promise<{ success: boolean; newStock: number; message: string }> {
     const { productId, productCategory, quantityChange, changeType, reason, orderId, userId } = params;
-    
+
     try {
       // Get current stock
       const currentStock = await this.getProductStock(productId, productCategory);
@@ -71,7 +75,8 @@ export class InventoryService {
 
       // Update product stock
       const model = this.getProductModel(productCategory);
-      await model.update({
+      // eslint-disable-next-line no-unused-vars
+      await (model as { update: (_args: unknown) => Promise<unknown> }).update({
         where: { id: productId },
         data: { stock: newStock }
       });
@@ -100,14 +105,14 @@ export class InventoryService {
       });
 
       logger.info(`Stock updated for product ${productId}: ${currentStock} -> ${newStock} (${changeType})`);
-      
+
       return {
         success: true,
         newStock,
         message: `Stock updated successfully. New stock: ${newStock}`
       };
     } catch (error) {
-      logger.error(`Error updating stock: ${error}`);
+      logger.error(`Error updating stock: ${String(error)}`);
       throw error;
     }
   }
@@ -115,24 +120,28 @@ export class InventoryService {
   /**
    * Validate stock availability for multiple products
    */
-  static async validateStockAvailability(items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>): Promise<{ valid: boolean; errors: string[] }> {
+  static async validateStockAvailability(
+    items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>
+  ): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
-    
+
     try {
       for (const item of items) {
         const currentStock = await this.getProductStock(item.productId, item.productCategory);
-        
+
         if (currentStock < item.quantity) {
-          errors.push(`Product ID ${item.productId} (${item.productCategory}): Insufficient stock. Available: ${currentStock}, Requested: ${item.quantity}`);
+          errors.push(
+            `Product ID ${item.productId} (${item.productCategory}): Insufficient stock. Available: ${currentStock}, Requested: ${item.quantity}`
+          );
         }
       }
-      
+
       return {
         valid: errors.length === 0,
         errors
       };
     } catch (error) {
-      logger.error(`Error validating stock: ${error}`);
+      logger.error(`Error validating stock: ${String(error)}`);
       throw error;
     }
   }
@@ -140,9 +149,13 @@ export class InventoryService {
   /**
    * Reserve stock for an order (reduce stock temporarily)
    */
-  static async reserveStock(items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>, orderId: number, userId: string): Promise<{ success: boolean; errors: string[] }> {
+  static async reserveStock(
+    items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>,
+    orderId: number,
+    userId: string
+  ): Promise<{ success: boolean; errors: string[] }> {
     const errors: string[] = [];
-    
+
     try {
       // First validate stock availability
       const validation = await this.validateStockAvailability(items);
@@ -172,7 +185,7 @@ export class InventoryService {
         errors
       };
     } catch (error) {
-      logger.error(`Error reserving stock: ${error}`);
+      logger.error(`Error reserving stock: ${String(error)}`);
       throw error;
     }
   }
@@ -180,7 +193,12 @@ export class InventoryService {
   /**
    * Release reserved stock (increase stock back)
    */
-  static async releaseStock(items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>, orderId: number, userId: string, reason: string = "Order cancelled"): Promise<void> {
+  static async releaseStock(
+    items: Array<{ productId: number; productCategory: ProductCategory; quantity: number }>,
+    orderId: number,
+    userId: string,
+    reason: string = "Order cancelled"
+  ): Promise<void> {
     try {
       for (const item of items) {
         await this.updateStock({
@@ -194,7 +212,7 @@ export class InventoryService {
         });
       }
     } catch (error) {
-      logger.error(`Error releasing stock: ${error}`);
+      logger.error(`Error releasing stock: ${String(error)}`);
       throw error;
     }
   }
@@ -204,7 +222,7 @@ export class InventoryService {
    */
   static async adjustStock(params: StockAdjustmentParams): Promise<{ success: boolean; newStock: number; message: string }> {
     const { productId, productCategory, adjustmentType, quantity, reason, notes, userId } = params;
-    
+
     try {
       const currentStock = await this.getProductStock(productId, productCategory);
       let quantityChange: number;
@@ -261,7 +279,7 @@ export class InventoryService {
 
       return result;
     } catch (error) {
-      logger.error(`Error adjusting stock: ${error}`);
+      logger.error(`Error adjusting stock: ${String(error)}`);
       throw error;
     }
   }
@@ -271,7 +289,7 @@ export class InventoryService {
    */
   static async checkLowStockAlert(params: LowStockAlertParams): Promise<void> {
     const { productId, productCategory, currentStock, threshold = 10, userId } = params;
-    
+
     try {
       // Check if already has unresolved alert
       const existingAlert = await db.lowStockAlert.findFirst({
@@ -308,7 +326,7 @@ export class InventoryService {
         logger.info(`Low stock alert resolved for product ${productId}: ${currentStock} > ${threshold}`);
       }
     } catch (error) {
-      logger.error(`Error checking low stock alert: ${error}`);
+      logger.error(`Error checking low stock alert: ${String(error)}`);
       // Don't throw error as this is not critical
     }
   }
@@ -316,7 +334,7 @@ export class InventoryService {
   /**
    * Get inventory logs for a product
    */
-  static async getInventoryLogs(productId: number, productCategory: ProductCategory, limit: number = 50): Promise<any[]> {
+  static async getInventoryLogs(productId: number, productCategory: ProductCategory, limit: number = 50): Promise<unknown[]> {
     try {
       return await db.inventoryLog.findMany({
         where: {
@@ -344,7 +362,7 @@ export class InventoryService {
         take: limit
       });
     } catch (error) {
-      logger.error(`Error getting inventory logs: ${error}`);
+      logger.error(`Error getting inventory logs: ${String(error)}`);
       throw error;
     }
   }
@@ -352,7 +370,7 @@ export class InventoryService {
   /**
    * Get low stock alerts
    */
-  static async getLowStockAlerts(userId?: string, resolved: boolean = false): Promise<any[]> {
+  static async getLowStockAlerts(userId?: string, resolved: boolean = false): Promise<unknown[]> {
     try {
       const where: Prisma.LowStockAlertWhereInput = {
         isResolved: resolved
@@ -378,7 +396,7 @@ export class InventoryService {
         }
       });
     } catch (error) {
-      logger.error(`Error getting low stock alerts: ${error}`);
+      logger.error(`Error getting low stock alerts: ${String(error)}`);
       throw error;
     }
   }
@@ -386,7 +404,7 @@ export class InventoryService {
   /**
    * Get stock adjustment history
    */
-  static async getStockAdjustments(userId?: string, limit: number = 50): Promise<any[]> {
+  static async getStockAdjustments(userId?: string, limit: number = 50): Promise<unknown[]> {
     try {
       const where: Prisma.StockAdjustmentWhereInput = {};
 
@@ -411,7 +429,7 @@ export class InventoryService {
         take: limit
       });
     } catch (error) {
-      logger.error(`Error getting stock adjustments: ${error}`);
+      logger.error(`Error getting stock adjustments: ${String(error)}`);
       throw error;
     }
   }
@@ -436,7 +454,7 @@ export class InventoryService {
       case ProductCategory.ACCESSORIES:
         return db.accessories;
       default:
-        throw new Error(`Unknown product category: ${productCategory}`);
+        throw new Error(`Unknown product category: ${String(productCategory)}`);
     }
   }
 
@@ -465,8 +483,8 @@ export class InventoryService {
       const allProducts = products.flat();
       const totalProducts = allProducts.length;
       const totalStock = allProducts.reduce((sum, product) => sum + product.stock, 0);
-      const lowStockProducts = allProducts.filter(product => product.stock <= 10 && product.stock > 0).length;
-      const outOfStockProducts = allProducts.filter(product => product.stock === 0).length;
+      const lowStockProducts = allProducts.filter((product) => product.stock <= 10 && product.stock > 0).length;
+      const outOfStockProducts = allProducts.filter((product) => product.stock === 0).length;
 
       // Get recent inventory movements (last 7 days)
       const sevenDaysAgo = new Date();
@@ -489,9 +507,8 @@ export class InventoryService {
         recentMovements
       };
     } catch (error) {
-      logger.error(`Error getting inventory summary: ${error}`);
+      logger.error(`Error getting inventory summary: ${String(error)}`);
       throw error;
     }
   }
 }
-

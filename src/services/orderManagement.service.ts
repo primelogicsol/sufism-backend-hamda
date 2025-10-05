@@ -1,4 +1,4 @@
-import { Prisma, OrderStatus, PaymentStatus, CancellationReason, OrderPriority } from "@prisma/client";
+import type { Prisma, OrderStatus, PaymentStatus, CancellationReason, OrderPriority } from "@prisma/client";
 import { db } from "../configs/database.js";
 import { InventoryService } from "./inventory.service.js";
 import logger from "../utils/loggerUtils.js";
@@ -50,10 +50,10 @@ export class OrderManagementService {
   /**
    * Get order by ID with full details
    */
-  static async getOrderById(orderId: number, userId?: string): Promise<any> {
+  static async getOrderById(orderId: number, userId?: string): Promise<unknown> {
     try {
       const where: Prisma.OrderWhereInput = { id: orderId };
-      
+
       if (userId) {
         where.userId = userId;
       }
@@ -98,7 +98,7 @@ export class OrderManagementService {
 
       return order;
     } catch (error) {
-      logger.error(`Error getting order by ID: ${error}`);
+      logger.error(`Error getting order by ID: ${String(error)}`);
       throw error;
     }
   }
@@ -107,27 +107,14 @@ export class OrderManagementService {
    * Search and filter orders
    */
   static async searchOrders(params: OrderSearchParams): Promise<{
-    orders: any[];
+    orders: unknown[];
     total: number;
     page: number;
     limit: number;
     totalPages: number;
   }> {
     try {
-      const {
-        userId,
-        vendorId,
-        status,
-        paymentStatus,
-        priority,
-        dateFrom,
-        dateTo,
-        amountMin,
-        amountMax,
-        search,
-        page = 1,
-        limit = 10
-      } = params;
+      const { userId, vendorId, status, paymentStatus, priority, dateFrom, dateTo, amountMin, amountMax, search, page = 1, limit = 10 } = params;
 
       const skip = (page - 1) * limit;
       const where: Prisma.OrderWhereInput = {};
@@ -226,7 +213,7 @@ export class OrderManagementService {
         totalPages: Math.ceil(total / limit)
       };
     } catch (error) {
-      logger.error(`Error searching orders: ${error}`);
+      logger.error(`Error searching orders: ${String(error)}`);
       throw error;
     }
   }
@@ -234,19 +221,8 @@ export class OrderManagementService {
   /**
    * Update order status and create history
    */
-  static async updateOrderStatus(params: OrderUpdateParams): Promise<{ success: boolean; message: string; order: any }> {
-    const {
-      orderId,
-      status,
-      paymentStatus,
-      priority,
-      trackingNumber,
-      estimatedDelivery,
-      actualDelivery,
-      reason,
-      notes,
-      userId
-    } = params;
+  static async updateOrderStatus(params: OrderUpdateParams): Promise<{ success: boolean; message: string; order: unknown }> {
+    const { orderId, status, paymentStatus, priority, trackingNumber, estimatedDelivery, actualDelivery, reason, notes, userId } = params;
 
     try {
       // Get current order
@@ -315,14 +291,14 @@ export class OrderManagementService {
       }
 
       logger.info(`Order ${orderId} status updated by user ${userId}`);
-      
+
       return {
         success: true,
         message: "Order status updated successfully",
         order: updatedOrder
       };
     } catch (error) {
-      logger.error(`Error updating order status: ${error}`);
+      logger.error(`Error updating order status: ${String(error)}`);
       throw error;
     }
   }
@@ -357,7 +333,7 @@ export class OrderManagementService {
       }
 
       // Release reserved stock
-      const stockReleaseItems = order.items.map(item => ({
+      const stockReleaseItems = order.items.map((item) => ({
         productId: item.productId,
         productCategory: item.category,
         quantity: item.quantity
@@ -394,7 +370,7 @@ export class OrderManagementService {
       if (order.transactions.length > 0 && refundAmount) {
         // In a real implementation, you would integrate with Stripe refund API here
         actualRefundAmount = refundAmount;
-        
+
         // Update payment status
         await db.order.update({
           where: { id: orderId },
@@ -403,14 +379,14 @@ export class OrderManagementService {
       }
 
       logger.info(`Order ${orderId} cancelled by ${cancelledBy}, reason: ${reason}`);
-      
+
       return {
         success: true,
         message: "Order cancelled successfully",
         refundAmount: actualRefundAmount
       };
     } catch (error) {
-      logger.error(`Error cancelling order: ${error}`);
+      logger.error(`Error cancelling order: ${String(error)}`);
       throw error;
     }
   }
@@ -418,7 +394,12 @@ export class OrderManagementService {
   /**
    * Add note to order
    */
-  static async addOrderNote(orderId: number, userId: string, note: string, isInternal: boolean = false): Promise<{ success: boolean; message: string }> {
+  static async addOrderNote(
+    orderId: number,
+    userId: string,
+    note: string,
+    isInternal: boolean = false
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const order = await db.order.findUnique({
         where: { id: orderId }
@@ -438,13 +419,13 @@ export class OrderManagementService {
       });
 
       logger.info(`Note added to order ${orderId} by user ${userId}`);
-      
+
       return {
         success: true,
         message: "Note added successfully"
       };
     } catch (error) {
-      logger.error(`Error adding order note: ${error}`);
+      logger.error(`Error adding order note: ${String(error)}`);
       throw error;
     }
   }
@@ -452,9 +433,10 @@ export class OrderManagementService {
   /**
    * Get order analytics
    */
-  static async getOrderAnalytics(params: OrderAnalyticsParams): Promise<any> {
+  static async getOrderAnalytics(params: OrderAnalyticsParams): Promise<unknown> {
     try {
-      const { userId, vendorId, period = "30d", groupBy = "day" } = params;
+      // eslint-disable-next-line no-unused-vars
+      const { userId, vendorId, period = "30d", groupBy: _groupBy = "day" } = params;
 
       const dateFrom = new Date();
       switch (period) {
@@ -497,13 +479,7 @@ export class OrderManagementService {
       }
 
       // Get order statistics
-      const [
-        totalOrders,
-        totalRevenue,
-        ordersByStatus,
-        ordersByPaymentStatus,
-        recentOrders
-      ] = await Promise.all([
+      const [totalOrders, totalRevenue, ordersByStatus, ordersByPaymentStatus, recentOrders] = await Promise.all([
         db.order.count({ where }),
         db.order.aggregate({
           where: { ...where, paymentStatus: "PAID" },
@@ -542,18 +518,18 @@ export class OrderManagementService {
           totalRevenue: totalRevenue._sum.amount || 0,
           averageOrderValue: totalOrders > 0 ? (totalRevenue._sum.amount || 0) / totalOrders : 0
         },
-        ordersByStatus: ordersByStatus.map(item => ({
+        ordersByStatus: ordersByStatus.map((item) => ({
           status: item.status,
           count: item._count.status
         })),
-        ordersByPaymentStatus: ordersByPaymentStatus.map(item => ({
+        ordersByPaymentStatus: ordersByPaymentStatus.map((item) => ({
           paymentStatus: item.paymentStatus,
           count: item._count.paymentStatus
         })),
         recentOrders
       };
     } catch (error) {
-      logger.error(`Error getting order analytics: ${error}`);
+      logger.error(`Error getting order analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -561,7 +537,12 @@ export class OrderManagementService {
   /**
    * Bulk update order statuses
    */
-  static async bulkUpdateOrderStatus(orderIds: number[], status: OrderStatus, userId: string, reason?: string): Promise<{ success: boolean; message: string; updatedCount: number }> {
+  static async bulkUpdateOrderStatus(
+    orderIds: number[],
+    status: OrderStatus,
+    userId: string,
+    reason?: string
+  ): Promise<{ success: boolean; message: string; updatedCount: number }> {
     try {
       let updatedCount = 0;
 
@@ -584,7 +565,7 @@ export class OrderManagementService {
         updatedCount
       };
     } catch (error) {
-      logger.error(`Error bulk updating order status: ${error}`);
+      logger.error(`Error bulk updating order status: ${String(error)}`);
       throw error;
     }
   }
@@ -614,11 +595,7 @@ export class OrderManagementService {
    * Check if order can be cancelled
    */
   private static canCancelOrder(status: OrderStatus): boolean {
-    const cancellableStatuses: OrderStatus[] = [
-      "PENDING",
-      "CONFIRMED",
-      "PROCESSING"
-    ];
+    const cancellableStatuses: OrderStatus[] = ["PENDING", "CONFIRMED", "PROCESSING"];
 
     return cancellableStatuses.includes(status);
   }
@@ -626,7 +603,7 @@ export class OrderManagementService {
   /**
    * Get order tracking information
    */
-  static async getOrderTracking(orderId: number): Promise<any> {
+  static async getOrderTracking(orderId: number): Promise<unknown> {
     try {
       const order = await db.order.findUnique({
         where: { id: orderId },
@@ -666,7 +643,7 @@ export class OrderManagementService {
         timeline: order.orderHistory
       };
     } catch (error) {
-      logger.error(`Error getting order tracking: ${error}`);
+      logger.error(`Error getting order tracking: ${String(error)}`);
       throw error;
     }
   }

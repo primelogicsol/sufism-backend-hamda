@@ -1,0 +1,810 @@
+{
+  "info": {
+    "name": "Sufism E-commerce API Collection",
+    "description": "Complete API collection for Sufism E-commerce Backend with Order Management, Inventory, Shipping, Returns, Notifications, and Analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "User Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"customer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "register"]
+            }
+          }
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.token) {",
+                  "        pm.collectionVariables.set('authToken', response.data.token);",
+                  "        pm.collectionVariables.set('userId', response.data.user.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.id) {",
+                  "        pm.collectionVariables.set('orderId', response.data.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"category\": \"MUSIC\",\n      \"quantity\": 2,\n      \"price\": 29.99\n    }\n  ],\n  \"shippingAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"billingAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"paymentMethod\": \"card\",\n  \"notes\": \"Please handle with care\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROCESSING\",\n  \"notes\": \"Order is being prepared\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/order-management/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "order-management", "{{orderId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory Management",
+      "item": [
+        {
+          "name": "Get Product Stock",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/stock/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "stock", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/logs?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Adjust Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"adjustmentType\": \"MANUAL_ADJUSTMENT\",\n  \"quantityChange\": 10,\n  \"reason\": \"Stock count correction\",\n  \"notes\": \"Physical count adjustment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/adjust",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "adjust"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipping & Fulfillment",
+      "item": [
+        {
+          "name": "Create Shipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{orderId}},\n  \"shippingMethod\": \"STANDARD\",\n  \"carrier\": \"FEDEX\",\n  \"trackingNumber\": \"FX123456789\",\n  \"shippingAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"estimatedDelivery\": \"2024-01-05T00:00:00.000Z\",\n  \"notes\": \"Handle with care\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shipping/shipments",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipping", "shipments"]
+            }
+          }
+        },
+        {
+          "name": "Update Shipment Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"location\": \"New York Distribution Center\",\n  \"notes\": \"Package is in transit\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shipping/shipments/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipping", "shipments", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Get Shipment Tracking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shipping/shipments/1/tracking",
+              "host": ["{{baseUrl}}"],
+              "path": ["shipping", "shipments", "1", "tracking"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Returns & Refunds",
+      "item": [
+        {
+          "name": "Create Return Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{orderId}},\n  \"reason\": \"DEFECTIVE_PRODUCT\",\n  \"description\": \"Product arrived damaged\",\n  \"items\": [\n    {\n      \"orderItemId\": 1,\n      \"quantity\": 1,\n      \"reason\": \"DEFECTIVE_PRODUCT\"\n    }\n  ],\n  \"preferredResolution\": \"REFUND\",\n  \"notes\": \"Please process refund as soon as possible\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/returns/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["returns", "requests"]
+            }
+          }
+        },
+        {
+          "name": "Get Return Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/returns/requests?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["returns", "requests"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnId\": 1,\n  \"refundAmount\": 29.99,\n  \"refundMethod\": \"ORIGINAL_PAYMENT\",\n  \"refundType\": \"FULL_REFUND\",\n  \"notes\": \"Processing full refund for defective product\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/returns/refunds",
+              "host": ["{{baseUrl}}"],
+              "path": ["returns", "refunds"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Real-time Notifications",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/1/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "1", "read"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "preferences"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": [\n    {\n      \"type\": \"ORDER_CREATED\",\n      \"emailEnabled\": true,\n      \"pushEnabled\": true,\n      \"smsEnabled\": false,\n      \"webSocketEnabled\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "preferences"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics & Reporting",
+      "item": [
+        {
+          "name": "Get Sales Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sales?period=30d&groupBy=day",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "sales"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/inventory?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "inventory"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/overview?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "overview"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get KPI Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/kpis",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "kpis"]
+            }
+          }
+        },
+        {
+          "name": "Create Custom Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monthly Sales Report\",\n  \"type\": \"SALES_REPORT\",\n  \"format\": \"PDF\",\n  \"parameters\": {\n    \"dateFrom\": \"2024-01-01T00:00:00.000Z\",\n    \"dateTo\": \"2024-01-31T00:00:00.000Z\",\n    \"groupBy\": \"day\",\n    \"metrics\": [\"revenue\", \"orders\", \"customers\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports"]
+            }
+          }
+        },
+        {
+          "name": "Get User Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Dashboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Dashboard\",\n  \"description\": \"Main sales performance dashboard\",\n  \"widgets\": [\n    {\n      \"type\": \"SALES_CHART\",\n      \"title\": \"Sales Trend\",\n      \"description\": \"Daily sales trend\",\n      \"position\": 1,\n      \"size\": \"large\",\n      \"configuration\": {\n        \"chartType\": \"line\",\n        \"period\": \"30d\"\n      },\n      \"refreshInterval\": 300\n    },\n    {\n      \"type\": \"REVENUE_METRIC\",\n      \"title\": \"Total Revenue\",\n      \"position\": 2,\n      \"size\": \"medium\",\n      \"refreshInterval\": 60\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboards",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboards"]
+            }
+          }
+        },
+        {
+          "name": "Get User Dashboards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboards",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboards"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Integration",
+      "item": [
+        {
+          "name": "Create Payment Intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5999,\n  \"currency\": \"usd\",\n  \"orderId\": {{orderId}},\n  \"customerEmail\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stripe/create-payment-intent",
+              "host": ["{{baseUrl}}"],
+              "path": ["stripe", "create-payment-intent"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentIntentId\": \"pi_1234567890\",\n  \"orderId\": {{orderId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stripe/confirm-payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["stripe", "confirm-payment"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

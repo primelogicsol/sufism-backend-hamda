@@ -1,4 +1,4 @@
-import { Prisma, ReportType, ReportFormat, ReportStatus, DashboardWidgetType } from "@prisma/client";
+import type { Prisma, ReportType, ReportFormat, DashboardWidgetType } from "@prisma/client";
 import { db } from "../configs/database.js";
 import logger from "../utils/loggerUtils.js";
 
@@ -11,9 +11,10 @@ export interface ReportParameters {
   category?: string;
   status?: string;
   format?: ReportFormat;
-  groupBy?: string;
+  groupBy?: "day" | "week" | "month";
+  period?: "7d" | "30d" | "90d" | "1y";
   metrics?: string[];
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface DashboardWidgetConfig {
@@ -22,7 +23,7 @@ export interface DashboardWidgetConfig {
   description?: string;
   position: number;
   size?: string;
-  configuration?: Record<string, any>;
+  configuration?: Record<string, unknown>;
   refreshInterval?: number;
 }
 
@@ -30,7 +31,7 @@ export interface AnalyticsEventData {
   userId?: string;
   eventType: string;
   eventName: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   sessionId?: string;
   ipAddress?: string;
   userAgent?: string;
@@ -55,7 +56,7 @@ export class AnalyticsService {
     vendorId?: string;
     period?: "7d" | "30d" | "90d" | "1y";
     groupBy?: "day" | "week" | "month";
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       const { userId, vendorId, period = "30d", groupBy = "day" } = params;
 
@@ -100,15 +101,7 @@ export class AnalyticsService {
         };
       }
 
-      const [
-        totalRevenue,
-        totalOrders,
-        averageOrderValue,
-        ordersByStatus,
-        revenueByPeriod,
-        topProducts,
-        customerMetrics
-      ] = await Promise.all([
+      const [totalRevenue, totalOrders, averageOrderValue, ordersByStatus, revenueByPeriod, topProducts, customerMetrics] = await Promise.all([
         db.order.aggregate({
           where,
           _sum: { amount: true }
@@ -138,7 +131,7 @@ export class AnalyticsService {
           dateFrom,
           dateTo: new Date()
         },
-        ordersByStatus: ordersByStatus.map(item => ({
+        ordersByStatus: ordersByStatus.map((item) => ({
           status: item.status,
           count: item._count.status,
           revenue: item._sum.amount || 0
@@ -148,7 +141,7 @@ export class AnalyticsService {
         customerMetrics
       };
     } catch (error) {
-      logger.error(`Error getting sales analytics: ${error}`);
+      logger.error(`Error getting sales analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -156,13 +149,10 @@ export class AnalyticsService {
   /**
    * Generate inventory analytics
    */
-  static async getInventoryAnalytics(params: {
-    userId?: string;
-    vendorId?: string;
-    period?: "7d" | "30d" | "90d" | "1y";
-  }): Promise<any> {
+  static async getInventoryAnalytics(params: { userId?: string; vendorId?: string; period?: "7d" | "30d" | "90d" | "1y" }): Promise<unknown> {
     try {
-      const { userId, vendorId, period = "30d" } = params;
+      // eslint-disable-next-line no-unused-vars
+      const { userId, vendorId: _vendorId, period = "30d" } = params;
 
       const dateFrom = new Date();
       switch (period) {
@@ -188,13 +178,7 @@ export class AnalyticsService {
         where.userId = userId;
       }
 
-      const [
-        totalStockMovements,
-        stockMovementsByType,
-        lowStockAlerts,
-        topMovingProducts,
-        inventoryValue
-      ] = await Promise.all([
+      const [totalStockMovements, stockMovementsByType, lowStockAlerts, topMovingProducts, inventoryValue] = await Promise.all([
         db.inventoryLog.count({ where }),
         db.inventoryLog.groupBy({
           by: ["changeType"],
@@ -221,7 +205,7 @@ export class AnalyticsService {
           dateFrom,
           dateTo: new Date()
         },
-        stockMovementsByType: stockMovementsByType.map(item => ({
+        stockMovementsByType: stockMovementsByType.map((item) => ({
           changeType: item.changeType,
           count: item._count.changeType,
           totalQuantity: item._sum.quantityChange || 0
@@ -229,7 +213,7 @@ export class AnalyticsService {
         topMovingProducts
       };
     } catch (error) {
-      logger.error(`Error getting inventory analytics: ${error}`);
+      logger.error(`Error getting inventory analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -237,9 +221,7 @@ export class AnalyticsService {
   /**
    * Generate customer analytics
    */
-  static async getCustomerAnalytics(params: {
-    period?: "7d" | "30d" | "90d" | "1y";
-  }): Promise<any> {
+  static async getCustomerAnalytics(params: { period?: "7d" | "30d" | "90d" | "1y" }): Promise<unknown> {
     try {
       const { period = "30d" } = params;
 
@@ -259,14 +241,7 @@ export class AnalyticsService {
           break;
       }
 
-      const [
-        totalCustomers,
-        newCustomers,
-        activeCustomers,
-        customerLifetimeValue,
-        customerSegments,
-        topCustomers
-      ] = await Promise.all([
+      const [totalCustomers, newCustomers, activeCustomers, customerLifetimeValue, customerSegments, topCustomers] = await Promise.all([
         db.user.count({
           where: { role: "customer" }
         }),
@@ -279,11 +254,7 @@ export class AnalyticsService {
         db.user.count({
           where: {
             role: "customer",
-            orders: {
-              some: {
-                createdAt: { gte: dateFrom }
-              }
-            }
+            createdAt: { gte: dateFrom }
           }
         }),
         this.calculateCustomerLifetimeValue(),
@@ -305,7 +276,7 @@ export class AnalyticsService {
         topCustomers
       };
     } catch (error) {
-      logger.error(`Error getting customer analytics: ${error}`);
+      logger.error(`Error getting customer analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -313,10 +284,7 @@ export class AnalyticsService {
   /**
    * Generate vendor analytics
    */
-  static async getVendorAnalytics(params: {
-    vendorId?: string;
-    period?: "7d" | "30d" | "90d" | "1y";
-  }): Promise<any> {
+  static async getVendorAnalytics(params: { vendorId?: string; period?: "7d" | "30d" | "90d" | "1y" }): Promise<unknown> {
     try {
       const { vendorId, period = "30d" } = params;
 
@@ -353,13 +321,7 @@ export class AnalyticsService {
         }
       };
 
-      const [
-        totalRevenue,
-        totalOrders,
-        averageOrderValue,
-        topProducts,
-        performanceMetrics
-      ] = await Promise.all([
+      const [totalRevenue, totalOrders, averageOrderValue, topProducts, performanceMetrics] = await Promise.all([
         db.order.aggregate({
           where,
           _sum: { amount: true }
@@ -386,7 +348,7 @@ export class AnalyticsService {
         performanceMetrics
       };
     } catch (error) {
-      logger.error(`Error getting vendor analytics: ${error}`);
+      logger.error(`Error getting vendor analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -400,7 +362,7 @@ export class AnalyticsService {
     type: ReportType,
     format: ReportFormat,
     parameters: ReportParameters
-  ): Promise<{ success: boolean; report: any; message: string }> {
+  ): Promise<{ success: boolean; report: unknown; message: string }> {
     try {
       const report = await db.report.create({
         data: {
@@ -415,19 +377,19 @@ export class AnalyticsService {
       });
 
       // Generate report data asynchronously
-      this.generateReportData(report.id, type, parameters).catch(error => {
+      this.generateReportData(report.id, type, parameters).catch((error) => {
         logger.error(`Error generating report data: ${error}`);
       });
 
       logger.info(`Report created: ${name} for user ${userId}`);
-      
+
       return {
         success: true,
         report,
         message: "Report created successfully"
       };
     } catch (error) {
-      logger.error(`Error creating report: ${error}`);
+      logger.error(`Error creating report: ${String(error)}`);
       throw error;
     }
   }
@@ -435,43 +397,39 @@ export class AnalyticsService {
   /**
    * Generate report data
    */
-  private static async generateReportData(
-    reportId: number,
-    type: ReportType,
-    parameters: ReportParameters
-  ): Promise<void> {
+  private static async generateReportData(reportId: number, type: ReportType, parameters: ReportParameters): Promise<void> {
     try {
       await db.report.update({
         where: { id: reportId },
         data: { status: "GENERATING" }
       });
 
-      let reportData: any = {};
+      let reportData: Record<string, unknown> = {};
 
       switch (type) {
         case "SALES_REPORT":
-          reportData = await this.getSalesAnalytics(parameters);
+          reportData = (await this.getSalesAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "INVENTORY_REPORT":
-          reportData = await this.getInventoryAnalytics(parameters);
+          reportData = (await this.getInventoryAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "CUSTOMER_REPORT":
-          reportData = await this.getCustomerAnalytics(parameters);
+          reportData = (await this.getCustomerAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "VENDOR_REPORT":
-          reportData = await this.getVendorAnalytics(parameters);
+          reportData = (await this.getVendorAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "ORDER_REPORT":
-          reportData = await this.getOrderAnalytics(parameters);
+          reportData = (await this.getOrderAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "RETURN_REPORT":
-          reportData = await this.getReturnAnalytics(parameters);
+          reportData = (await this.getReturnAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "PAYMENT_REPORT":
-          reportData = await this.getPaymentAnalytics(parameters);
+          reportData = (await this.getPaymentAnalytics(parameters)) as Record<string, unknown>;
           break;
         case "PERFORMANCE_REPORT":
-          reportData = await this.getPerformanceAnalytics(parameters);
+          reportData = (await this.getPerformanceAnalytics(parameters)) as Record<string, unknown>;
           break;
         default:
           throw new Error(`Unknown report type: ${type}`);
@@ -508,7 +466,7 @@ export class AnalyticsService {
     name: string,
     description?: string,
     widgets?: DashboardWidgetConfig[]
-  ): Promise<{ success: boolean; dashboard: any; message: string }> {
+  ): Promise<{ success: boolean; dashboard: unknown; message: string }> {
     try {
       const dashboard = await db.dashboard.create({
         data: {
@@ -522,7 +480,7 @@ export class AnalyticsService {
 
       if (widgets && widgets.length > 0) {
         await db.dashboardWidget.createMany({
-          data: widgets.map(widget => ({
+          data: widgets.map((widget) => ({
             dashboardId: dashboard.id,
             type: widget.type,
             title: widget.title,
@@ -536,14 +494,14 @@ export class AnalyticsService {
       }
 
       logger.info(`Dashboard created: ${name} for user ${userId}`);
-      
+
       return {
         success: true,
         dashboard,
         message: "Dashboard created successfully"
       };
     } catch (error) {
-      logger.error(`Error creating dashboard: ${error}`);
+      logger.error(`Error creating dashboard: ${String(error)}`);
       throw error;
     }
   }
@@ -566,14 +524,14 @@ export class AnalyticsService {
         }
       });
     } catch (error) {
-      logger.error(`Error tracking analytics event: ${error}`);
+      logger.error(`Error tracking analytics event: ${String(error)}`);
     }
   }
 
   /**
    * Get KPI metrics
    */
-  static async getKPIMetrics(): Promise<any> {
+  static async getKPIMetrics(): Promise<Record<string, unknown>> {
     try {
       const kpis = await db.kPI.findMany({
         where: { isActive: true },
@@ -584,43 +542,46 @@ export class AnalyticsService {
       const kpiMetrics = await Promise.all(
         kpis.map(async (kpi) => {
           let currentValue = 0;
-          
+
           switch (kpi.name) {
-            case "total_revenue":
+            case "total_revenue": {
               const revenueResult = await db.order.aggregate({
                 where: { paymentStatus: "PAID" },
                 _sum: { amount: true }
               });
               currentValue = revenueResult._sum.amount || 0;
               break;
-              
+            }
+
             case "total_orders":
               currentValue = await db.order.count({
                 where: { paymentStatus: "PAID" }
               });
               break;
-              
-            case "average_order_value":
+
+            case "average_order_value": {
               const avgResult = await db.order.aggregate({
                 where: { paymentStatus: "PAID" },
                 _avg: { amount: true }
               });
               currentValue = avgResult._avg.amount || 0;
               break;
-              
+            }
+
             case "total_customers":
               currentValue = await db.user.count({
                 where: { role: "customer" }
               });
               break;
-              
-            case "inventory_turnover":
+
+            case "inventory_turnover": {
               // Calculate inventory turnover ratio
               const inventoryLogs = await db.inventoryLog.count({
                 where: { changeType: "SALE" }
               });
               currentValue = inventoryLogs;
               break;
+            }
           }
 
           return {
@@ -631,75 +592,86 @@ export class AnalyticsService {
         })
       );
 
-      return kpiMetrics;
+      return kpiMetrics as unknown as Record<string, unknown>;
     } catch (error) {
-      logger.error(`Error getting KPI metrics: ${error}`);
+      logger.error(`Error getting KPI metrics: ${String(error)}`);
       throw error;
     }
   }
 
   // Helper methods
-  private static async getRevenueByPeriod(where: Prisma.OrderWhereInput, groupBy: string): Promise<any[]> {
+
+  // eslint-disable-next-line no-unused-vars
+  private static getRevenueByPeriod(_where: Prisma.OrderWhereInput, _groupBy: string): unknown[] {
     // Implementation for revenue grouping by period
     return [];
   }
 
-  private static async getTopProducts(where: Prisma.OrderWhereInput): Promise<any[]> {
+  // eslint-disable-next-line no-unused-vars
+  private static getTopProducts(_where: Prisma.OrderWhereInput): unknown[] {
     // Implementation for top products
     return [];
   }
 
-  private static async getCustomerMetrics(where: Prisma.OrderWhereInput): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getCustomerMetrics(_where: Prisma.OrderWhereInput): unknown {
     // Implementation for customer metrics
     return {};
   }
 
-  private static async getTopMovingProducts(where: Prisma.InventoryLogWhereInput): Promise<any[]> {
+  // eslint-disable-next-line no-unused-vars
+  private static getTopMovingProducts(_where: Prisma.InventoryLogWhereInput): unknown[] {
     // Implementation for top moving products
     return [];
   }
 
-  private static async calculateInventoryValue(): Promise<number> {
+  private static calculateInventoryValue(): number {
     // Implementation for inventory value calculation
     return 0;
   }
 
-  private static async calculateCustomerLifetimeValue(): Promise<number> {
+  private static calculateCustomerLifetimeValue(): number {
     // Implementation for customer lifetime value
     return 0;
   }
 
-  private static async getCustomerSegments(): Promise<any[]> {
+  private static getCustomerSegments(): unknown[] {
     // Implementation for customer segments
     return [];
   }
 
-  private static async getTopCustomers(dateFrom: Date): Promise<any[]> {
+  // eslint-disable-next-line no-unused-vars
+  private static getTopCustomers(_dateFrom: Date): unknown[] {
     // Implementation for top customers
     return [];
   }
 
-  private static async getVendorPerformanceMetrics(vendorId?: string, dateFrom?: Date): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getVendorPerformanceMetrics(_vendorId?: string, _dateFrom?: Date): unknown {
     // Implementation for vendor performance metrics
     return {};
   }
 
-  private static async getOrderAnalytics(parameters: ReportParameters): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getOrderAnalytics(_parameters: ReportParameters): unknown {
     // Implementation for order analytics
     return {};
   }
 
-  private static async getReturnAnalytics(parameters: ReportParameters): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getReturnAnalytics(_parameters: ReportParameters): unknown {
     // Implementation for return analytics
     return {};
   }
 
-  private static async getPaymentAnalytics(parameters: ReportParameters): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getPaymentAnalytics(_parameters: ReportParameters): unknown {
     // Implementation for payment analytics
     return {};
   }
 
-  private static async getPerformanceAnalytics(parameters: ReportParameters): Promise<any> {
+  // eslint-disable-next-line no-unused-vars
+  private static getPerformanceAnalytics(_parameters: ReportParameters): unknown {
     // Implementation for performance analytics
     return {};
   }

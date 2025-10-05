@@ -1,3 +1,4 @@
+import type { NotificationPriority } from "@prisma/client";
 import { NotificationService } from "../services/notification.service.js";
 import logger from "../utils/loggerUtils.js";
 
@@ -13,14 +14,14 @@ export class NotificationIntegrationService {
     userId: string,
     type: "ORDER_CREATED" | "ORDER_UPDATED" | "ORDER_CANCELLED" | "ORDER_SHIPPED" | "ORDER_DELIVERED",
     orderId: number,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getOrderNotificationTitle(type),
-        message: this.getOrderNotificationMessage(type, additionalData),
+        message: this.getOrderNotificationMessage(type, additionalData as Record<string, unknown>),
         priority: "NORMAL" as const,
         data: additionalData,
         orderId
@@ -29,7 +30,7 @@ export class NotificationIntegrationService {
       await NotificationService.createNotification(notificationData);
       logger.info(`Order notification sent: ${type} for order ${orderId}`);
     } catch (error) {
-      logger.error(`Error sending order notification: ${error}`);
+      logger.error(`Error sending order notification: ${String(error)}`);
     }
   }
 
@@ -41,23 +42,23 @@ export class NotificationIntegrationService {
     type: "PAYMENT_SUCCESS" | "PAYMENT_FAILED" | "PAYMENT_REFUNDED",
     orderId: number,
     amount?: number,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getPaymentNotificationTitle(type),
-        message: this.getPaymentNotificationMessage(type, amount, additionalData),
+        message: this.getPaymentNotificationMessage(type, amount),
         priority: "HIGH" as const,
-        data: { amount, ...additionalData },
+        data: { amount, ...(additionalData as Record<string, unknown>) },
         orderId
       };
 
       await NotificationService.createNotification(notificationData);
       logger.info(`Payment notification sent: ${type} for order ${orderId}`);
     } catch (error) {
-      logger.error(`Error sending payment notification: ${error}`);
+      logger.error(`Error sending payment notification: ${String(error)}`);
     }
   }
 
@@ -70,22 +71,22 @@ export class NotificationIntegrationService {
     productId: number,
     productName?: string,
     currentStock?: number,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getInventoryNotificationTitle(type),
-        message: this.getInventoryNotificationMessage(type, productName, currentStock, additionalData),
-        priority: type === "INVENTORY_OUT_OF_STOCK" ? "HIGH" : "NORMAL" as const,
-        data: { productId, productName, currentStock, ...additionalData }
+        message: this.getInventoryNotificationMessage(type, productName, currentStock),
+        priority: (type === "INVENTORY_OUT_OF_STOCK" ? "HIGH" : "NORMAL") as NotificationPriority,
+        data: { productId, productName, currentStock, ...(additionalData as Record<string, unknown>) }
       };
 
       await NotificationService.createNotification(notificationData);
       logger.info(`Inventory notification sent: ${type} for product ${productId}`);
     } catch (error) {
-      logger.error(`Error sending inventory notification: ${error}`);
+      logger.error(`Error sending inventory notification: ${String(error)}`);
     }
   }
 
@@ -97,14 +98,14 @@ export class NotificationIntegrationService {
     type: "RETURN_REQUESTED" | "RETURN_APPROVED" | "RETURN_REJECTED" | "RETURN_PROCESSED",
     returnId: number,
     orderId?: number,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getReturnNotificationTitle(type),
-        message: this.getReturnNotificationMessage(type, additionalData),
+        message: this.getReturnNotificationMessage(type, additionalData as Record<string, unknown>),
         priority: "NORMAL" as const,
         data: additionalData,
         returnId,
@@ -114,7 +115,7 @@ export class NotificationIntegrationService {
       await NotificationService.createNotification(notificationData);
       logger.info(`Return notification sent: ${type} for return ${returnId}`);
     } catch (error) {
-      logger.error(`Error sending return notification: ${error}`);
+      logger.error(`Error sending return notification: ${String(error)}`);
     }
   }
 
@@ -127,16 +128,16 @@ export class NotificationIntegrationService {
     returnId: number,
     orderId: number,
     amount?: number,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getRefundNotificationTitle(type),
-        message: this.getRefundNotificationMessage(type, amount, additionalData),
+        message: this.getRefundNotificationMessage(type, amount),
         priority: "HIGH" as const,
-        data: { amount, ...additionalData },
+        data: { amount, ...(additionalData as Record<string, unknown>) },
         returnId,
         orderId
       };
@@ -144,7 +145,7 @@ export class NotificationIntegrationService {
       await NotificationService.createNotification(notificationData);
       logger.info(`Refund notification sent: ${type} for return ${returnId}`);
     } catch (error) {
-      logger.error(`Error sending refund notification: ${error}`);
+      logger.error(`Error sending refund notification: ${String(error)}`);
     }
   }
 
@@ -157,16 +158,16 @@ export class NotificationIntegrationService {
     shipmentId: number,
     orderId: number,
     trackingNumber?: string,
-    additionalData?: any
+    additionalData?: unknown
   ): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getShipmentNotificationTitle(type),
-        message: this.getShipmentNotificationMessage(type, trackingNumber, additionalData),
+        message: this.getShipmentNotificationMessage(type, trackingNumber),
         priority: "NORMAL" as const,
-        data: { trackingNumber, ...additionalData },
+        data: { trackingNumber, ...(additionalData as Record<string, unknown>) },
         shipmentId,
         orderId
       };
@@ -174,24 +175,20 @@ export class NotificationIntegrationService {
       await NotificationService.createNotification(notificationData);
       logger.info(`Shipment notification sent: ${type} for shipment ${shipmentId}`);
     } catch (error) {
-      logger.error(`Error sending shipment notification: ${error}`);
+      logger.error(`Error sending shipment notification: ${String(error)}`);
     }
   }
 
   /**
    * Send vendor-related notifications
    */
-  static async sendVendorNotification(
-    userId: string,
-    type: "VENDOR_APPROVED" | "VENDOR_REJECTED",
-    additionalData?: any
-  ): Promise<void> {
+  static async sendVendorNotification(userId: string, type: "VENDOR_APPROVED" | "VENDOR_REJECTED", additionalData?: unknown): Promise<void> {
     try {
       const notificationData = {
         userId,
         type,
         title: this.getVendorNotificationTitle(type),
-        message: this.getVendorNotificationMessage(type, additionalData),
+        message: this.getVendorNotificationMessage(type, additionalData as Record<string, unknown>),
         priority: "HIGH" as const,
         data: additionalData
       };
@@ -199,31 +196,25 @@ export class NotificationIntegrationService {
       await NotificationService.createNotification(notificationData);
       logger.info(`Vendor notification sent: ${type} for user ${userId}`);
     } catch (error) {
-      logger.error(`Error sending vendor notification: ${error}`);
+      logger.error(`Error sending vendor notification: ${String(error)}`);
     }
   }
 
   /**
    * Send system-wide notifications
    */
-  static async sendSystemNotification(
+  static sendSystemNotification(
     type: "SYSTEM_MAINTENANCE" | "SECURITY_ALERT" | "GENERAL",
     title: string,
     message: string,
     priority: "LOW" | "NORMAL" | "HIGH" | "URGENT" = "NORMAL",
-    data?: any
-  ): Promise<void> {
+    data?: unknown
+  ): void {
     try {
-      await NotificationService.broadcastSystemNotification(
-        type,
-        title,
-        message,
-        priority,
-        data
-      );
+      NotificationService.broadcastSystemNotification(type, title, message, priority, data);
       logger.info(`System notification sent: ${type}`);
     } catch (error) {
-      logger.error(`Error sending system notification: ${error}`);
+      logger.error(`Error sending system notification: ${String(error)}`);
     }
   }
 
@@ -239,12 +230,12 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Order Update";
   }
 
-  private static getOrderNotificationMessage(type: string, data?: any): string {
+  private static getOrderNotificationMessage(type: string, _data?: Record<string, unknown>): string {
     const messages = {
-      ORDER_CREATED: `Your order has been confirmed and is being processed. Order ID: ${data?.orderId || 'N/A'}`,
-      ORDER_UPDATED: `Your order status has been updated. ${data?.status || 'Status changed'}`,
-      ORDER_CANCELLED: `Your order has been cancelled. ${data?.reason || 'Please contact support if you have questions.'}`,
-      ORDER_SHIPPED: `Your order has been shipped! Tracking number: ${data?.trackingNumber || 'N/A'}`,
+      ORDER_CREATED: `Your order has been confirmed and is being processed. Order ID: ${String(_data?.orderId) || "N/A"}`,
+      ORDER_UPDATED: `Your order status has been updated. ${String(_data?.status) || "Status changed"}`,
+      ORDER_CANCELLED: `Your order has been cancelled. ${String(_data?.reason) || "Please contact support if you have questions."}`,
+      ORDER_SHIPPED: `Your order has been shipped! Tracking number: ${String(_data?.trackingNumber) || "N/A"}`,
       ORDER_DELIVERED: `Your order has been delivered successfully. Thank you for your purchase!`
     };
     return messages[type as keyof typeof messages] || "Order update notification";
@@ -259,8 +250,8 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Payment Update";
   }
 
-  private static getPaymentNotificationMessage(type: string, amount?: number, data?: any): string {
-    const amountText = amount ? `$${amount.toFixed(2)}` : '';
+  private static getPaymentNotificationMessage(type: string, amount?: number): string {
+    const amountText = amount ? `$${amount.toFixed(2)}` : "";
     const messages = {
       PAYMENT_SUCCESS: `Your payment of ${amountText} has been processed successfully.`,
       PAYMENT_FAILED: `Your payment of ${amountText} could not be processed. Please try again or contact support.`,
@@ -277,9 +268,9 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Inventory Alert";
   }
 
-  private static getInventoryNotificationMessage(type: string, productName?: string, currentStock?: number, data?: any): string {
-    const productText = productName ? ` for ${productName}` : '';
-    const stockText = currentStock !== undefined ? ` (${currentStock} remaining)` : '';
+  private static getInventoryNotificationMessage(type: string, productName?: string, currentStock?: number): string {
+    const productText = productName ? ` for ${productName}` : "";
+    const stockText = currentStock !== undefined ? ` (${currentStock} remaining)` : "";
     const messages = {
       INVENTORY_LOW_STOCK: `Low stock alert${productText}${stockText}. Consider restocking soon.`,
       INVENTORY_OUT_OF_STOCK: `Out of stock alert${productText}. Immediate restocking required.`
@@ -297,11 +288,11 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Return Update";
   }
 
-  private static getReturnNotificationMessage(type: string, data?: any): string {
+  private static getReturnNotificationMessage(type: string, _data?: Record<string, unknown>): string {
     const messages = {
-      RETURN_REQUESTED: `Your return request has been submitted and is under review. Return ID: ${data?.returnId || 'N/A'}`,
+      RETURN_REQUESTED: `Your return request has been submitted and is under review. Return ID: ${String(_data?.returnId) || "N/A"}`,
       RETURN_APPROVED: `Your return request has been approved. Please ship the items using the provided return label.`,
-      RETURN_REJECTED: `Your return request has been rejected. Reason: ${data?.reason || 'Please contact support for more information.'}`,
+      RETURN_REJECTED: `Your return request has been rejected. Reason: ${String(_data?.reason) || "Please contact support for more information."}`,
       RETURN_PROCESSED: `Your return has been processed successfully. Refund will be processed within 3-5 business days.`
     };
     return messages[type as keyof typeof messages] || "Return notification";
@@ -314,8 +305,8 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Refund Update";
   }
 
-  private static getRefundNotificationMessage(type: string, amount?: number, data?: any): string {
-    const amountText = amount ? `$${amount.toFixed(2)}` : '';
+  private static getRefundNotificationMessage(type: string, amount?: number): string {
+    const amountText = amount ? `$${amount.toFixed(2)}` : "";
     const messages = {
       REFUND_PROCESSED: `Your refund of ${amountText} has been processed successfully. It will appear in your account within 3-5 business days.`
     };
@@ -331,8 +322,8 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Shipment Update";
   }
 
-  private static getShipmentNotificationMessage(type: string, trackingNumber?: string, data?: any): string {
-    const trackingText = trackingNumber ? ` Tracking: ${trackingNumber}` : '';
+  private static getShipmentNotificationMessage(type: string, trackingNumber?: string): string {
+    const trackingText = trackingNumber ? ` Tracking: ${trackingNumber}` : "";
     const messages = {
       SHIPMENT_CREATED: `Your shipment has been created and is ready for pickup.${trackingText}`,
       SHIPMENT_UPDATED: `Your shipment status has been updated.${trackingText}`,
@@ -349,10 +340,10 @@ export class NotificationIntegrationService {
     return titles[type as keyof typeof titles] || "Vendor Update";
   }
 
-  private static getVendorNotificationMessage(type: string, data?: any): string {
+  private static getVendorNotificationMessage(type: string, _data?: Record<string, unknown>): string {
     const messages = {
       VENDOR_APPROVED: `Congratulations! Your vendor application has been approved. You can now start selling your products.`,
-      VENDOR_REJECTED: `Your vendor application has been rejected. Reason: ${data?.reason || 'Please contact support for more information.'}`
+      VENDOR_REJECTED: `Your vendor application has been rejected. Reason: ${String(_data?.reason) || "Please contact support for more information."}`
     };
     return messages[type as keyof typeof messages] || "Vendor notification";
   }

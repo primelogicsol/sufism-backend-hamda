@@ -1,4 +1,4 @@
-import { Prisma, ShippingMethod, ShippingStatus, Carrier, ReturnStatus, ReturnReason } from "@prisma/client";
+import type { Prisma, ShippingMethod, ShippingStatus, Carrier, ReturnReason, ProductCategory } from "@prisma/client";
 import { db } from "../configs/database.js";
 import { InventoryService } from "./inventory.service.js";
 import logger from "../utils/loggerUtils.js";
@@ -53,9 +53,15 @@ export class ShippingFulfillmentService {
    */
   static async calculateShippingRates(
     orderId: number,
-    destination: { country: string; zip: string },
-    weight: number,
-    dimensions?: { length: number; width: number; height: number }
+
+    // eslint-disable-next-line no-unused-vars
+    _destination: { country: string; zip: string },
+
+    // eslint-disable-next-line no-unused-vars
+    _weight: number,
+
+    // eslint-disable-next-line no-unused-vars
+    _dimensions?: { length: number; width: number; height: number }
   ): Promise<ShippingRate[]> {
     try {
       const order = await db.order.findUnique({
@@ -80,7 +86,7 @@ export class ShippingFulfillmentService {
         {
           carrier: "UPS",
           service: "UPS Ground",
-          cost: 9.50,
+          cost: 9.5,
           estimatedDays: 3,
           trackingAvailable: true
         },
@@ -101,21 +107,23 @@ export class ShippingFulfillmentService {
         {
           carrier: "UPS",
           service: "UPS 2nd Day Air",
-          cost: 16.50,
+          cost: 16.5,
           estimatedDays: 2,
           trackingAvailable: true
         }
       ];
 
       // Filter rates based on destination, weight, and dimensions
-      const filteredRates = rates.filter(rate => {
+
+      // eslint-disable-next-line no-unused-vars
+      const filteredRates = rates.filter((_rate) => {
         // Add business logic for rate filtering
         return true;
       });
 
       return filteredRates;
     } catch (error) {
-      logger.error(`Error calculating shipping rates: ${error}`);
+      logger.error(`Error calculating shipping rates: ${String(error)}`);
       throw error;
     }
   }
@@ -123,7 +131,7 @@ export class ShippingFulfillmentService {
   /**
    * Create shipment and generate shipping label
    */
-  static async createShipment(shipmentData: ShipmentData): Promise<{ success: boolean; shipment: any; message: string }> {
+  static async createShipment(shipmentData: ShipmentData): Promise<{ success: boolean; shipment: unknown; message: string }> {
     try {
       const { orderId, trackingNumber, carrier, shippingMethod, weight, dimensions, cost, labelUrl, trackingUrl, estimatedDelivery } = shipmentData;
 
@@ -184,14 +192,14 @@ export class ShippingFulfillmentService {
       });
 
       logger.info(`Shipment created for order ${orderId}: ${trackingNumber}`);
-      
+
       return {
         success: true,
         shipment,
         message: "Shipment created successfully"
       };
     } catch (error) {
-      logger.error(`Error creating shipment: ${error}`);
+      logger.error(`Error creating shipment: ${String(error)}`);
       throw error;
     }
   }
@@ -262,13 +270,13 @@ export class ShippingFulfillmentService {
       }
 
       logger.info(`Shipment status updated: ${trackingNumber} -> ${status}`);
-      
+
       return {
         success: true,
         message: "Shipment status updated successfully"
       };
     } catch (error) {
-      logger.error(`Error updating shipment status: ${error}`);
+      logger.error(`Error updating shipment status: ${String(error)}`);
       throw error;
     }
   }
@@ -276,7 +284,7 @@ export class ShippingFulfillmentService {
   /**
    * Get shipment tracking information
    */
-  static async getShipmentTracking(trackingNumber: string): Promise<any> {
+  static async getShipmentTracking(trackingNumber: string): Promise<unknown> {
     try {
       const shipment = await db.shipment.findFirst({
         where: { trackingNumber },
@@ -308,7 +316,7 @@ export class ShippingFulfillmentService {
         estimatedDelivery: shipment.estimatedDelivery,
         actualDelivery: shipment.actualDelivery,
         weight: shipment.weight,
-        dimensions: shipment.dimensions ? JSON.parse(shipment.dimensions) : null,
+        dimensions: shipment.dimensions ? (JSON.parse(String(shipment.dimensions)) as unknown) : null,
         cost: shipment.cost,
         labelUrl: shipment.labelUrl,
         trackingUrl: shipment.trackingUrl,
@@ -318,7 +326,7 @@ export class ShippingFulfillmentService {
         updatedAt: shipment.updatedAt
       };
     } catch (error) {
-      logger.error(`Error getting shipment tracking: ${error}`);
+      logger.error(`Error getting shipment tracking: ${String(error)}`);
       throw error;
     }
   }
@@ -326,7 +334,7 @@ export class ShippingFulfillmentService {
   /**
    * Request return for an order
    */
-  static async requestReturn(returnRequest: ReturnRequest): Promise<{ success: boolean; return: any; message: string }> {
+  static async requestReturn(returnRequest: ReturnRequest): Promise<{ success: boolean; return: unknown; message: string }> {
     try {
       const { orderId, userId, reason, description, items } = returnRequest;
 
@@ -359,9 +367,9 @@ export class ShippingFulfillmentService {
 
       // Calculate refund amount
       const refundAmount = items.reduce((total, item) => {
-        const orderItem = order.items.find(oi => oi.productId === item.productId);
+        const orderItem = order.items.find((oi) => oi.productId === item.productId);
         if (orderItem) {
-          return total + (orderItem.price * item.quantity);
+          return total + orderItem.price * item.quantity;
         }
         return total;
       }, 0);
@@ -376,7 +384,7 @@ export class ShippingFulfillmentService {
           refundAmount,
           status: "REQUESTED",
           items: {
-            create: items.map(item => ({
+            create: items.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
               reason: item.reason,
@@ -402,14 +410,14 @@ export class ShippingFulfillmentService {
       });
 
       logger.info(`Return requested for order ${orderId} by user ${userId}`);
-      
+
       return {
         success: true,
         return: returnRecord,
         message: "Return request submitted successfully"
       };
     } catch (error) {
-      logger.error(`Error requesting return: ${error}`);
+      logger.error(`Error requesting return: ${String(error)}`);
       throw error;
     }
   }
@@ -452,7 +460,8 @@ export class ShippingFulfillmentService {
             approvedAt: new Date(),
             approvedBy: processedBy,
             refundAmount: data?.refundAmount || returnRecord.refundAmount,
-            refundMethod: data?.refundMethod || "original_payment",
+            refundMethod:
+              (data?.refundMethod as "ORIGINAL_PAYMENT" | "STORE_CREDIT" | "BANK_TRANSFER" | "CHECK" | "CASH" | "GIFT_CARD") || "ORIGINAL_PAYMENT",
             returnLabelUrl: data?.returnLabelUrl,
             notes: data?.notes
           }
@@ -471,7 +480,7 @@ export class ShippingFulfillmentService {
         });
 
         logger.info(`Return request ${returnId} approved by ${processedBy}`);
-        
+
         return {
           success: true,
           message: "Return request approved successfully"
@@ -490,14 +499,14 @@ export class ShippingFulfillmentService {
         });
 
         logger.info(`Return request ${returnId} rejected by ${processedBy}`);
-        
+
         return {
           success: true,
           message: "Return request rejected"
         };
       }
     } catch (error) {
-      logger.error(`Error processing return request: ${error}`);
+      logger.error(`Error processing return request: ${String(error)}`);
       throw error;
     }
   }
@@ -541,14 +550,16 @@ export class ShippingFulfillmentService {
 
       // Restore inventory for returned items
       for (const item of items) {
-        const returnItem = returnRecord.items.find(ri => ri.productId === item.productId);
+        const returnItem = returnRecord.items.find((ri) => ri.productId === item.productId);
         if (returnItem) {
           // Determine product category from order items
-          const orderItem = returnRecord.order.items.find(oi => oi.productId === item.productId);
+          const orderItem = (returnRecord.order as unknown as { items: Array<{ productId: number; category: string }> }).items.find(
+            (oi: { productId: number; category: string }) => oi.productId === item.productId
+          );
           if (orderItem) {
             await InventoryService.adjustStock({
               productId: item.productId,
-              productCategory: orderItem.category,
+              productCategory: orderItem.category as ProductCategory,
               adjustmentType: "INCREASE",
               quantity: item.quantity,
               reason: `Return processed - ${item.condition}`,
@@ -560,7 +571,7 @@ export class ShippingFulfillmentService {
       }
 
       // Process refund if applicable
-      if (returnRecord.refundAmount && returnRecord.refundMethod === "original_payment") {
+      if (returnRecord.refundAmount && returnRecord.refundMethod === "ORIGINAL_PAYMENT") {
         // In a real implementation, you would integrate with Stripe refund API here
         await db.return.update({
           where: { id: returnId },
@@ -592,13 +603,13 @@ export class ShippingFulfillmentService {
       });
 
       logger.info(`Return ${returnId} processed by ${processedBy}`);
-      
+
       return {
         success: true,
         message: "Return processed successfully"
       };
     } catch (error) {
-      logger.error(`Error processing returned items: ${error}`);
+      logger.error(`Error processing returned items: ${String(error)}`);
       throw error;
     }
   }
@@ -610,7 +621,7 @@ export class ShippingFulfillmentService {
     userId?: string;
     vendorId?: string;
     period?: "7d" | "30d" | "90d" | "1y";
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     try {
       const { userId, vendorId, period = "30d" } = params;
 
@@ -656,13 +667,7 @@ export class ShippingFulfillmentService {
         };
       }
 
-      const [
-        totalReturns,
-        returnsByStatus,
-        returnsByReason,
-        totalRefundAmount,
-        averageRefundAmount
-      ] = await Promise.all([
+      const [totalReturns, returnsByStatus, returnsByReason, totalRefundAmount, averageRefundAmount] = await Promise.all([
         db.return.count({ where }),
         db.return.groupBy({
           by: ["status"],
@@ -690,17 +695,17 @@ export class ShippingFulfillmentService {
           totalRefundAmount: totalRefundAmount._sum.refundAmount || 0,
           averageRefundAmount: averageRefundAmount._avg.refundAmount || 0
         },
-        returnsByStatus: returnsByStatus.map(item => ({
+        returnsByStatus: returnsByStatus.map((item) => ({
           status: item.status,
           count: item._count.status
         })),
-        returnsByReason: returnsByReason.map(item => ({
+        returnsByReason: returnsByReason.map((item) => ({
           reason: item.reason,
           count: item._count.reason
         }))
       };
     } catch (error) {
-      logger.error(`Error getting return analytics: ${error}`);
+      logger.error(`Error getting return analytics: ${String(error)}`);
       throw error;
     }
   }

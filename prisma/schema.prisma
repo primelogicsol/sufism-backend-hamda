@@ -178,6 +178,16 @@ model OrderItem {
   shippedAt  DateTime?
   deliveredAt DateTime?
   order      Order           @relation(fields: [orderId], references: [id])
+  
+  // Product relations based on category
+  music      Music?          @relation(fields: [productId], references: [id], map: "order_item_music")
+  digitalBook DigitalBook?   @relation(fields: [productId], references: [id], map: "order_item_digital_book")
+  meditation Meditation?     @relation(fields: [productId], references: [id], map: "order_item_meditation")
+  fashion    Fashion?        @relation(fields: [productId], references: [id], map: "order_item_fashion")
+  decoration Decoration?     @relation(fields: [productId], references: [id], map: "order_item_decoration")
+  homeAndLiving HomeAndLiving? @relation(fields: [productId], references: [id], map: "order_item_home_living")
+  accessories Accessories?   @relation(fields: [productId], references: [id], map: "order_item_accessories")
+  
   createdAt  DateTime        @default(now())
   updatedAt  DateTime?        @updatedAt
 
@@ -631,6 +641,7 @@ model Accessories {
   images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   reviews     Review[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -656,6 +667,7 @@ model Decoration {
   images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   reviews     Review[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -680,6 +692,7 @@ model HomeAndLiving {
   sku         String     @unique
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   reviews     Review[]
   images      String[]   @default([])
   createdAt   DateTime   @default(now())
@@ -706,6 +719,7 @@ model Fashion {
   images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   reviews     Review[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -731,6 +745,7 @@ model Meditation {
   images      String[]   @default([])
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   reviews     Review[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -753,9 +768,11 @@ model DigitalBook {
   fileType       String?
   coverImage     String?
   price          Float     @default(0)
+  stock          Int       @default(0)
   overviewImages String[]  @default([])
   wishlist       Wishlist[]
   cart           Cart[]
+  orderItems     OrderItem[]
   reviews        Review[]
   isAvailable    Boolean    @default(false)
   createdAt      DateTime   @default(now())
@@ -983,6 +1000,7 @@ model Music {
   reviews     Review[]
   wishlist    Wishlist[]
   cart        Cart[]
+  orderItems  OrderItem[]
   isDelete    Boolean    @default(false)
   isAvailable Boolean    @default(false)
   createdAt   DateTime   @default(now())

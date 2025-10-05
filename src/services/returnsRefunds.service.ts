@@ -1,4 +1,4 @@
-import { Prisma, ReturnStatus, ReturnReason, RefundStatus, RefundMethod, RefundType, OrderPriority } from "@prisma/client";
+import type { Prisma, ReturnStatus, ReturnReason, RefundStatus, RefundMethod, RefundType, OrderPriority, ProductCategory } from "@prisma/client";
 import { db } from "../configs/database.js";
 import { InventoryService } from "./inventory.service.js";
 import logger from "../utils/loggerUtils.js";
@@ -62,7 +62,7 @@ export class ReturnsRefundsService {
   /**
    * Create a return request
    */
-  static async createReturnRequest(data: ReturnRequestData): Promise<{ success: boolean; return: any; message: string }> {
+  static async createReturnRequest(data: ReturnRequestData): Promise<{ success: boolean; return: unknown; message: string }> {
     try {
       const { orderId, userId, reason, description, items, isExpedited = false, priority = "NORMAL", notes } = data;
 
@@ -95,9 +95,9 @@ export class ReturnsRefundsService {
 
       // Calculate refund amount
       const refundAmount = items.reduce((total, item) => {
-        const orderItem = order.items.find(oi => oi.productId === item.productId);
+        const orderItem = order.items.find((oi) => oi.productId === item.productId);
         if (orderItem) {
-          return total + (orderItem.price * item.quantity);
+          return total + orderItem.price * item.quantity;
         }
         return total;
       }, 0);
@@ -117,13 +117,15 @@ export class ReturnsRefundsService {
           returnDeadline,
           notes,
           items: {
-            create: items.map(item => ({
+            create: items.map((item) => ({
               productId: item.productId,
               quantity: item.quantity,
               reason: item.reason,
               condition: item.condition,
               notes: item.notes,
-              refundAmount: order.items.find(oi => oi.productId === item.productId)?.price * item.quantity
+              refundAmount: order.items.find((oi) => oi.productId === item.productId)?.price
+                ? order.items.find((oi) => oi.productId === item.productId)!.price * item.quantity
+                : 0
             }))
           }
         },
@@ -144,14 +146,14 @@ export class ReturnsRefundsService {
       });
 
       logger.info(`Return requested for order ${orderId} by user ${userId}`);
-      
+
       return {
         success: true,
         return: returnRecord,
         message: "Return request submitted successfully"
       };
     } catch (error) {
-      logger.error(`Error creating return request: ${error}`);
+      logger.error(`Error creating return request: ${String(error)}`);
       throw error;
     }
   }
@@ -217,7 +219,7 @@ export class ReturnsRefundsService {
         });
 
         logger.info(`Return request ${returnId} approved by ${processedBy}`);
-        
+
         return {
           success: true,
           message: "Return request approved successfully"
@@ -237,14 +239,14 @@ export class ReturnsRefundsService {
         });
 
         logger.info(`Return request ${returnId} rejected by ${processedBy}`);
-        
+
         return {
           success: true,
           message: "Return request rejected"
         };
       }
     } catch (error) {
-      logger.error(`Error processing return request: ${error}`);
+      logger.error(`Error processing return request: ${String(error)}`);
       throw error;
     }
   }
@@ -288,14 +290,16 @@ export class ReturnsRefundsService {
 
       // Restore inventory for returned items
       for (const item of items) {
-        const returnItem = returnRecord.items.find(ri => ri.productId === item.productId);
+        const returnItem = returnRecord.items.find((ri) => ri.productId === item.productId);
         if (returnItem) {
           // Determine product category from order items
-          const orderItem = returnRecord.order.items.find(oi => oi.productId === item.productId);
+          const orderItem = (returnRecord.order as Record<string, unknown>).items as Array<Record<string, unknown>>;
+          const foundItem = orderItem.find((oi: Record<string, unknown>) => oi.productId === item.productId);
           if (orderItem) {
+            const category = foundItem?.category as string;
             await InventoryService.adjustStock({
               productId: item.productId,
-              productCategory: orderItem.category,
+              productCategory: category as ProductCategory,
               adjustmentType: "INCREASE",
               quantity: item.quantity,
               reason: `Return processed - ${item.condition}`,
@@ -319,13 +323,13 @@ export class ReturnsRefundsService {
       });
 
       logger.info(`Return ${returnId} processed by ${processedBy}`);
-      
+
       return {
         success: true,
         message: "Return processed successfully"
       };
     } catch (error) {
-      logger.error(`Error processing returned items: ${error}`);
+      logger.error(`Error processing returned items: ${String(error)}`);
       throw error;
     }
   }
@@ -333,7 +337,7 @@ export class ReturnsRefundsService {
   /**
    * Process refund
    */
-  static async processRefund(data: RefundProcessingData): Promise<{ success: boolean; refund: any; message: string }> {
+  static async processRefund(data: RefundProcessingData): Promise<{ success: boolean; refund: unknown; message: string }> {
     try {
       const { returnId, amount, refundMethod, refundType, processedBy, externalRefundId, notes } = data;
 
@@ -428,14 +432,14 @@ export class ReturnsRefundsService {
       }
 
       logger.info(`Refund processed for return ${returnId} by ${processedBy}`);
-      
+
       return {
         success: true,
         refund,
         message: "Refund processed successfully"
       };
     } catch (error) {
-      logger.error(`Error processing refund: ${error}`);
+      logger.error(`Error processing refund: ${String(error)}`);
       throw error;
     }
   }
@@ -443,7 +447,7 @@ export class ReturnsRefundsService {
   /**
    * Create store credit
    */
-  static async createStoreCredit(data: StoreCreditData): Promise<{ success: boolean; storeCredit: any; message: string }> {
+  static async createStoreCredit(data: StoreCreditData): Promise<{ success: boolean; storeCredit: unknown; message: string }> {
     try {
       const { userId, amount, reason, returnId, expiresAt, notes } = data;
 
@@ -460,14 +464,14 @@ export class ReturnsRefundsService {
       });
 
       logger.info(`Store credit created for user ${userId}: $${amount}`);
-      
+
       return {
         success: true,
         storeCredit,
         message: "Store credit created successfully"
       };
     } catch (error) {
-      logger.error(`Error creating store credit: ${error}`);
+      logger.error(`Error creating store credit: ${String(error)}`);
       throw error;
     }
   }
@@ -475,16 +479,13 @@ export class ReturnsRefundsService {
   /**
    * Get user's store credits
    */
-  static async getUserStoreCredits(userId: string): Promise<any> {
+  static async getUserStoreCredits(userId: string): Promise<unknown> {
     try {
       const storeCredits = await db.storeCredit.findMany({
         where: {
           userId,
           isActive: true,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: new Date() } }
-          ]
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }]
         },
         orderBy: { createdAt: "desc" }
       });
@@ -497,7 +498,7 @@ export class ReturnsRefundsService {
         activeCredits: storeCredits.length
       };
     } catch (error) {
-      logger.error(`Error getting user store credits: ${error}`);
+      logger.error(`Error getting user store credits: ${String(error)}`);
       throw error;
     }
   }
@@ -508,31 +509,32 @@ export class ReturnsRefundsService {
   static async useStoreCredit(
     userId: string,
     amount: number,
-    orderId: number,
-    notes?: string
-  ): Promise<{ success: boolean; message: string; usedCredits: any[] }> {
+
+    // eslint-disable-next-line no-unused-vars
+    _orderId: number,
+
+    // eslint-disable-next-line no-unused-vars
+    _notes?: string
+  ): Promise<{ success: boolean; message: string; usedCredits: unknown[] }> {
     try {
       const availableCredits = await db.storeCredit.findMany({
         where: {
           userId,
           isActive: true,
           balance: { gt: 0 },
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: new Date() } }
-          ]
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }]
         },
         orderBy: { createdAt: "asc" } // Use oldest credits first
       });
 
       let remainingAmount = amount;
-      const usedCredits: any[] = [];
+      const usedCredits: unknown[] = [];
 
       for (const credit of availableCredits) {
         if (remainingAmount <= 0) break;
 
         const useAmount = Math.min(remainingAmount, credit.balance);
-        
+
         await db.storeCredit.update({
           where: { id: credit.id },
           data: {
@@ -555,14 +557,14 @@ export class ReturnsRefundsService {
       }
 
       logger.info(`Store credit used for user ${userId}: $${amount}`);
-      
+
       return {
         success: true,
         message: "Store credit used successfully",
         usedCredits
       };
     } catch (error) {
-      logger.error(`Error using store credit: ${error}`);
+      logger.error(`Error using store credit: ${String(error)}`);
       throw error;
     }
   }
@@ -570,7 +572,7 @@ export class ReturnsRefundsService {
   /**
    * Get return analytics
    */
-  static async getReturnAnalytics(params: ReturnAnalyticsParams): Promise<any> {
+  static async getReturnAnalytics(params: ReturnAnalyticsParams): Promise<unknown> {
     try {
       const { userId, vendorId, period = "30d", status, reason } = params;
 
@@ -624,14 +626,7 @@ export class ReturnsRefundsService {
         };
       }
 
-      const [
-        totalReturns,
-        returnsByStatus,
-        returnsByReason,
-        totalRefundAmount,
-        averageRefundAmount,
-        returnRate
-      ] = await Promise.all([
+      const [totalReturns, returnsByStatus, returnsByReason, totalRefundAmount, averageRefundAmount, returnRate] = await Promise.all([
         db.return.count({ where }),
         db.return.groupBy({
           by: ["status"],
@@ -675,17 +670,17 @@ export class ReturnsRefundsService {
           averageRefundAmount: averageRefundAmount._avg.refundAmount || 0,
           returnRate: totalOrders > 0 ? (returnRate / totalOrders) * 100 : 0
         },
-        returnsByStatus: returnsByStatus.map(item => ({
+        returnsByStatus: returnsByStatus.map((item) => ({
           status: item.status,
           count: item._count.status
         })),
-        returnsByReason: returnsByReason.map(item => ({
+        returnsByReason: returnsByReason.map((item) => ({
           reason: item.reason,
           count: item._count.reason
         }))
       };
     } catch (error) {
-      logger.error(`Error getting return analytics: ${error}`);
+      logger.error(`Error getting return analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -693,10 +688,10 @@ export class ReturnsRefundsService {
   /**
    * Get return by ID with full details
    */
-  static async getReturnById(returnId: number, userId?: string): Promise<any> {
+  static async getReturnById(returnId: number, userId?: string): Promise<unknown> {
     try {
       const where: Prisma.ReturnWhereInput = { id: returnId };
-      
+
       if (userId) {
         where.userId = userId;
       }
@@ -734,7 +729,7 @@ export class ReturnsRefundsService {
 
       return returnRecord;
     } catch (error) {
-      logger.error(`Error getting return by ID: ${error}`);
+      logger.error(`Error getting return by ID: ${String(error)}`);
       throw error;
     }
   }
@@ -756,27 +751,14 @@ export class ReturnsRefundsService {
     page?: number;
     limit?: number;
   }): Promise<{
-    returns: any[];
+    returns: unknown[];
     total: number;
     page: number;
     limit: number;
     totalPages: number;
   }> {
     try {
-      const {
-        userId,
-        vendorId,
-        status,
-        reason,
-        refundStatus,
-        dateFrom,
-        dateTo,
-        amountMin,
-        amountMax,
-        search,
-        page = 1,
-        limit = 10
-      } = params;
+      const { userId, vendorId, status, reason, refundStatus, dateFrom, dateTo, amountMin, amountMax, search, page = 1, limit = 10 } = params;
 
       const skip = (page - 1) * limit;
       const where: Prisma.ReturnWhereInput = {};
@@ -882,7 +864,7 @@ export class ReturnsRefundsService {
         totalPages: Math.ceil(total / limit)
       };
     } catch (error) {
-      logger.error(`Error searching returns: ${error}`);
+      logger.error(`Error searching returns: ${String(error)}`);
       throw error;
     }
   }

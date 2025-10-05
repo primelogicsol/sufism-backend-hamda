@@ -7,11 +7,13 @@ export const shippingRateRequestSchema = z.object({
     zip: z.string().min(1, "ZIP code is required")
   }),
   weight: z.number().positive("Weight must be positive"),
-  dimensions: z.object({
-    length: z.number().positive(),
-    width: z.number().positive(),
-    height: z.number().positive()
-  }).optional()
+  dimensions: z
+    .object({
+      length: z.number().positive(),
+      width: z.number().positive(),
+      height: z.number().positive()
+    })
+    .optional()
 });
 
 export const createShipmentSchema = z.object({
@@ -19,11 +21,13 @@ export const createShipmentSchema = z.object({
   carrier: z.nativeEnum(Carrier),
   shippingMethod: z.nativeEnum(ShippingMethod),
   weight: z.number().positive().optional(),
-  dimensions: z.object({
-    length: z.number().positive(),
-    width: z.number().positive(),
-    height: z.number().positive()
-  }).optional(),
+  dimensions: z
+    .object({
+      length: z.number().positive(),
+      width: z.number().positive(),
+      height: z.number().positive()
+    })
+    .optional(),
   cost: z.number().positive("Cost must be positive"),
   labelUrl: z.string().url().optional(),
   trackingUrl: z.string().url().optional(),
@@ -40,13 +44,17 @@ export const updateShipmentStatusSchema = z.object({
 export const returnRequestSchema = z.object({
   reason: z.nativeEnum(ReturnReason),
   description: z.string().min(1, "Description is required"),
-  items: z.array(z.object({
-    productId: z.number().positive(),
-    quantity: z.number().positive(),
-    reason: z.nativeEnum(ReturnReason),
-    condition: z.string().optional(),
-    notes: z.string().optional()
-  })).min(1, "At least one item is required")
+  items: z
+    .array(
+      z.object({
+        productId: z.number().positive(),
+        quantity: z.number().positive(),
+        reason: z.nativeEnum(ReturnReason),
+        condition: z.string().optional(),
+        notes: z.string().optional()
+      })
+    )
+    .min(1, "At least one item is required")
 });
 
 export const processReturnRequestSchema = z.object({
@@ -59,12 +67,16 @@ export const processReturnRequestSchema = z.object({
 });
 
 export const processReturnedItemsSchema = z.object({
-  items: z.array(z.object({
-    productId: z.number().positive(),
-    quantity: z.number().positive(),
-    condition: z.string().min(1, "Condition is required"),
-    notes: z.string().optional()
-  })).min(1, "At least one item is required")
+  items: z
+    .array(
+      z.object({
+        productId: z.number().positive(),
+        quantity: z.number().positive(),
+        condition: z.string().min(1, "Condition is required"),
+        notes: z.string().optional()
+      })
+    )
+    .min(1, "At least one item is required")
 });
 
 export const returnAnalyticsSchema = z.object({

@@ -4,13 +4,17 @@ import { ReturnStatus, ReturnReason, RefundStatus, RefundMethod, RefundType, Ord
 export const returnRequestSchema = z.object({
   reason: z.nativeEnum(ReturnReason),
   description: z.string().min(1, "Description is required"),
-  items: z.array(z.object({
-    productId: z.number().positive(),
-    quantity: z.number().positive(),
-    reason: z.nativeEnum(ReturnReason),
-    condition: z.string().optional(),
-    notes: z.string().optional()
-  })).min(1, "At least one item is required"),
+  items: z
+    .array(
+      z.object({
+        productId: z.number().positive(),
+        quantity: z.number().positive(),
+        reason: z.nativeEnum(ReturnReason),
+        condition: z.string().optional(),
+        notes: z.string().optional()
+      })
+    )
+    .min(1, "At least one item is required"),
   isExpedited: z.boolean().default(false),
   priority: z.nativeEnum(OrderPriority).default("NORMAL"),
   notes: z.string().optional()
@@ -28,12 +32,16 @@ export const processReturnRequestSchema = z.object({
 });
 
 export const processReturnedItemsSchema = z.object({
-  items: z.array(z.object({
-    productId: z.number().positive(),
-    quantity: z.number().positive(),
-    condition: z.string().min(1, "Condition is required"),
-    notes: z.string().optional()
-  })).min(1, "At least one item is required")
+  items: z
+    .array(
+      z.object({
+        productId: z.number().positive(),
+        quantity: z.number().positive(),
+        condition: z.string().min(1, "Condition is required"),
+        notes: z.string().optional()
+      })
+    )
+    .min(1, "At least one item is required")
 });
 
 export const processRefundSchema = z.object({

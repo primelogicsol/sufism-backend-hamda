@@ -160,6 +160,7 @@ function createDigitalBookData(row: RowData, userId: string): Omit<DigitalBook, 
     fileType: row.fileType ?? null,
     coverImage: row.coverImage ?? null,
     price,
+    stock: typeof row.stock === "string" ? parseInt(row.stock) : row.stock || 0,
     overviewImages: parseCommaSeparatedArray(row.overviewImages),
     isAvailable: true,
     isDelete: false

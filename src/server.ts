@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 const httpServer = createServer(app);
 
 // Initialize Socket.IO
-const io = NotificationService.initializeSocketIO(httpServer);
+NotificationService.initializeSocketIO(httpServer);
 
 // Connect to database
 await connectDB();

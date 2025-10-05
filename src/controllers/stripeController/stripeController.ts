@@ -318,7 +318,7 @@ export default {
             });
 
             console.log("<><><odd", newOrder.id);
-            
+
             // 📦 Reserve stock for the confirmed order
             try {
               const stockReservationItems = orderData.map((item: OrderItem) => ({
@@ -326,15 +326,15 @@ export default {
                 productCategory: item.category.toUpperCase() as ProductCategory,
                 quantity: item.quantity
               }));
-              
+
               const stockReservation = await InventoryService.reserveStock(stockReservationItems, newOrder.id, metadata.userId);
               if (!stockReservation.success) {
                 logger.error(`Stock reservation failed for order ${newOrder.id}: ${stockReservation.errors.join(", ")}`);
               }
             } catch (error) {
-              logger.error(`Error reserving stock for order ${newOrder.id}: ${error}`);
+              logger.error(`Error reserving stock for order ${newOrder.id}: ${String(error)}`);
             }
-            
+
             await db.cart.deleteMany({ where: { userId: metadata.userId } });
             try {
               await gloabalMailMessage(
@@ -376,15 +376,15 @@ export default {
         // Release reserved stock if order exists
         if (failedOrder) {
           try {
-            const stockReleaseItems = failedOrder.items.map(item => ({
+            const stockReleaseItems = failedOrder.items.map((item) => ({
               productId: item.productId,
               productCategory: item.category,
               quantity: item.quantity
             }));
-            
+
             await InventoryService.releaseStock(stockReleaseItems, failedOrder.id, metadata.userId, "Payment failed");
           } catch (error) {
-            logger.error(`Error releasing stock for failed order ${failedOrder.id}: ${error}`);
+            logger.error(`Error releasing stock for failed order ${failedOrder.id}: ${String(error)}`);
           }
         }
 

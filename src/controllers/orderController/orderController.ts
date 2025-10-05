@@ -41,35 +41,37 @@ export default {
     }
 
     // 🔍 Validate stock availability before processing order
-    const stockValidationItems = cartItems.map(item => {
-      let productId: number | null = null;
-      let productCategory: ProductCategory | null = null;
+    const stockValidationItems = cartItems
+      .map((item) => {
+        let productId: number | null = null;
+        let productCategory: ProductCategory | null = null;
 
-      if (item.musicId) {
-        productId = item.musicId;
-        productCategory = "MUSIC";
-      } else if (item.bookId) {
-        productId = item.bookId;
-        productCategory = "DIGITAL_BOOK";
-      } else if (item.fashionId) {
-        productId = item.fashionId;
-        productCategory = "FASHION";
-      } else if (item.meditationId) {
-        productId = item.meditationId;
-        productCategory = "MEDITATION";
-      } else if (item.decorationId) {
-        productId = item.decorationId;
-        productCategory = "DECORATION";
-      } else if (item.livingId) {
-        productId = item.livingId;
-        productCategory = "HOME_LIVING";
-      } else if (item.accessoriesId) {
-        productId = item.accessoriesId;
-        productCategory = "ACCESSORIES";
-      }
+        if (item.musicId) {
+          productId = item.musicId;
+          productCategory = "MUSIC";
+        } else if (item.bookId) {
+          productId = item.bookId;
+          productCategory = "DIGITAL_BOOK";
+        } else if (item.fashionId) {
+          productId = item.fashionId;
+          productCategory = "FASHION";
+        } else if (item.meditationId) {
+          productId = item.meditationId;
+          productCategory = "MEDITATION";
+        } else if (item.decorationId) {
+          productId = item.decorationId;
+          productCategory = "DECORATION";
+        } else if (item.livingId) {
+          productId = item.livingId;
+          productCategory = "HOME_LIVING";
+        } else if (item.accessoriesId) {
+          productId = item.accessoriesId;
+          productCategory = "ACCESSORIES";
+        }
 
-      return { productId, productCategory, quantity: item.qty };
-    }).filter(item => item.productId && item.productCategory) as Array<{ productId: number; productCategory: ProductCategory; quantity: number }>;
+        return { productId, productCategory, quantity: item.qty };
+      })
+      .filter((item) => item.productId && item.productCategory) as Array<{ productId: number; productCategory: ProductCategory; quantity: number }>;
 
     // Validate stock availability
     const stockValidation = await InventoryService.validateStockAvailability(stockValidationItems);
@@ -219,7 +221,7 @@ export default {
           // Note: In a production system, you might want to cancel the order or handle this differently
         }
       } catch (error) {
-        logger.error(`Error reserving stock for order ${newOrder.id}: ${error}`);
+        logger.error(`Error reserving stock for order ${newOrder.id}: ${String(error)}`);
         // Continue with order creation even if stock reservation fails
         // This ensures the order is created and can be handled manually if needed
       }

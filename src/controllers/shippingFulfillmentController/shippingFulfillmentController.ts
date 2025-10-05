@@ -1,4 +1,4 @@
-import { ShippingMethod, ShippingStatus, Carrier, ReturnStatus, ReturnReason } from "@prisma/client";
+import type { ShippingMethod, ShippingStatus, Carrier, ReturnReason } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -13,7 +13,11 @@ export default {
    */
   calculateShippingRates: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { destination, weight, dimensions } = req.body;
+    const { destination, weight, dimensions } = req.body as {
+      destination?: unknown;
+      weight?: unknown;
+      dimensions?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -26,15 +30,15 @@ export default {
 
     try {
       const rates = await ShippingFulfillmentService.calculateShippingRates(
-        parseInt(orderId),
-        destination,
-        weight,
-        dimensions
+        Number(orderId),
+        destination as { country: string; zip: string },
+        Number(weight),
+        dimensions as { length: number; width: number; height: number } | undefined
       );
 
       return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", rates);
     } catch (error) {
-      logger.error(`Error calculating shipping rates: ${error}`);
+      logger.error(`Error calculating shipping rates: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to calculate shipping rates");
     }
   }),
@@ -44,7 +48,17 @@ export default {
    */
   createShipment: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { trackingNumber, carrier, shippingMethod, weight, dimensions, cost, labelUrl, trackingUrl, estimatedDelivery } = req.body;
+    const { trackingNumber, carrier, shippingMethod, weight, dimensions, cost, labelUrl, trackingUrl, estimatedDelivery } = req.body as {
+      trackingNumber?: unknown;
+      carrier?: unknown;
+      shippingMethod?: unknown;
+      weight?: unknown;
+      dimensions?: unknown;
+      cost?: unknown;
+      labelUrl?: unknown;
+      trackingUrl?: unknown;
+      estimatedDelivery?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -57,27 +71,29 @@ export default {
 
     try {
       const shipmentData = {
-        orderId: parseInt(orderId),
-        trackingNumber,
+        orderId: Number(orderId),
+        trackingNumber: typeof trackingNumber === "string" ? trackingNumber : String(trackingNumber as string | number | boolean),
         carrier: carrier as Carrier,
         shippingMethod: shippingMethod as ShippingMethod,
-        weight,
-        dimensions,
-        cost: parseFloat(cost),
-        labelUrl,
-        trackingUrl,
-        estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : undefined
+        weight: Number(weight),
+        dimensions: dimensions as { length: number; width: number; height: number } | undefined,
+        cost: Number(cost),
+        labelUrl: labelUrl as string | undefined,
+        trackingUrl: trackingUrl as string | undefined,
+        estimatedDelivery: estimatedDelivery
+          ? new Date(typeof estimatedDelivery === "string" ? estimatedDelivery : String(estimatedDelivery as string | number | boolean))
+          : undefined
       };
 
       const result = await ShippingFulfillmentService.createShipment(shipmentData);
-      
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, result.shipment);
     } catch (error) {
-      logger.error(`Error creating shipment: ${error}`);
+      logger.error(`Error creating shipment: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create shipment");
     }
   }),
@@ -87,30 +103,33 @@ export default {
    */
   updateShipmentStatus: asyncHandler(async (req: _Request, res) => {
     const { trackingNumber } = req.params;
-    const { status, actualDelivery, location, notes } = req.body;
+    const { status, actualDelivery, location, notes } = req.body as {
+      status?: unknown;
+      actualDelivery?: unknown;
+      location?: unknown;
+      notes?: unknown;
+    };
 
     if (!status) {
       return httpResponse(req, res, reshttp.badRequestCode, "Status is required");
     }
 
     try {
-      const result = await ShippingFulfillmentService.updateShipmentStatus(
-        trackingNumber,
-        status as ShippingStatus,
-        {
-          actualDelivery: actualDelivery ? new Date(actualDelivery) : undefined,
-          location,
-          notes
-        }
-      );
-      
+      const result = await ShippingFulfillmentService.updateShipmentStatus(String(trackingNumber), status as ShippingStatus, {
+        actualDelivery: actualDelivery
+          ? new Date(typeof actualDelivery === "string" ? actualDelivery : String(actualDelivery as string | number | boolean))
+          : undefined,
+        location: location as string | undefined,
+        notes: notes as string | undefined
+      });
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message);
     } catch (error) {
-      logger.error(`Error updating shipment status: ${error}`);
+      logger.error(`Error updating shipment status: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to update shipment status");
     }
   }),
@@ -127,15 +146,15 @@ export default {
     }
 
     try {
-      const tracking = await ShippingFulfillmentService.getShipmentTracking(trackingNumber);
-      
+      const tracking = await ShippingFulfillmentService.getShipmentTracking(String(trackingNumber));
+
       if (!tracking) {
         return httpResponse(req, res, reshttp.notFoundCode, "Shipment not found");
       }
 
       return httpResponse(req, res, reshttp.okCode, "Shipment tracking retrieved successfully", tracking);
     } catch (error) {
-      logger.error(`Error getting shipment tracking: ${error}`);
+      logger.error(`Error getting shipment tracking: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get shipment tracking");
     }
   }),
@@ -145,7 +164,11 @@ export default {
    */
   requestReturn: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { reason, description, items } = req.body;
+    const { reason, description, items } = req.body as {
+      reason?: unknown;
+      description?: unknown;
+      items?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -158,28 +181,28 @@ export default {
 
     try {
       const returnRequest = {
-        orderId: parseInt(orderId),
+        orderId: Number(orderId),
         userId,
         reason: reason as ReturnReason,
-        description,
-        items: items.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
+        description: typeof description === "string" ? description : String(description as string | number | boolean),
+        items: items.map((item: { productId: number; quantity: number; reason: string; condition: string; notes: string }) => ({
+          productId: Number(item.productId),
+          quantity: Number(item.quantity),
           reason: item.reason as ReturnReason,
-          condition: item.condition,
-          notes: item.notes
+          condition: String(item.condition),
+          notes: String(item.notes)
         }))
       };
 
       const result = await ShippingFulfillmentService.requestReturn(returnRequest);
-      
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, result.return);
     } catch (error) {
-      logger.error(`Error requesting return: ${error}`);
+      logger.error(`Error requesting return: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to request return");
     }
   }),
@@ -189,38 +212,40 @@ export default {
    */
   processReturnRequest: asyncHandler(async (req: _Request, res) => {
     const { returnId } = req.params;
-    const { action, refundAmount, refundMethod, returnLabelUrl, rejectionReason, notes } = req.body;
+    const { action, refundAmount, refundMethod, returnLabelUrl, rejectionReason, notes } = req.body as {
+      action?: unknown;
+      refundAmount?: unknown;
+      refundMethod?: unknown;
+      returnLabelUrl?: unknown;
+      rejectionReason?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    if (!action || !["approve", "reject"].includes(action)) {
+    if (!action || !["approve", "reject"].includes(typeof action === "string" ? action : String(action as string | number | boolean))) {
       return httpResponse(req, res, reshttp.badRequestCode, "Valid action (approve/reject) is required");
     }
 
     try {
-      const result = await ShippingFulfillmentService.processReturnRequest(
-        parseInt(returnId),
-        action as "approve" | "reject",
-        userId,
-        {
-          refundAmount: refundAmount ? parseFloat(refundAmount) : undefined,
-          refundMethod,
-          returnLabelUrl,
-          rejectionReason,
-          notes
-        }
-      );
-      
+      const result = await ShippingFulfillmentService.processReturnRequest(Number(returnId), action as "approve" | "reject", userId, {
+        refundAmount: refundAmount ? Number(refundAmount) : undefined,
+        refundMethod: refundMethod as string | undefined,
+        returnLabelUrl: returnLabelUrl as string | undefined,
+        rejectionReason: rejectionReason as string | undefined,
+        notes: notes as string | undefined
+      });
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message);
     } catch (error) {
-      logger.error(`Error processing return request: ${error}`);
+      logger.error(`Error processing return request: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to process return request");
     }
   }),
@@ -230,7 +255,7 @@ export default {
    */
   processReturnedItems: asyncHandler(async (req: _Request, res) => {
     const { returnId } = req.params;
-    const { items } = req.body;
+    const { items } = req.body as { items?: unknown };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -242,26 +267,22 @@ export default {
     }
 
     try {
-      const processedItems = items.map((item: any) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        condition: item.condition,
-        notes: item.notes
+      const processedItems = items.map((item: { productId: number; quantity: number; condition: string; notes: string }) => ({
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        condition: String(item.condition),
+        notes: String(item.notes)
       }));
 
-      const result = await ShippingFulfillmentService.processReturnedItems(
-        parseInt(returnId),
-        userId,
-        processedItems
-      );
-      
+      const result = await ShippingFulfillmentService.processReturnedItems(Number(returnId), userId, processedItems);
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message);
     } catch (error) {
-      logger.error(`Error processing returned items: ${error}`);
+      logger.error(`Error processing returned items: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to process returned items");
     }
   }),
@@ -271,7 +292,7 @@ export default {
    */
   getReturnAnalytics: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { period = "30d" } = req.query;
+    const { period = "30d" } = req.query as { period?: string };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -282,10 +303,10 @@ export default {
         userId,
         period: period as "7d" | "30d" | "90d" | "1y"
       });
-      
+
       return httpResponse(req, res, reshttp.okCode, "Return analytics retrieved successfully", analytics);
     } catch (error) {
-      logger.error(`Error getting return analytics: ${error}`);
+      logger.error(`Error getting return analytics: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get return analytics");
     }
   }),
@@ -295,7 +316,7 @@ export default {
    */
   getVendorReturnAnalytics: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { period = "30d" } = req.query;
+    const { period = "30d" } = req.query as { period?: string };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -311,10 +332,10 @@ export default {
         vendorId: userId,
         period: period as "7d" | "30d" | "90d" | "1y"
       });
-      
+
       return httpResponse(req, res, reshttp.okCode, "Vendor return analytics retrieved successfully", analytics);
     } catch (error) {
-      logger.error(`Error getting vendor return analytics: ${error}`);
+      logger.error(`Error getting vendor return analytics: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get vendor return analytics");
     }
   }),
@@ -324,7 +345,17 @@ export default {
    */
   getUserReturns: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { status, period = "30d", page = "1", limit = "10" } = req.query;
+    const {
+      status,
+      period = "30d",
+      page = "1",
+      limit = "10"
+    } = req.query as {
+      status?: string;
+      period?: string;
+      page?: string;
+      limit?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -347,22 +378,22 @@ export default {
           break;
       }
 
-      const where: any = {
+      const where: Record<string, unknown> = {
         userId,
         createdAt: { gte: dateFrom }
       };
 
       if (status) {
-        where.status = status;
+        where.status = String(status);
       }
 
-      const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+      const skip = (Number(page) - 1) * Number(limit);
 
       const [returns, total] = await Promise.all([
         db.return.findMany({
           where,
           skip,
-          take: parseInt(limit as string),
+          take: Number(limit),
           include: {
             order: {
               include: {
@@ -385,12 +416,12 @@ export default {
       return httpResponse(req, res, reshttp.okCode, "User returns retrieved successfully", {
         returns,
         total,
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        totalPages: Math.ceil(total / parseInt(limit as string))
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit))
       });
     } catch (error) {
-      logger.error(`Error getting user returns: ${error}`);
+      logger.error(`Error getting user returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get user returns");
     }
   }),
@@ -400,7 +431,19 @@ export default {
    */
   getAllReturns: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { status, reason, period = "30d", page = "1", limit = "10" } = req.query;
+    const {
+      status,
+      reason,
+      period = "30d",
+      page = "1",
+      limit = "10"
+    } = req.query as {
+      status?: string;
+      reason?: string;
+      period?: string;
+      page?: string;
+      limit?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -428,16 +471,16 @@ export default {
           break;
       }
 
-      const where: any = {
+      const where: Record<string, unknown> = {
         createdAt: { gte: dateFrom }
       };
 
       if (status) {
-        where.status = status;
+        where.status = String(status);
       }
 
       if (reason) {
-        where.reason = reason;
+        where.reason = String(reason);
       }
 
       // If user is vendor, filter by their products
@@ -459,13 +502,13 @@ export default {
         };
       }
 
-      const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+      const skip = (Number(page) - 1) * Number(limit);
 
       const [returns, total] = await Promise.all([
         db.return.findMany({
           where,
           skip,
-          take: parseInt(limit as string),
+          take: Number(limit),
           include: {
             order: {
               include: {
@@ -488,12 +531,12 @@ export default {
       return httpResponse(req, res, reshttp.okCode, "Returns retrieved successfully", {
         returns,
         total,
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        totalPages: Math.ceil(total / parseInt(limit as string))
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit))
       });
     } catch (error) {
-      logger.error(`Error getting all returns: ${error}`);
+      logger.error(`Error getting all returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get returns");
     }
   })

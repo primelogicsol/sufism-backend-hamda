@@ -1,8 +1,8 @@
-import { Prisma, NotificationType, NotificationPriority, NotificationStatus } from "@prisma/client";
+import type { Prisma, NotificationType, NotificationPriority, NotificationStatus } from "@prisma/client";
 import { db } from "../configs/database.js";
 import logger from "../utils/loggerUtils.js";
 import { Server as SocketIOServer } from "socket.io";
-import { Server as HTTPServer } from "http";
+import type { Server as HTTPServer } from "http";
 
 export interface NotificationData {
   userId: string;
@@ -10,7 +10,7 @@ export interface NotificationData {
   title: string;
   message: string;
   priority?: NotificationPriority;
-  data?: any;
+  data?: unknown;
   orderId?: number;
   returnId?: number;
   shipmentId?: number;
@@ -68,7 +68,7 @@ export class NotificationService {
           // In a real implementation, you would verify the JWT token here
           // For now, we'll assume the token is valid and contains userId
           const userId = data.token; // This should be extracted from JWT
-          
+
           const connection: WebSocketConnection = {
             userId,
             connectionId: socket.id,
@@ -92,12 +92,12 @@ export class NotificationService {
           });
 
           // Join user-specific room
-          socket.join(`user:${userId}`);
-          
+          void socket.join(`user:${userId}`);
+
           socket.emit("authenticated", { success: true });
           logger.info(`User ${userId} authenticated with socket ${socket.id}`);
         } catch (error) {
-          logger.error(`Authentication error: ${error}`);
+          logger.error(`Authentication error: ${String(error)}`);
           socket.emit("authentication_error", { message: "Authentication failed" });
         }
       });
@@ -107,7 +107,7 @@ export class NotificationService {
         socket.emit("pong");
         const connection = this.activeConnections.get(socket.id);
         if (connection) {
-          db.webSocketConnection.updateMany({
+          void db.webSocketConnection.updateMany({
             where: { connectionId: socket.id },
             data: { lastPingAt: new Date() }
           });
@@ -117,7 +117,7 @@ export class NotificationService {
       // Handle disconnection
       socket.on("disconnect", async () => {
         logger.info(`WebSocket disconnected: ${socket.id}`);
-        
+
         const connection = this.activeConnections.get(socket.id);
         if (connection) {
           // Update connection status in database
@@ -140,20 +140,9 @@ export class NotificationService {
   /**
    * Create notification
    */
-  static async createNotification(data: NotificationData): Promise<{ success: boolean; notification: any; message: string }> {
+  static async createNotification(data: NotificationData): Promise<{ success: boolean; notification: unknown; message: string }> {
     try {
-      const {
-        userId,
-        type,
-        title,
-        message,
-        priority = "NORMAL",
-        data: notificationData,
-        orderId,
-        returnId,
-        shipmentId,
-        expiresAt
-      } = data;
+      const { userId, type, title, message, priority = "NORMAL", data: notificationData, orderId, returnId, shipmentId, expiresAt } = data;
 
       // Check user notification preferences
       const preferences = await db.notificationPreference.findFirst({
@@ -215,14 +204,14 @@ export class NotificationService {
       await this.sendRealTimeNotification(notification);
 
       logger.info(`Notification created for user ${userId}: ${type}`);
-      
+
       return {
         success: true,
         notification,
         message: "Notification created and sent successfully"
       };
     } catch (error) {
-      logger.error(`Error creating notification: ${error}`);
+      logger.error(`Error creating notification: ${String(error)}`);
       throw error;
     }
   }
@@ -230,7 +219,7 @@ export class NotificationService {
   /**
    * Send real-time notification via WebSocket
    */
-  static async sendRealTimeNotification(notification: any): Promise<void> {
+  static async sendRealTimeNotification(notification: Record<string, unknown>): Promise<void> {
     try {
       if (!this.io) {
         logger.warn("Socket.IO server not initialized");
@@ -238,36 +227,36 @@ export class NotificationService {
       }
 
       // Send to user-specific room
-      this.io.to(`user:${notification.userId}`).emit("notification", {
-        id: notification.id,
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        priority: notification.priority,
-        data: notification.data ? JSON.parse(notification.data) : null,
-        orderId: notification.orderId,
-        returnId: notification.returnId,
-        shipmentId: notification.shipmentId,
-        createdAt: notification.createdAt,
-        isRead: notification.isRead
+      this.io.to(`user:${notification.userId as string}`).emit("notification", {
+        id: notification.id as number,
+        type: notification.type as string,
+        title: notification.title as string,
+        message: notification.message as string,
+        priority: notification.priority as string,
+        data: notification.data ? (JSON.parse(String(notification.data as string | number | boolean)) as Record<string, unknown>) : null,
+        orderId: notification.orderId as number | null,
+        returnId: notification.returnId as number | null,
+        shipmentId: notification.shipmentId as number | null,
+        createdAt: notification.createdAt as Date,
+        isRead: notification.isRead as boolean
       });
 
       // Update notification status
       await db.notification.update({
-        where: { id: notification.id },
+        where: { id: notification.id as number },
         data: {
           status: "SENT",
           sentAt: new Date()
         }
       });
 
-      logger.info(`Real-time notification sent to user ${notification.userId}`);
+      logger.info(`Real-time notification sent to user ${notification.userId as string}`);
     } catch (error) {
-      logger.error(`Error sending real-time notification: ${error}`);
-      
+      logger.error(`Error sending real-time notification: ${String(error)}`);
+
       // Update notification status to failed
       await db.notification.update({
-        where: { id: notification.id },
+        where: { id: notification.id as number },
         data: {
           status: "FAILED",
           retryCount: { increment: 1 },
@@ -300,13 +289,13 @@ export class NotificationService {
       });
 
       logger.info(`Notification ${notificationId} marked as read by user ${userId}`);
-      
+
       return {
         success: true,
         message: "Notification marked as read"
       };
     } catch (error) {
-      logger.error(`Error marking notification as read: ${error}`);
+      logger.error(`Error marking notification as read: ${String(error)}`);
       throw error;
     }
   }
@@ -324,7 +313,7 @@ export class NotificationService {
       limit?: number;
     } = {}
   ): Promise<{
-    notifications: any[];
+    notifications: unknown[];
     total: number;
     page: number;
     limit: number;
@@ -386,7 +375,7 @@ export class NotificationService {
         unreadCount
       };
     } catch (error) {
-      logger.error(`Error getting user notifications: ${error}`);
+      logger.error(`Error getting user notifications: ${String(error)}`);
       throw error;
     }
   }
@@ -394,7 +383,7 @@ export class NotificationService {
   /**
    * Create notification template
    */
-  static async createNotificationTemplate(template: NotificationTemplate): Promise<{ success: boolean; template: any; message: string }> {
+  static async createNotificationTemplate(template: NotificationTemplate): Promise<{ success: boolean; template: unknown; message: string }> {
     try {
       const notificationTemplate = await db.notificationTemplate.create({
         data: {
@@ -407,14 +396,14 @@ export class NotificationService {
       });
 
       logger.info(`Notification template created: ${template.type}`);
-      
+
       return {
         success: true,
         template: notificationTemplate,
         message: "Notification template created successfully"
       };
     } catch (error) {
-      logger.error(`Error creating notification template: ${error}`);
+      logger.error(`Error creating notification template: ${String(error)}`);
       throw error;
     }
   }
@@ -436,6 +425,7 @@ export class NotificationService {
       for (const pref of preferences) {
         await db.notificationPreference.upsert({
           where: {
+            // eslint-disable-next-line camelcase
             userId_type: {
               userId,
               type: pref.type
@@ -459,13 +449,13 @@ export class NotificationService {
       }
 
       logger.info(`Notification preferences updated for user ${userId}`);
-      
+
       return {
         success: true,
         message: "Notification preferences updated successfully"
       };
     } catch (error) {
-      logger.error(`Error updating notification preferences: ${error}`);
+      logger.error(`Error updating notification preferences: ${String(error)}`);
       throw error;
     }
   }
@@ -477,7 +467,7 @@ export class NotificationService {
     userId?: string;
     period?: "7d" | "30d" | "90d" | "1y";
     type?: NotificationType;
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     try {
       const { userId, period = "30d", type } = params;
 
@@ -509,14 +499,7 @@ export class NotificationService {
         where.type = type;
       }
 
-      const [
-        totalNotifications,
-        notificationsByType,
-        notificationsByStatus,
-        notificationsByPriority,
-        unreadCount,
-        readCount
-      ] = await Promise.all([
+      const [totalNotifications, notificationsByType, notificationsByStatus, notificationsByPriority, unreadCount, readCount] = await Promise.all([
         db.notification.count({ where }),
         db.notification.groupBy({
           by: ["type"],
@@ -548,21 +531,21 @@ export class NotificationService {
           readCount,
           readRate: totalNotifications > 0 ? (readCount / totalNotifications) * 100 : 0
         },
-        notificationsByType: notificationsByType.map(item => ({
+        notificationsByType: notificationsByType.map((item) => ({
           type: item.type,
           count: item._count.type
         })),
-        notificationsByStatus: notificationsByStatus.map(item => ({
+        notificationsByStatus: notificationsByStatus.map((item) => ({
           status: item.status,
           count: item._count.status
         })),
-        notificationsByPriority: notificationsByPriority.map(item => ({
+        notificationsByPriority: notificationsByPriority.map((item) => ({
           priority: item.priority,
           count: item._count.priority
         }))
       };
     } catch (error) {
-      logger.error(`Error getting notification analytics: ${error}`);
+      logger.error(`Error getting notification analytics: ${String(error)}`);
       throw error;
     }
   }
@@ -570,7 +553,7 @@ export class NotificationService {
   /**
    * Clean up expired notifications
    */
-  static async cleanupExpiredNotifications(): Promise<{ success: boolean; deletedCount: number }> {
+  static async cleanupExpiredNotifications(): Promise<{ success: boolean; deletedCount: number; message: string }> {
     try {
       const result = await db.notification.deleteMany({
         where: {
@@ -581,13 +564,14 @@ export class NotificationService {
       });
 
       logger.info(`Cleaned up ${result.count} expired notifications`);
-      
+
       return {
         success: true,
-        deletedCount: result.count
+        deletedCount: result.count,
+        message: `Cleaned up ${result.count} expired notifications`
       };
     } catch (error) {
-      logger.error(`Error cleaning up expired notifications: ${error}`);
+      logger.error(`Error cleaning up expired notifications: ${String(error)}`);
       throw error;
     }
   }
@@ -595,7 +579,7 @@ export class NotificationService {
   /**
    * Retry failed notifications
    */
-  static async retryFailedNotifications(): Promise<{ success: boolean; retriedCount: number }> {
+  static async retryFailedNotifications(): Promise<{ success: boolean; retriedCount: number; message: string }> {
     try {
       const failedNotifications = await db.notification.findMany({
         where: {
@@ -612,18 +596,19 @@ export class NotificationService {
           await this.sendRealTimeNotification(notification);
           retriedCount++;
         } catch (error) {
-          logger.error(`Failed to retry notification ${notification.id}: ${error}`);
+          logger.error(`Failed to retry notification ${notification.id}: ${String(error)}`);
         }
       }
 
       logger.info(`Retried ${retriedCount} failed notifications`);
-      
+
       return {
         success: true,
-        retriedCount
+        retriedCount,
+        message: `Retried ${retriedCount} failed notifications`
       };
     } catch (error) {
-      logger.error(`Error retrying failed notifications: ${error}`);
+      logger.error(`Error retrying failed notifications: ${String(error)}`);
       throw error;
     }
   }
@@ -631,13 +616,13 @@ export class NotificationService {
   /**
    * Broadcast system-wide notification
    */
-  static async broadcastSystemNotification(
+  static broadcastSystemNotification(
     type: NotificationType,
     title: string,
     message: string,
     priority: NotificationPriority = "NORMAL",
-    data?: any
-  ): Promise<{ success: boolean; message: string }> {
+    data?: unknown
+  ): { success: boolean; message: string } {
     try {
       if (!this.io) {
         return { success: false, message: "Socket.IO server not initialized" };
@@ -654,13 +639,13 @@ export class NotificationService {
       });
 
       logger.info(`System notification broadcasted: ${type}`);
-      
+
       return {
         success: true,
         message: "System notification broadcasted successfully"
       };
     } catch (error) {
-      logger.error(`Error broadcasting system notification: ${error}`);
+      logger.error(`Error broadcasting system notification: ${String(error)}`);
       throw error;
     }
   }

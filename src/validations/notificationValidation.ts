@@ -31,13 +31,17 @@ export const createNotificationTemplateSchema = z.object({
 });
 
 export const updateNotificationPreferencesSchema = z.object({
-  preferences: z.array(z.object({
-    type: z.nativeEnum(NotificationType),
-    emailEnabled: z.boolean().optional(),
-    pushEnabled: z.boolean().optional(),
-    smsEnabled: z.boolean().optional(),
-    webSocketEnabled: z.boolean().optional()
-  })).min(1, "At least one preference is required")
+  preferences: z
+    .array(
+      z.object({
+        type: z.nativeEnum(NotificationType),
+        emailEnabled: z.boolean().optional(),
+        pushEnabled: z.boolean().optional(),
+        smsEnabled: z.boolean().optional(),
+        webSocketEnabled: z.boolean().optional()
+      })
+    )
+    .min(1, "At least one preference is required")
 });
 
 export const broadcastSystemNotificationSchema = z.object({

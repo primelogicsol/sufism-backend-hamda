@@ -1,0 +1,39 @@
+# Server Configuration
+PORT=8001
+NODE_ENV=development
+BASE_URL=http://localhost:8001
+
+# Database Configuration
+DATABASE_URL="postgresql://username:password@localhost:5432/sufism_db"
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Admin Configuration
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_HOST_EMAIL=your-email@gmail.com
+SMTP_SECRET=your-app-password
+
+# Frontend URL
+FRONTEND_APP_URL=http://localhost:3000
+
+# Cloudinary Configuration
+CLOUDINARY_NAME=your-cloudinary-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+
+# Stripe Configuration
+STRIPE_SK=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+
+# AWS S3 Configuration (Optional)
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=your-s3-bucket-name
+

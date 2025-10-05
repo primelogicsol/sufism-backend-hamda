@@ -1,4 +1,4 @@
-import { ReturnStatus, ReturnReason, RefundStatus, RefundMethod, RefundType, OrderPriority } from "@prisma/client";
+import type { ReturnStatus, ReturnReason, RefundStatus, RefundMethod, RefundType, OrderPriority } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -13,7 +13,14 @@ export default {
    */
   createReturnRequest: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { reason, description, items, isExpedited, priority, notes } = req.body;
+    const { reason, description, items, isExpedited, priority, notes } = req.body as {
+      reason?: unknown;
+      description?: unknown;
+      items?: unknown;
+      isExpedited?: unknown;
+      priority?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -26,31 +33,31 @@ export default {
 
     try {
       const returnRequestData = {
-        orderId: parseInt(orderId),
+        orderId: Number(orderId),
         userId,
         reason: reason as ReturnReason,
-        description,
-        items: items.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
+        description: typeof description === "string" ? description : String(description as string | number | boolean),
+        items: items.map((item: { productId: number; quantity: number; reason: string; condition: string; notes: string }) => ({
+          productId: Number(item.productId),
+          quantity: Number(item.quantity),
           reason: item.reason as ReturnReason,
-          condition: item.condition,
-          notes: item.notes
+          condition: String(item.condition),
+          notes: String(item.notes)
         })),
-        isExpedited: isExpedited || false,
-        priority: priority as OrderPriority || "NORMAL",
-        notes
+        isExpedited: Boolean(isExpedited),
+        priority: (priority as OrderPriority) || "NORMAL",
+        notes: notes as string | undefined
       };
 
       const result = await ReturnsRefundsService.createReturnRequest(returnRequestData);
-      
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, result.return);
     } catch (error) {
-      logger.error(`Error creating return request: ${error}`);
+      logger.error(`Error creating return request: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create return request");
     }
   }),
@@ -60,40 +67,44 @@ export default {
    */
   processReturnRequest: asyncHandler(async (req: _Request, res) => {
     const { returnId } = req.params;
-    const { action, refundAmount, refundMethod, refundType, returnLabelUrl, rejectionReason, internalNotes, notes } = req.body;
+    const { action, refundAmount, refundMethod, refundType, returnLabelUrl, rejectionReason, internalNotes, notes } = req.body as {
+      action?: unknown;
+      refundAmount?: unknown;
+      refundMethod?: unknown;
+      refundType?: unknown;
+      returnLabelUrl?: unknown;
+      rejectionReason?: unknown;
+      internalNotes?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    if (!action || !["approve", "reject"].includes(action)) {
+    if (!action || !["approve", "reject"].includes(typeof action === "string" ? action : String(action as string | number | boolean))) {
       return httpResponse(req, res, reshttp.badRequestCode, "Valid action (approve/reject) is required");
     }
 
     try {
-      const result = await ReturnsRefundsService.processReturnRequest(
-        parseInt(returnId),
-        action as "approve" | "reject",
-        userId,
-        {
-          refundAmount: refundAmount ? parseFloat(refundAmount) : undefined,
-          refundMethod: refundMethod as RefundMethod,
-          refundType: refundType as RefundType,
-          returnLabelUrl,
-          rejectionReason,
-          internalNotes,
-          notes
-        }
-      );
-      
+      const result = await ReturnsRefundsService.processReturnRequest(Number(returnId), action as "approve" | "reject", userId, {
+        refundAmount: refundAmount ? Number(refundAmount) : undefined,
+        refundMethod: refundMethod as RefundMethod,
+        refundType: refundType as RefundType,
+        returnLabelUrl: returnLabelUrl as string | undefined,
+        rejectionReason: rejectionReason as string | undefined,
+        internalNotes: internalNotes as string | undefined,
+        notes: notes as string | undefined
+      });
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message);
     } catch (error) {
-      logger.error(`Error processing return request: ${error}`);
+      logger.error(`Error processing return request: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to process return request");
     }
   }),
@@ -103,7 +114,7 @@ export default {
    */
   processReturnedItems: asyncHandler(async (req: _Request, res) => {
     const { returnId } = req.params;
-    const { items } = req.body;
+    const { items } = req.body as { items?: unknown };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -115,26 +126,22 @@ export default {
     }
 
     try {
-      const processedItems = items.map((item: any) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        condition: item.condition,
-        notes: item.notes
+      const processedItems = items.map((item: { productId: number; quantity: number; condition: string; notes: string }) => ({
+        productId: Number(item.productId),
+        quantity: Number(item.quantity),
+        condition: String(item.condition),
+        notes: String(item.notes)
       }));
 
-      const result = await ReturnsRefundsService.processReturnedItems(
-        parseInt(returnId),
-        userId,
-        processedItems
-      );
-      
+      const result = await ReturnsRefundsService.processReturnedItems(Number(returnId), userId, processedItems);
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message);
     } catch (error) {
-      logger.error(`Error processing returned items: ${error}`);
+      logger.error(`Error processing returned items: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to process returned items");
     }
   }),
@@ -144,7 +151,13 @@ export default {
    */
   processRefund: asyncHandler(async (req: _Request, res) => {
     const { returnId } = req.params;
-    const { amount, refundMethod, refundType, externalRefundId, notes } = req.body;
+    const { amount, refundMethod, refundType, externalRefundId, notes } = req.body as {
+      amount?: unknown;
+      refundMethod?: unknown;
+      refundType?: unknown;
+      externalRefundId?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -157,24 +170,24 @@ export default {
 
     try {
       const refundData = {
-        returnId: parseInt(returnId),
-        amount: parseFloat(amount),
+        returnId: Number(returnId),
+        amount: Number(amount),
         refundMethod: refundMethod as RefundMethod,
         refundType: refundType as RefundType,
         processedBy: userId,
-        externalRefundId,
-        notes
+        externalRefundId: externalRefundId as string | undefined,
+        notes: notes as string | undefined
       };
 
       const result = await ReturnsRefundsService.processRefund(refundData);
-      
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, result.refund);
     } catch (error) {
-      logger.error(`Error processing refund: ${error}`);
+      logger.error(`Error processing refund: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to process refund");
     }
   }),
@@ -183,7 +196,21 @@ export default {
    * Create store credit
    */
   createStoreCredit: asyncHandler(async (req: _Request, res) => {
-    const { userId: targetUserId, amount, reason, returnId, expiresAt, notes } = req.body;
+    const {
+      userId: targetUserId,
+      amount,
+      reason,
+      returnId,
+      expiresAt,
+      notes
+    } = req.body as {
+      userId?: unknown;
+      amount?: unknown;
+      reason?: unknown;
+      returnId?: unknown;
+      expiresAt?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -196,23 +223,23 @@ export default {
 
     try {
       const storeCreditData = {
-        userId: targetUserId,
-        amount: parseFloat(amount),
-        reason,
-        returnId: returnId ? parseInt(returnId) : undefined,
-        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-        notes
+        userId: typeof targetUserId === "string" ? targetUserId : String(targetUserId as string | number | boolean),
+        amount: Number(amount),
+        reason: typeof reason === "string" ? reason : String(reason as string | number | boolean),
+        returnId: returnId ? Number(returnId) : undefined,
+        expiresAt: expiresAt ? new Date(typeof expiresAt === "string" ? expiresAt : String(expiresAt as string | number | boolean)) : undefined,
+        notes: notes as string | undefined
       };
 
       const result = await ReturnsRefundsService.createStoreCredit(storeCreditData);
-      
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, result.storeCredit);
     } catch (error) {
-      logger.error(`Error creating store credit: ${error}`);
+      logger.error(`Error creating store credit: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create store credit");
     }
   }),
@@ -229,10 +256,10 @@ export default {
 
     try {
       const storeCredits = await ReturnsRefundsService.getUserStoreCredits(userId);
-      
+
       return httpResponse(req, res, reshttp.okCode, "Store credits retrieved successfully", storeCredits);
     } catch (error) {
-      logger.error(`Error getting user store credits: ${error}`);
+      logger.error(`Error getting user store credits: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get store credits");
     }
   }),
@@ -241,7 +268,11 @@ export default {
    * Use store credit
    */
   useStoreCredit: asyncHandler(async (req: _Request, res) => {
-    const { amount, orderId, notes } = req.body;
+    const { amount, orderId, notes } = req.body as {
+      amount?: unknown;
+      orderId?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -253,13 +284,8 @@ export default {
     }
 
     try {
-      const result = await ReturnsRefundsService.useStoreCredit(
-        userId,
-        parseFloat(amount),
-        parseInt(orderId),
-        notes
-      );
-      
+      const result = await ReturnsRefundsService.useStoreCredit(userId, Number(amount), Number(orderId), notes as string | undefined);
+
       if (!result.success) {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
@@ -268,7 +294,7 @@ export default {
         usedCredits: result.usedCredits
       });
     } catch (error) {
-      logger.error(`Error using store credit: ${error}`);
+      logger.error(`Error using store credit: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to use store credit");
     }
   }),
@@ -285,15 +311,15 @@ export default {
     }
 
     try {
-      const returnRecord = await ReturnsRefundsService.getReturnById(parseInt(returnId), userId);
-      
+      const returnRecord = await ReturnsRefundsService.getReturnById(Number(returnId), userId);
+
       if (!returnRecord) {
         return httpResponse(req, res, reshttp.notFoundCode, "Return not found");
       }
 
       return httpResponse(req, res, reshttp.okCode, "Return retrieved successfully", returnRecord);
     } catch (error) {
-      logger.error(`Error getting return: ${error}`);
+      logger.error(`Error getting return: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get return");
     }
   }),
@@ -314,7 +340,18 @@ export default {
       search,
       page = "1",
       limit = "10"
-    } = req.query;
+    } = req.query as {
+      status?: string;
+      reason?: string;
+      refundStatus?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      amountMin?: string;
+      amountMax?: string;
+      search?: string;
+      page?: string;
+      limit?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -323,23 +360,23 @@ export default {
     try {
       const searchParams = {
         userId,
-        status: status as ReturnStatus,
-        reason: reason as ReturnReason,
-        refundStatus: refundStatus as RefundStatus,
-        dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
-        dateTo: dateTo ? new Date(dateTo as string) : undefined,
-        amountMin: amountMin ? parseFloat(amountMin as string) : undefined,
-        amountMax: amountMax ? parseFloat(amountMax as string) : undefined,
-        search: search as string,
-        page: parseInt(page as string),
-        limit: parseInt(limit as string)
+        status: status as ReturnStatus | undefined,
+        reason: reason as ReturnReason | undefined,
+        refundStatus: refundStatus as RefundStatus | undefined,
+        dateFrom: dateFrom ? new Date(String(dateFrom)) : undefined,
+        dateTo: dateTo ? new Date(String(dateTo)) : undefined,
+        amountMin: amountMin ? Number(amountMin) : undefined,
+        amountMax: amountMax ? Number(amountMax) : undefined,
+        search: typeof search === "string" ? search : undefined,
+        page: Number(page),
+        limit: Number(limit)
       };
 
       const result = await ReturnsRefundsService.searchReturns(searchParams);
-      
+
       return httpResponse(req, res, reshttp.okCode, "Returns retrieved successfully", result);
     } catch (error) {
-      logger.error(`Error searching returns: ${error}`);
+      logger.error(`Error searching returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to search returns");
     }
   }),
@@ -349,7 +386,15 @@ export default {
    */
   getReturnAnalytics: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { period = "30d", status, reason } = req.query;
+    const {
+      period = "30d",
+      status,
+      reason
+    } = req.query as {
+      period?: string;
+      status?: string;
+      reason?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -359,13 +404,13 @@ export default {
       const analytics = await ReturnsRefundsService.getReturnAnalytics({
         userId,
         period: period as "7d" | "30d" | "90d" | "1y",
-        status: status as ReturnStatus,
-        reason: reason as ReturnReason
+        status: status as ReturnStatus | undefined,
+        reason: reason as ReturnReason | undefined
       });
-      
+
       return httpResponse(req, res, reshttp.okCode, "Return analytics retrieved successfully", analytics);
     } catch (error) {
-      logger.error(`Error getting return analytics: ${error}`);
+      logger.error(`Error getting return analytics: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get return analytics");
     }
   }),
@@ -375,7 +420,15 @@ export default {
    */
   getVendorReturnAnalytics: asyncHandler(async (req: _Request, res) => {
     const userId = req.userFromToken?.id;
-    const { period = "30d", status, reason } = req.query;
+    const {
+      period = "30d",
+      status,
+      reason
+    } = req.query as {
+      period?: string;
+      status?: string;
+      reason?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -390,13 +443,13 @@ export default {
       const analytics = await ReturnsRefundsService.getReturnAnalytics({
         vendorId: userId,
         period: period as "7d" | "30d" | "90d" | "1y",
-        status: status as ReturnStatus,
-        reason: reason as ReturnReason
+        status: status as ReturnStatus | undefined,
+        reason: reason as ReturnReason | undefined
       });
-      
+
       return httpResponse(req, res, reshttp.okCode, "Vendor return analytics retrieved successfully", analytics);
     } catch (error) {
-      logger.error(`Error getting vendor return analytics: ${error}`);
+      logger.error(`Error getting vendor return analytics: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get vendor return analytics");
     }
   }),
@@ -417,7 +470,18 @@ export default {
       search,
       page = "1",
       limit = "10"
-    } = req.query;
+    } = req.query as {
+      status?: string;
+      reason?: string;
+      refundStatus?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      amountMin?: string;
+      amountMax?: string;
+      search?: string;
+      page?: string;
+      limit?: string;
+    };
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
@@ -431,23 +495,23 @@ export default {
     try {
       const searchParams = {
         vendorId: user.role === "vendor" ? userId : undefined,
-        status: status as ReturnStatus,
-        reason: reason as ReturnReason,
-        refundStatus: refundStatus as RefundStatus,
-        dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
-        dateTo: dateTo ? new Date(dateTo as string) : undefined,
-        amountMin: amountMin ? parseFloat(amountMin as string) : undefined,
-        amountMax: amountMax ? parseFloat(amountMax as string) : undefined,
-        search: search as string,
-        page: parseInt(page as string),
-        limit: parseInt(limit as string)
+        status: status as ReturnStatus | undefined,
+        reason: reason as ReturnReason | undefined,
+        refundStatus: refundStatus as RefundStatus | undefined,
+        dateFrom: dateFrom ? new Date(String(dateFrom)) : undefined,
+        dateTo: dateTo ? new Date(String(dateTo)) : undefined,
+        amountMin: amountMin ? Number(amountMin) : undefined,
+        amountMax: amountMax ? Number(amountMax) : undefined,
+        search: typeof search === "string" ? search : undefined,
+        page: Number(page),
+        limit: Number(limit)
       };
 
       const result = await ReturnsRefundsService.searchReturns(searchParams);
-      
+
       return httpResponse(req, res, reshttp.okCode, "Returns retrieved successfully", result);
     } catch (error) {
-      logger.error(`Error getting all returns: ${error}`);
+      logger.error(`Error getting all returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get returns");
     }
   }),
@@ -456,7 +520,16 @@ export default {
    * Bulk process return requests
    */
   bulkProcessReturns: asyncHandler(async (req: _Request, res) => {
-    const { returnIds, action, refundAmount, refundMethod, refundType, rejectionReason, internalNotes, notes } = req.body;
+    const { returnIds, action, refundAmount, refundMethod, refundType, rejectionReason, internalNotes, notes } = req.body as {
+      returnIds?: unknown;
+      action?: unknown;
+      refundAmount?: unknown;
+      refundMethod?: unknown;
+      refundType?: unknown;
+      rejectionReason?: unknown;
+      internalNotes?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -467,7 +540,7 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "Return IDs array is required");
     }
 
-    if (!action || !["approve", "reject"].includes(action)) {
+    if (!action || !["approve", "reject"].includes(typeof action === "string" ? action : String(action as string | number | boolean))) {
       return httpResponse(req, res, reshttp.badRequestCode, "Valid action (approve/reject) is required");
     }
 
@@ -476,22 +549,17 @@ export default {
       const results = [];
 
       for (const returnId of returnIds) {
-        const result = await ReturnsRefundsService.processReturnRequest(
-          parseInt(returnId),
-          action as "approve" | "reject",
-          userId,
-          {
-            refundAmount: refundAmount ? parseFloat(refundAmount) : undefined,
-            refundMethod: refundMethod as RefundMethod,
-            refundType: refundType as RefundType,
-            rejectionReason,
-            internalNotes,
-            notes
-          }
-        );
+        const result = await ReturnsRefundsService.processReturnRequest(Number(returnId), action as "approve" | "reject", userId, {
+          refundAmount: refundAmount ? Number(refundAmount) : undefined,
+          refundMethod: refundMethod as RefundMethod,
+          refundType: refundType as RefundType,
+          rejectionReason: rejectionReason as string | undefined,
+          internalNotes: internalNotes as string | undefined,
+          notes: notes as string | undefined
+        });
 
         results.push({
-          returnId: parseInt(returnId),
+          returnId: Number(returnId),
           success: result.success,
           message: result.message
         });
@@ -507,7 +575,7 @@ export default {
         results
       });
     } catch (error) {
-      logger.error(`Error bulk processing returns: ${error}`);
+      logger.error(`Error bulk processing returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to bulk process returns");
     }
   })

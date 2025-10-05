@@ -1,4 +1,5 @@
-import { ProductCategory, StockAdjustmentType } from "@prisma/client";
+import type { ProductCategory } from "@prisma/client";
+import { StockAdjustmentType } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -27,7 +28,7 @@ export default {
       const summary = await InventoryService.getInventorySummary(userId);
       return httpResponse(req, res, reshttp.okCode, "Inventory summary retrieved successfully", summary);
     } catch (error) {
-      logger.error(`Error getting inventory summary: ${error}`);
+      logger.error(`Error getting inventory summary: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get inventory summary");
     }
   }),
@@ -37,7 +38,7 @@ export default {
    */
   getProductInventoryLogs: asyncHandler(async (req: _Request, res) => {
     const { productId, category } = req.params;
-    const { limit = "50" } = req.query;
+    const { limit = "50" } = req.query as { limit?: string };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -51,15 +52,11 @@ export default {
 
     try {
       const productCategory = category.toUpperCase() as ProductCategory;
-      const logs = await InventoryService.getInventoryLogs(
-        parseInt(productId),
-        productCategory,
-        parseInt(limit as string)
-      );
+      const logs = await InventoryService.getInventoryLogs(parseInt(productId), productCategory, parseInt(limit));
 
       return httpResponse(req, res, reshttp.okCode, "Inventory logs retrieved successfully", logs);
     } catch (error) {
-      logger.error(`Error getting inventory logs: ${error}`);
+      logger.error(`Error getting inventory logs: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get inventory logs");
     }
   }),
@@ -68,7 +65,7 @@ export default {
    * Get low stock alerts
    */
   getLowStockAlerts: asyncHandler(async (req: _Request, res) => {
-    const { resolved = "false" } = req.query;
+    const { resolved = "false" } = req.query as { resolved?: string };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -84,7 +81,7 @@ export default {
       const alerts = await InventoryService.getLowStockAlerts(userId, resolved === "true");
       return httpResponse(req, res, reshttp.okCode, "Low stock alerts retrieved successfully", alerts);
     } catch (error) {
-      logger.error(`Error getting low stock alerts: ${error}`);
+      logger.error(`Error getting low stock alerts: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get low stock alerts");
     }
   }),
@@ -93,7 +90,7 @@ export default {
    * Get stock adjustment history
    */
   getStockAdjustments: asyncHandler(async (req: _Request, res) => {
-    const { limit = "50" } = req.query;
+    const { limit = "50" } = req.query as { limit?: string };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -106,10 +103,10 @@ export default {
     }
 
     try {
-      const adjustments = await InventoryService.getStockAdjustments(userId, parseInt(limit as string));
+      const adjustments = await InventoryService.getStockAdjustments(userId, parseInt(limit));
       return httpResponse(req, res, reshttp.okCode, "Stock adjustments retrieved successfully", adjustments);
     } catch (error) {
-      logger.error(`Error getting stock adjustments: ${error}`);
+      logger.error(`Error getting stock adjustments: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get stock adjustments");
     }
   }),
@@ -118,7 +115,14 @@ export default {
    * Adjust stock manually
    */
   adjustStock: asyncHandler(async (req: _Request, res) => {
-    const { productId, category, adjustmentType, quantity, reason, notes } = req.body;
+    const { productId, category, adjustmentType, quantity, reason, notes } = req.body as {
+      productId?: unknown;
+      category?: unknown;
+      adjustmentType?: unknown;
+      quantity?: unknown;
+      reason?: unknown;
+      notes?: unknown;
+    };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -136,39 +140,42 @@ export default {
     }
 
     // Validate adjustment type
-    if (!Object.values(StockAdjustmentType).includes(adjustmentType)) {
+    if (!Object.values(StockAdjustmentType).includes(adjustmentType as StockAdjustmentType)) {
       return httpResponse(req, res, reshttp.badRequestCode, "Invalid adjustment type");
     }
 
     // Validate quantity
-    if (quantity <= 0) {
+    if (Number(quantity) <= 0) {
       return httpResponse(req, res, reshttp.badRequestCode, "Quantity must be greater than 0");
     }
 
     try {
-      const productCategory = category.toUpperCase() as ProductCategory;
+      const productCategory =
+        typeof category === "string"
+          ? (category.toUpperCase() as ProductCategory)
+          : (String(category as string | number | boolean).toUpperCase() as ProductCategory);
       const result = await InventoryService.adjustStock({
-        productId: parseInt(productId),
+        productId: Number(productId),
         productCategory,
-        adjustmentType,
-        quantity: parseInt(quantity),
-        reason,
-        notes,
+        adjustmentType: adjustmentType as StockAdjustmentType,
+        quantity: Number(quantity),
+        reason: typeof reason === "string" ? reason : String(reason as string | number | boolean),
+        notes: notes ? (typeof notes === "string" ? notes : String(notes as string | number | boolean)) : undefined,
         userId
       });
 
       if (result.success) {
         return httpResponse(req, res, reshttp.okCode, result.message, {
           newStock: result.newStock,
-          adjustmentType,
-          quantity,
-          reason
+          adjustmentType: adjustmentType as StockAdjustmentType,
+          quantity: Number(quantity),
+          reason: typeof reason === "string" ? reason : String(reason as string | number | boolean)
         });
       } else {
         return httpResponse(req, res, reshttp.badRequestCode, result.message);
       }
     } catch (error) {
-      logger.error(`Error adjusting stock: ${error}`);
+      logger.error(`Error adjusting stock: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to adjust stock");
     }
   }),
@@ -199,7 +206,7 @@ export default {
         currentStock: stock
       });
     } catch (error) {
-      logger.error(`Error getting product stock: ${error}`);
+      logger.error(`Error getting product stock: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get product stock");
     }
   }),
@@ -208,7 +215,7 @@ export default {
    * Validate stock for multiple products
    */
   validateStock: asyncHandler(async (req: _Request, res) => {
-    const { items } = req.body;
+    const { items } = req.body as { items?: unknown };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
@@ -220,8 +227,10 @@ export default {
     }
 
     try {
-      const validation = await InventoryService.validateStockAvailability(items);
-      
+      const validation = await InventoryService.validateStockAvailability(
+        items as Array<{ productId: number; productCategory: ProductCategory; quantity: number }>
+      );
+
       if (validation.valid) {
         return httpResponse(req, res, reshttp.okCode, "Stock validation passed", { valid: true });
       } else {
@@ -231,7 +240,7 @@ export default {
         });
       }
     } catch (error) {
-      logger.error(`Error validating stock: ${error}`);
+      logger.error(`Error validating stock: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to validate stock");
     }
   }),
@@ -254,10 +263,10 @@ export default {
     try {
       // Get summary
       const summary = await InventoryService.getInventorySummary(userId);
-      
+
       // Get recent low stock alerts
       const lowStockAlerts = await InventoryService.getLowStockAlerts(userId, false);
-      
+
       // Get recent inventory movements
       const recentMovements = await InventoryService.getStockAdjustments(userId, 10);
 
@@ -270,9 +279,8 @@ export default {
 
       return httpResponse(req, res, reshttp.okCode, "Inventory dashboard retrieved successfully", dashboard);
     } catch (error) {
-      logger.error(`Error getting inventory dashboard: ${error}`);
+      logger.error(`Error getting inventory dashboard: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get inventory dashboard");
     }
   })
 };
-

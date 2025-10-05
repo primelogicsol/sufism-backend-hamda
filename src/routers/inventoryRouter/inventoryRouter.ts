@@ -20,4 +20,3 @@ inventoryRouter.get("/alerts", inventoryController.getLowStockAlerts);
 
 // Stock validation
 inventoryRouter.post("/validate", inventoryController.validateStock);
-
