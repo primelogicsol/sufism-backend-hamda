@@ -482,7 +482,7 @@ export class InventoryService {
 
       const allProducts = products.flat();
       const totalProducts = allProducts.length;
-      const totalStock = allProducts.reduce((sum, product) => sum + product.stock, 0);
+      const totalStock = allProducts.reduce((sum: number, product) => sum + (product.stock ?? 0), 0);
       const lowStockProducts = allProducts.filter((product) => product.stock <= 10 && product.stock > 0).length;
       const outOfStockProducts = allProducts.filter((product) => product.stock === 0).length;
 
