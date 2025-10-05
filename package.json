@@ -11,8 +11,10 @@
     "fmt": "prettier --write . --ignore-path .prettierignore",
     "prebuild": "bun run lint && rimraf -rf ./dist",
     "build": "bun run tsc --build",
+    "build:prod": "rimraf -rf ./dist && bun run tsc --build",
     "dev": "bun run build  && concurrently  \"bun run --env-file .env --watch ./src/server.ts\" \"tsc -w\"",
     "start": "bun run build && bun run --env-file .env ./dist/server.js",
+    "start:prod": "bun run build:prod && bun run --env-file .env ./dist/server.js",
     "commit-lint": "commitlint  --edit",
     "precommit": "concurrently \"eslint .\" \"bun run type-check && bun run fmt && git add .\"",
     "prepare": "husky",
@@ -21,7 +23,7 @@
     "db:deploy": "prisma deploy",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
-    "project:deploy": "bun run db:generate && bun run db:push && bun run start"
+    "project:deploy": "bun run db:generate && bun run db:push && bun run start:prod"
   },
   "keywords": [],
   "author": "hamda",

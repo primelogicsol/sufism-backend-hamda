@@ -23,7 +23,6 @@ httpServer.listen(PORT, () => {
 });
 
 // Graceful shutdown
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received, shutting down gracefully");
   httpServer.close(() => {
@@ -31,8 +30,6 @@ process.on("SIGTERM", () => {
     process.exit(0);
   });
 });
-
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 
 process.on("SIGINT", () => {
   logger.info("SIGINT received, shutting down gracefully");
