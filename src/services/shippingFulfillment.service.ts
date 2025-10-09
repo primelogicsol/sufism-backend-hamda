@@ -1,6 +1,7 @@
 import type { Prisma, ShippingMethod, ShippingStatus, Carrier, ReturnReason, ProductCategory } from "@prisma/client";
 import { db } from "../configs/database.js";
 import { InventoryService } from "./inventory.service.js";
+import { USPSService, type USPSAddress } from "./usps.service.js";
 import logger from "../utils/loggerUtils.js";
 
 export interface ShippingRate {
@@ -53,14 +54,8 @@ export class ShippingFulfillmentService {
    */
   static async calculateShippingRates(
     orderId: number,
-
-    // eslint-disable-next-line no-unused-vars
     _destination: { country: string; zip: string },
-
-    // eslint-disable-next-line no-unused-vars
     _weight: number,
-
-    // eslint-disable-next-line no-unused-vars
     _dimensions?: { length: number; width: number; height: number }
   ): Promise<ShippingRate[]> {
     try {
@@ -73,9 +68,11 @@ export class ShippingFulfillmentService {
         throw new Error("Order not found");
       }
 
-      // Mock shipping rate calculation
-      // In a real implementation, you would integrate with carrier APIs
-      const rates: ShippingRate[] = [
+      // Calculate real USPS rates
+      const uspsRates = await this.calculateUSPSRates(order, _destination, _weight, _dimensions);
+
+      // Mock rates for other carriers (to be replaced with real APIs)
+      const otherCarrierRates: ShippingRate[] = [
         {
           carrier: "FEDEX",
           service: "FedEx Ground",
@@ -88,13 +85,6 @@ export class ShippingFulfillmentService {
           service: "UPS Ground",
           cost: 9.5,
           estimatedDays: 3,
-          trackingAvailable: true
-        },
-        {
-          carrier: "USPS",
-          service: "Priority Mail",
-          cost: 7.95,
-          estimatedDays: 2,
           trackingAvailable: true
         },
         {
@@ -113,6 +103,9 @@ export class ShippingFulfillmentService {
         }
       ];
 
+      // Combine USPS rates with other carrier rates
+      const rates: ShippingRate[] = [...uspsRates, ...otherCarrierRates];
+
       // Filter rates based on destination, weight, and dimensions
 
       // eslint-disable-next-line no-unused-vars
@@ -125,6 +118,177 @@ export class ShippingFulfillmentService {
     } catch (error) {
       logger.error(`Error calculating shipping rates: ${String(error)}`);
       throw error;
+    }
+  }
+
+  /**
+   * Calculate USPS shipping rates
+   */
+  private static async calculateUSPSRates(
+    _order: unknown,
+    destination: { country: string; zip: string },
+    weight: number,
+    dimensions?: { length: number; width: number; height: number }
+  ): Promise<ShippingRate[]> {
+    try {
+      // Default origin ZIP (should be configurable)
+      const originZip = process.env.USPS_ORIGIN_ZIP || "10001";
+
+      // Only calculate USPS rates for US destinations
+      if (destination.country !== "US" && destination.country !== "USA") {
+        return [];
+      }
+
+      // Convert weight to ounces if needed
+      const weightInOunces = weight < 10 ? weight * 16 : weight;
+
+      // Get USPS rates
+      const uspsRates = await USPSService.calculateRates({
+        originZip,
+        destinationZip: destination.zip,
+        weight: weightInOunces,
+        dimensions
+      });
+
+      // Convert USPS rates to ShippingRate format
+      return uspsRates.map((rate) => ({
+        carrier: "USPS" as Carrier,
+        service: rate.service,
+        cost: rate.cost,
+        estimatedDays: rate.estimatedDays,
+        trackingAvailable: rate.trackingAvailable
+      }));
+    } catch (error) {
+      logger.error(`Error calculating USPS rates: ${String(error)}`);
+      // Return empty array on error to not break the flow
+      return [];
+    }
+  }
+
+  /**
+   * Generate USPS shipping label
+   */
+  static async generateUSPSLabel(params: {
+    orderId: number;
+    fromAddress: USPSAddress;
+    toAddress: USPSAddress;
+    weight: number;
+    dimensions?: { length: number; width: number; height: number };
+    serviceType?: string;
+  }): Promise<{ success: boolean; label: unknown; message: string }> {
+    try {
+      const { orderId, fromAddress, toAddress, weight, dimensions, serviceType } = params;
+
+      // Generate USPS label
+      const uspsLabel = await USPSService.generateLabel({
+        fromAddress,
+        toAddress,
+        weight,
+        dimensions,
+        serviceType
+      });
+
+      if (!uspsLabel) {
+        return { success: false, label: null, message: "Failed to generate USPS label" };
+      }
+
+      // Create shipment record
+      const shipment = await db.shipment.create({
+        data: {
+          orderId,
+          trackingNumber: uspsLabel.trackingNumber,
+          carrier: "USPS",
+          shippingMethod: "STANDARD",
+          weight,
+          dimensions: dimensions ? JSON.stringify(dimensions) : null,
+          cost: uspsLabel.cost,
+          labelUrl: uspsLabel.labelUrl,
+          trackingUrl: uspsLabel.trackingUrl,
+          status: "LABEL_CREATED"
+        }
+      });
+
+      // Update order status
+      await db.order.update({
+        where: { id: orderId },
+        data: {
+          status: "SHIPPED",
+          shippingStatus: "LABEL_CREATED",
+          trackingNumber: uspsLabel.trackingNumber,
+          carrier: "USPS",
+          shippingCost: uspsLabel.cost
+        }
+      });
+
+      // Create order history entry
+      await db.orderHistory.create({
+        data: {
+          orderId,
+          status: "SHIPPED",
+          previousStatus: "PROCESSING",
+          changedBy: "system",
+          reason: "USPS label generated",
+          notes: `USPS ${uspsLabel.service} label generated - ${uspsLabel.trackingNumber}`
+        }
+      });
+
+      logger.info(`USPS label generated for order ${orderId}: ${uspsLabel.trackingNumber}`);
+
+      return {
+        success: true,
+        label: {
+          ...uspsLabel,
+          shipmentId: shipment.id
+        },
+        message: "USPS label generated successfully"
+      };
+    } catch (error) {
+      logger.error(`Error generating USPS label: ${String(error)}`);
+      return { success: false, label: null, message: "Failed to generate USPS label" };
+    }
+  }
+
+  /**
+   * Validate USPS address
+   */
+  static async validateUSPSAddress(address: USPSAddress): Promise<{ success: boolean; validatedAddress: unknown; message: string }> {
+    try {
+      const validatedAddress = await USPSService.validateAddress(address);
+
+      if (!validatedAddress) {
+        return { success: false, validatedAddress: null, message: "Address validation failed" };
+      }
+
+      return {
+        success: true,
+        validatedAddress,
+        message: "Address validated successfully"
+      };
+    } catch (error) {
+      logger.error(`Error validating USPS address: ${String(error)}`);
+      return { success: false, validatedAddress: null, message: "Address validation failed" };
+    }
+  }
+
+  /**
+   * Track USPS package
+   */
+  static async trackUSPSPackage(trackingNumber: string): Promise<{ success: boolean; tracking: unknown; message: string }> {
+    try {
+      const trackingInfo = await USPSService.trackPackage(trackingNumber);
+
+      if (!trackingInfo) {
+        return { success: false, tracking: null, message: "Tracking information not found" };
+      }
+
+      return {
+        success: true,
+        tracking: trackingInfo,
+        message: "Tracking information retrieved successfully"
+      };
+    } catch (error) {
+      logger.error(`Error tracking USPS package: ${String(error)}`);
+      return { success: false, tracking: null, message: "Failed to retrieve tracking information" };
     }
   }
 

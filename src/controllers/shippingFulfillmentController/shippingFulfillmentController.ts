@@ -3,6 +3,7 @@ import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
 import { ShippingFulfillmentService } from "../../services/shippingFulfillment.service.js";
+import type { USPSAddress } from "../../services/usps.service.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
@@ -538,6 +539,107 @@ export default {
     } catch (error) {
       logger.error(`Error getting all returns: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get returns");
+    }
+  }),
+
+  /**
+   * Generate USPS shipping label
+   */
+  generateUSPSLabel: asyncHandler(async (req: _Request, res) => {
+    const { orderId } = req.params;
+    const { fromAddress, toAddress, weight, dimensions, serviceType } = req.body as {
+      fromAddress?: unknown;
+      toAddress?: unknown;
+      weight?: unknown;
+      dimensions?: unknown;
+      serviceType?: unknown;
+    };
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!fromAddress || !toAddress || !weight) {
+      return httpResponse(req, res, reshttp.badRequestCode, "From address, to address, and weight are required");
+    }
+
+    try {
+      const result = await ShippingFulfillmentService.generateUSPSLabel({
+        orderId: Number(orderId),
+        fromAddress: fromAddress as USPSAddress,
+        toAddress: toAddress as USPSAddress,
+        weight: Number(weight),
+        dimensions: dimensions as { length: number; width: number; height: number } | undefined,
+        serviceType: serviceType as string | undefined
+      });
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.badRequestCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, result.label);
+    } catch (error) {
+      logger.error(`Error generating USPS label: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to generate USPS label");
+    }
+  }),
+
+  /**
+   * Validate USPS address
+   */
+  validateUSPSAddress: asyncHandler(async (req: _Request, res) => {
+    const { address } = req.body as { address?: unknown };
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!address) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Address is required");
+    }
+
+    try {
+      const result = await ShippingFulfillmentService.validateUSPSAddress(address as USPSAddress);
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.badRequestCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, result.validatedAddress);
+    } catch (error) {
+      logger.error(`Error validating USPS address: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to validate USPS address");
+    }
+  }),
+
+  /**
+   * Track USPS package
+   */
+  trackUSPSPackage: asyncHandler(async (req: _Request, res) => {
+    const { trackingNumber } = req.params;
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!trackingNumber) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Tracking number is required");
+    }
+
+    try {
+      const result = await ShippingFulfillmentService.trackUSPSPackage(String(trackingNumber));
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.notFoundCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, result.tracking);
+    } catch (error) {
+      logger.error(`Error tracking USPS package: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to track USPS package");
     }
   })
 };

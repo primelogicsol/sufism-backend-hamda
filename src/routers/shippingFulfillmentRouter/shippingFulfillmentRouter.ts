@@ -9,6 +9,11 @@ shippingFulfillmentRouter.post("/orders/:orderId/shipments", shippingFulfillment
 shippingFulfillmentRouter.put("/shipments/:trackingNumber/status", shippingFulfillmentController.updateShipmentStatus);
 shippingFulfillmentRouter.get("/shipments/:trackingNumber/tracking", shippingFulfillmentController.getShipmentTracking);
 
+// USPS-specific routes
+shippingFulfillmentRouter.post("/orders/:orderId/usps/label", shippingFulfillmentController.generateUSPSLabel);
+shippingFulfillmentRouter.post("/usps/validate-address", shippingFulfillmentController.validateUSPSAddress);
+shippingFulfillmentRouter.get("/usps/track/:trackingNumber", shippingFulfillmentController.trackUSPSPackage);
+
 // Return routes
 shippingFulfillmentRouter.post("/orders/:orderId/returns", shippingFulfillmentController.requestReturn);
 shippingFulfillmentRouter.put("/returns/:returnId/process", shippingFulfillmentController.processReturnRequest);

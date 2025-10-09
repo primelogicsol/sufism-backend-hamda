@@ -37,3 +37,11 @@ AWS_SECRET_ACCESS_KEY=your-aws-secret-key
 AWS_REGION=us-east-1
 AWS_BUCKET_NAME=your-s3-bucket-name
 
+# USPS Configuration
+USPS_USER_ID=your-usps-user-id
+USPS_PASSWORD=your-usps-password
+USPS_API_URL=https://secure.shippingapis.com/ShippingAPI.dll
+USPS_TRACKING_URL=https://secure.shippingapis.com/ShippingAPI.dll
+USPS_TEST_MODE=true
+USPS_ORIGIN_ZIP=10001
+
