@@ -170,14 +170,111 @@ export class ShippingFulfillmentService {
    */
   static async generateUSPSLabel(params: {
     orderId: number;
-    fromAddress: USPSAddress;
-    toAddress: USPSAddress;
     weight: number;
     dimensions?: { length: number; width: number; height: number };
     serviceType?: string;
   }): Promise<{ success: boolean; label: unknown; message: string }> {
     try {
-      const { orderId, fromAddress, toAddress, weight, dimensions, serviceType } = params;
+      const { orderId, weight, dimensions, serviceType } = params;
+
+      // Fetch order with items and user information
+      const order = await db.order.findUnique({
+        where: { id: orderId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              fullName: true,
+              address: true,
+              city: true,
+              state: true,
+              zipCode: true,
+              country: true
+            }
+          },
+          items: {
+            include: {
+              music: {
+                select: { userId: true }
+              },
+              digitalBook: {
+                select: { userId: true }
+              },
+              fashion: {
+                select: { userId: true }
+              },
+              meditation: {
+                select: { userId: true }
+              },
+              decoration: {
+                select: { userId: true }
+              },
+              homeAndLiving: {
+                select: { userId: true }
+              },
+              accessories: {
+                select: { userId: true }
+              }
+            }
+          }
+        }
+      });
+
+      if (!order) {
+        return { success: false, label: null, message: "Order not found" };
+      }
+
+      // Determine vendor from order items (assuming all items are from the same vendor)
+      const vendorId = this.getVendorIdFromOrderItems(order.items);
+      if (!vendorId) {
+        return { success: false, label: null, message: "Unable to determine vendor for this order" };
+      }
+
+      // Fetch vendor address
+      const vendor = await db.user.findUnique({
+        where: { id: vendorId },
+        select: {
+          id: true,
+          fullName: true,
+          businessName: true,
+          address: true,
+          city: true,
+          state: true,
+          zipCode: true,
+          country: true
+        }
+      });
+
+      if (!vendor) {
+        return { success: false, label: null, message: "Vendor not found" };
+      }
+
+      // Validate vendor address
+      if (!vendor.address || !vendor.city || !vendor.state || !vendor.zipCode) {
+        return { success: false, label: null, message: "Vendor address is incomplete" };
+      }
+
+      // Validate order shipping address
+      if (!order.shippingAddress || !order.zip) {
+        return { success: false, label: null, message: "Order shipping address is incomplete" };
+      }
+
+      // Create USPS addresses
+      const fromAddress: USPSAddress = {
+        name: vendor.businessName || vendor.fullName,
+        address1: vendor.address,
+        city: vendor.city,
+        state: vendor.state,
+        zip: vendor.zipCode
+      };
+
+      const toAddress: USPSAddress = {
+        name: order.fullName,
+        address1: order.shippingAddress,
+        city: order.user.city || "",
+        state: order.user.state || "",
+        zip: order.zip
+      };
 
       // Generate USPS label
       const uspsLabel = await USPSService.generateLabel({
@@ -238,7 +335,9 @@ export class ShippingFulfillmentService {
         success: true,
         label: {
           ...uspsLabel,
-          shipmentId: shipment.id
+          shipmentId: shipment.id,
+          fromAddress,
+          toAddress
         },
         message: "USPS label generated successfully"
       };
@@ -246,6 +345,33 @@ export class ShippingFulfillmentService {
       logger.error(`Error generating USPS label: ${String(error)}`);
       return { success: false, label: null, message: "Failed to generate USPS label" };
     }
+  }
+
+  /**
+   * Get vendor ID from order items
+   */
+  private static getVendorIdFromOrderItems(
+    items: Array<{
+      music?: { userId: string } | null;
+      digitalBook?: { userId: string } | null;
+      fashion?: { userId: string } | null;
+      meditation?: { userId: string } | null;
+      decoration?: { userId: string } | null;
+      homeAndLiving?: { userId: string } | null;
+      accessories?: { userId: string } | null;
+    }>
+  ): string | null {
+    for (const item of items) {
+      // Check each product category for vendor ID
+      if (item.music?.userId) return item.music.userId;
+      if (item.digitalBook?.userId) return item.digitalBook.userId;
+      if (item.fashion?.userId) return item.fashion.userId;
+      if (item.meditation?.userId) return item.meditation.userId;
+      if (item.decoration?.userId) return item.decoration.userId;
+      if (item.homeAndLiving?.userId) return item.homeAndLiving.userId;
+      if (item.accessories?.userId) return item.accessories.userId;
+    }
+    return null;
   }
 
   /**

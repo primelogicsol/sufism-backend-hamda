@@ -630,3 +630,63 @@ export const verifyOrderDetails = z.object({
   country: z.string({ message: "Must be valid Country" }).optional(),
   phone: z.string({ message: "Must be valid Phone Number" }).optional()
 });
+
+// Vendor company profile schema
+export const vendorCompanyProfileSchema = z.object({
+  businessName: z
+    .string({ message: "Business name must be a string" })
+    .min(1, { message: "Business name is required" })
+    .max(100, { message: "Business name cannot exceed 100 characters" })
+    .optional(),
+  email: z
+    .string({ message: "Email must be a string" })
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email format. e.g: john.doe@example.com" })
+    .max(150, { message: "Email cannot exceed 150 characters" })
+    .optional(),
+  address: z
+    .string({ message: "Address must be a string" })
+    .min(1, { message: "Address is required" })
+    .max(200, { message: "Address cannot exceed 200 characters" })
+    .optional(),
+  zipCode: z
+    .string({ message: "Zip code must be a string" })
+    .min(1, { message: "Zip code is required" })
+    .max(20, { message: "Zip code cannot exceed 20 characters" })
+    .regex(/^[0-9-]+$/, { message: "Zip code can only contain numbers and hyphens" })
+    .optional(),
+  city: z
+    .string({ message: "City must be a string" })
+    .min(1, { message: "City is required" })
+    .max(50, { message: "City cannot exceed 50 characters" })
+    .regex(/^[a-zA-Z\s]+$/, { message: "City can only contain letters and spaces" })
+    .optional(),
+  state: z
+    .string({ message: "State must be a string" })
+    .min(1, { message: "State is required" })
+    .max(50, { message: "State cannot exceed 50 characters" })
+    .regex(/^[a-zA-Z\s]+$/, { message: "State can only contain letters and spaces" })
+    .optional(),
+  country: z
+    .string({ message: "Country must be a string" })
+    .min(1, { message: "Country is required" })
+    .max(50, { message: "Country cannot exceed 50 characters" })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Country can only contain letters and spaces" })
+    .optional(),
+  phone: z
+    .string({ message: "Phone must be a string" })
+    .min(1, { message: "Phone is required" })
+    .max(20, { message: "Phone cannot exceed 20 characters" })
+    .regex(/^[0-9+\-\s()]+$/, { message: "Phone can only contain numbers, spaces, hyphens, parentheses, and plus sign" })
+    .optional(),
+  businessType: z.string({ message: "Business type must be a string" }).max(50, { message: "Business type cannot exceed 50 characters" }).optional(),
+  businessLegalStructure: z
+    .string({ message: "Business legal structure must be a string" })
+    .max(50, { message: "Business legal structure cannot exceed 50 characters" })
+    .optional(),
+  contactPerson: z
+    .string({ message: "Contact person must be a string" })
+    .max(100, { message: "Contact person cannot exceed 100 characters" })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Contact person can only contain letters and spaces" })
+    .optional()
+});

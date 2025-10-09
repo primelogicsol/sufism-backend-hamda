@@ -547,9 +547,7 @@ export default {
    */
   generateUSPSLabel: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { fromAddress, toAddress, weight, dimensions, serviceType } = req.body as {
-      fromAddress?: unknown;
-      toAddress?: unknown;
+    const { weight, dimensions, serviceType } = req.body as {
       weight?: unknown;
       dimensions?: unknown;
       serviceType?: unknown;
@@ -560,15 +558,13 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    if (!fromAddress || !toAddress || !weight) {
-      return httpResponse(req, res, reshttp.badRequestCode, "From address, to address, and weight are required");
+    if (!weight) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Weight is required");
     }
 
     try {
       const result = await ShippingFulfillmentService.generateUSPSLabel({
         orderId: Number(orderId),
-        fromAddress: fromAddress as USPSAddress,
-        toAddress: toAddress as USPSAddress,
         weight: Number(weight),
         dimensions: dimensions as { length: number; width: number; height: number } | undefined,
         serviceType: serviceType as string | undefined
