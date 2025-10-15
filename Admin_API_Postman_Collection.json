@@ -31,6 +31,24 @@
       "name": "🔐 Admin Authentication",
       "item": [
         {
+          "name": "Database Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/health/database",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "health", "database"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Admin Login",
           "event": [
             {
@@ -93,6 +111,24 @@
       "name": "📊 Analytics & Reporting",
       "item": [
         {
+          "name": "Get System Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "overview"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Sales Analytics",
           "request": {
             "method": "GET",
@@ -103,19 +139,69 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/analytics/sales?period=30d&groupBy=day",
+              "raw": "{{baseUrl}}/admin/analytics/sales?period=30d",
               "host": ["{{baseUrl}}"],
-              "path": ["analytics", "sales"],
+              "path": ["admin", "analytics", "sales"],
               "query": [
                 {
                   "key": "period",
                   "value": "30d"
-                },
-                {
-                  "key": "groupBy",
-                  "value": "day"
                 }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "orders"]
             }
           },
           "response": []

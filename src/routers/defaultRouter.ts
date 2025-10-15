@@ -1,5 +1,6 @@
 import { Router } from "express";
 import uploadRouter from "./bulkuploader/upload.js";
+import { adminRouter } from "./adminRouter/adminRouter.js";
 import { analyticsRouter } from "./analyticsRouter/analyticsRouter.js";
 import { contentRouter } from "./contentRouter/contentRouter.js";
 import { inventoryRouter } from "./inventoryRouter/inventoryRouter.js";
@@ -24,6 +25,7 @@ defaultRouter.use("/user", userRouter);
 defaultRouter.use("/user", orderRouter);
 defaultRouter.use("/user", orderManagementRouter);
 defaultRouter.use("/user", purchaseRouter);
+defaultRouter.use("/admin", adminRouter);
 defaultRouter.use("/", productRouter);
 defaultRouter.use("/", vendorPublicRouter);
 defaultRouter.use("/", vendorOrderRouter);

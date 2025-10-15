@@ -663,4 +663,31 @@ export class NotificationService {
   static getConnectionCount(): number {
     return this.activeConnections.size;
   }
+
+  /**
+   * Get notification templates
+   */
+  static async getNotificationTemplates(): Promise<unknown[]> {
+    try {
+      const templates = await db.notificationTemplate.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: "desc" }
+      });
+
+      return templates;
+    } catch (error) {
+      logger.error(`Error getting notification templates: ${String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get WebSocket connection status
+   */
+  static getConnectionStatus(): { activeConnections: number; isServerRunning: boolean } {
+    return {
+      activeConnections: this.activeConnections.size,
+      isServerRunning: this.io !== null
+    };
+  }
 }

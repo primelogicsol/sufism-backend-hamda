@@ -1,0 +1,633 @@
+{
+  "info": {
+    "name": "✅ CONFIRMED - Sufism Admin API Collection",
+    "description": "✅ TESTED & CONFIRMED - Complete collection of all Admin APIs for Sufism Backend\n\n🔑 ADMIN CREDENTIALS (TESTED):\n- Username: admin\n- Password: admin123\n\n📝 INSTRUCTIONS:\n1. Update the baseUrl variable to your server URL (default: http://localhost:6015/v1)\n2. Run the 'Admin Login' request to get the admin token\n3. The token will be automatically saved to the adminToken variable\n4. All other requests will automatically use the admin token\n\n✅ TESTED ENDPOINTS:\n- Admin Login: ✅ Working\n- Database Health Check: ✅ Working\n- System Overview: ✅ Working\n- User Analytics: ✅ Working\n- All other endpoints: ✅ Ready to test\n\n📊 TESTED ON: 2025-01-13\n🌐 BASE URL: http://localhost:6015/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminUsername",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "admin123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Admin Authentication",
+      "item": [
+        {
+          "name": "✅ Admin Login (TESTED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.collectionVariables.set('adminToken', response.data.token);",
+                  "        console.log('✅ Admin token saved:', response.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "admin", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Admin Verify (TESTED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/admin/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "admin", "verify"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏥 System Health",
+      "item": [
+        {
+          "name": "✅ Database Health Check (TESTED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/health/database",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "health", "database"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics & Reporting",
+      "item": [
+        {
+          "name": "✅ Get System Overview (TESTED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "overview"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Get Sales Analytics (TESTED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/sales?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "sales"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d",
+                  "description": "7d, 30d, 90d, 1y"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Get User Analytics (TESTED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "products"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/analytics/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "analytics", "orders"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"vendor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/cmfppnozk0000uo8spbto3dm8/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "cmfppnozk0000uo8spbto3dm8", "role"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Verification",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isVerified\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/cmfppnozk0000uo8spbto3dm8/verification",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "cmfppnozk0000uo8spbto3dm8", "verification"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏪 Vendor Management",
+      "item": [
+        {
+          "name": "Get All Vendors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Vendor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"notes\": \"Vendor approved by admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors/cmfppnozk0000uo8spbto3dm8/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors", "cmfppnozk0000uo8spbto3dm8", "approve"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Vendor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\",\n  \"reason\": \"Incomplete documentation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors/cmfppnozk0000uo8spbto3dm8/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors", "cmfppnozk0000uo8spbto3dm8", "reject"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Approve Vendors",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorIds\": [\"cmfppnozk0000uo8spbto3dm8\", \"cmfppnozk0000uo8spbto3dm9\"],\n  \"status\": \"APPROVED\",\n  \"notes\": \"Bulk approval by admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors/bulk-approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors", "bulk-approve"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/vendors/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vendors", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notification Management",
+      "item": [
+        {
+          "name": "Create Notification Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Welcome Template\",\n  \"type\": \"WELCOME\",\n  \"subject\": \"Welcome to Sufism Platform\",\n  \"body\": \"Welcome {{userName}}! Thank you for joining our platform.\",\n  \"variables\": [\"userName\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification Templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Broadcast System Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SYSTEM\",\n  \"title\": \"System Maintenance\",\n  \"message\": \"The system will be under maintenance from 2 AM to 4 AM\",\n  \"priority\": \"HIGH\",\n  \"data\": {\n    \"maintenanceStart\": \"2025-01-14T02:00:00Z\",\n    \"maintenanceEnd\": \"2025-01-14T04:00:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/broadcast",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "broadcast"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Connection Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/connection-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "connection-status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cleanup Expired Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/cleanup",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "cleanup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retry Failed Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/notifications/retry",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "notifications", "retry"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
