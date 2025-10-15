@@ -1,0 +1,958 @@
+{
+  "info": {
+    "name": "🔐 Sufism Admin API Collection",
+    "description": "Complete collection of all Admin APIs for Sufism Backend\n\n🔑 ADMIN CREDENTIALS:\n- Username: [UPDATE WITH CORRECT ADMIN_USERNAME]\n- Password: [UPDATE WITH CORRECT ADMIN_PASSWORD]\n\n📝 INSTRUCTIONS:\n1. Update the admin credentials in the 'Admin Login' request\n2. Run the 'Admin Login' request to get the admin token\n3. Copy the token from the response\n4. Update the 'adminToken' variable in the collection\n5. All other requests will automatically use the admin token\n\n⚠️ NOTE: Admin credentials are stored in environment variables (ADMIN_USERNAME, ADMIN_PASSWORD)\n\n📊 TESTED ON: 2025-01-13",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminUsername",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "admin123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Admin Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.token) {",
+                  "        pm.collectionVariables.set('adminToken', response.data.token);",
+                  "        console.log('Admin token saved:', response.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "admin", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Verify",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/admin/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "admin", "verify"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics & Reporting",
+      "item": [
+        {
+          "name": "Get Sales Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sales?period=30d&groupBy=day",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "sales"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inventory Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/inventory?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "inventory"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/customers?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "customers"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/vendors?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "vendors"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/overview?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "overview"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get KPI Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/kpis",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "kpis"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Report\",\n  \"type\": \"sales\",\n  \"period\": \"30d\",\n  \"format\": \"pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Dashboard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin Dashboard\",\n  \"description\": \"Main admin dashboard\",\n  \"widgets\": [\n    {\n      \"type\": \"sales_chart\",\n      \"position\": {\n        \"x\": 0,\n        \"y\": 0,\n        \"width\": 6,\n        \"height\": 4\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboards",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboards"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboards",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboards"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Track Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"admin_action\",\n  \"category\": \"system\",\n  \"action\": \"dashboard_view\",\n  \"properties\": {\n    \"page\": \"analytics\",\n    \"user_id\": \"admin\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/analytics/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "events"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📝 Content Management",
+      "item": [
+        {
+          "name": "Get Content List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/content/academy",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "academy"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content Item",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/content/academy/sufism-intro",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "academy", "sufism-intro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content Versions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/content/academy/sufism-intro/versions",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "academy", "sufism-intro", "versions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Content (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction to Sufism\",\n  \"content\": \"Updated content about Sufism...\",\n  \"metadata\": {\n    \"author\": \"Admin\",\n    \"lastModified\": \"2025-01-13\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/content/academy/sufism-intro",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "academy", "sufism-intro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Content (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section\": \"academy\",\n  \"slug\": \"test-content\",\n  \"title\": \"Test Content\",\n  \"content\": \"This is test content for validation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/content/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Save Content (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"section\": \"academy\",\n    \"slug\": \"bulk-content-1\",\n    \"title\": \"Bulk Content 1\",\n    \"content\": \"First bulk content item\"\n  },\n  {\n    \"section\": \"academy\",\n    \"slug\": \"bulk-content-2\",\n    \"title\": \"Bulk Content 2\",\n    \"content\": \"Second bulk content item\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/content/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["content", "bulk"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notification Management",
+      "item": [
+        {
+          "name": "Broadcast System Notification (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SYSTEM\",\n  \"title\": \"System Maintenance\",\n  \"message\": \"The system will be under maintenance from 2 AM to 4 AM\",\n  \"priority\": \"HIGH\",\n  \"data\": {\n    \"maintenanceStart\": \"2025-01-14T02:00:00Z\",\n    \"maintenanceEnd\": \"2025-01-14T04:00:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/broadcast",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "broadcast"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification Template (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Welcome Template\",\n  \"type\": \"WELCOME\",\n  \"subject\": \"Welcome to Sufism Platform\",\n  \"body\": \"Welcome {{userName}}! Thank you for joining our platform.\",\n  \"variables\": [\"userName\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification Templates (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Connection Status (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/connection-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "connection-status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cleanup Expired Notifications (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/cleanup",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "cleanup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retry Failed Notifications (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/retry",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "retry"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "analytics"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📦 Order Management",
+      "item": [
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders?page=1&limit=10&status=PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROCESSING\",\n  \"notes\": \"Order is being processed by admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"CUSTOMER_REQUEST\",\n  \"notes\": \"Order cancelled by customer request\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/1/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "1", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Order Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Admin note: Order requires special handling\",\n  \"type\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/1/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "1", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/analytics/summary?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "analytics", "summary"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Update Order Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderIds\": [1, 2, 3],\n  \"status\": \"SHIPPED\",\n  \"notes\": \"Bulk update by admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/bulk-update",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "bulk-update"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/vendor/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "vendor", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/vendor/analytics?period=30d",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "vendor", "analytics"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "30d"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏪 Vendor Management",
+      "item": [
+        {
+          "name": "Get Vendor by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/stats/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "stats", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-company-profile/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-company-profile", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Company Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Updated Company Name\",\n  \"description\": \"Updated company description\",\n  \"website\": \"https://updated-website.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"Updated Address\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-company-profile/cmfppnozk0000uo8spbto3dm8",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-company-profile", "cmfppnozk0000uo8spbto3dm8"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

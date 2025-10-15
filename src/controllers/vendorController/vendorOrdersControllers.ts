@@ -30,16 +30,14 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    // Get vendor's products from all categories
-    const [accessories, fashion, music, digitalBooks, meditation, homeLiving, decoration] = await Promise.all([
-      db.accessories.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.fashion.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.music.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.digitalBook.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.meditation.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.homeAndLiving.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.decoration.findMany({ where: { userId: vendorId }, select: { id: true } })
-    ]);
+    // Get vendor's products from all categories - using sequential queries to avoid connection pool exhaustion
+    const accessories = await db.accessories.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const fashion = await db.fashion.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const music = await db.music.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const digitalBooks = await db.digitalBook.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const meditation = await db.meditation.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const homeLiving = await db.homeAndLiving.findMany({ where: { userId: vendorId }, select: { id: true } });
+    const decoration = await db.decoration.findMany({ where: { userId: vendorId }, select: { id: true } });
 
     const productIdsByCategory = {
       ACCESSORIES: accessories.map((p) => p.id),
@@ -162,15 +160,14 @@ export default {
       targetVendorId = vendor.id;
     }
 
-    const [accessories, fashion, music, digitalBooks, meditation, homeLiving, decoration] = await Promise.all([
-      db.accessories.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.fashion.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.music.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.digitalBook.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.meditation.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.homeAndLiving.findMany({ where: { userId: targetVendorId }, select: { id: true } }),
-      db.decoration.findMany({ where: { userId: targetVendorId }, select: { id: true } })
-    ]);
+    // Get vendor's products from all categories - using sequential queries to avoid connection pool exhaustion
+    const accessories = await db.accessories.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const fashion = await db.fashion.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const music = await db.music.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const digitalBooks = await db.digitalBook.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const meditation = await db.meditation.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const homeLiving = await db.homeAndLiving.findMany({ where: { userId: targetVendorId }, select: { id: true } });
+    const decoration = await db.decoration.findMany({ where: { userId: targetVendorId }, select: { id: true } });
 
     const productIdsByCategory = {
       ACCESSORIES: accessories.map((p) => p.id),
@@ -416,56 +413,68 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, "Unauthorized to view other vendor stats");
     }
 
-    // Get all product IDs for this vendor
-    const [accessories, fashion, music, digitalBooks, meditation, homeLiving, decoration] = await Promise.all([
-      db.accessories.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.fashion.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.music.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.digitalBook.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.meditation.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.homeAndLiving.findMany({ where: { userId: vendorId }, select: { id: true } }),
-      db.decoration.findMany({ where: { userId: vendorId }, select: { id: true } })
-    ]);
+    try {
+      // Get all product IDs for this vendor - using sequential queries to avoid connection pool exhaustion
+      const accessories = await db.accessories.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const fashion = await db.fashion.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const music = await db.music.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const digitalBooks = await db.digitalBook.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const meditation = await db.meditation.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const homeLiving = await db.homeAndLiving.findMany({ where: { userId: vendorId }, select: { id: true } });
+      const decoration = await db.decoration.findMany({ where: { userId: vendorId }, select: { id: true } });
 
-    const productIdsByCategory = {
-      ACCESSORIES: accessories.map((p) => p.id),
-      FASHION: fashion.map((p) => p.id),
-      MUSIC: music.map((p) => p.id),
-      DIGITAL_BOOK: digitalBooks.map((p) => p.id),
-      MEDITATION: meditation.map((p) => p.id),
-      HOME_LIVING: homeLiving.map((p) => p.id),
-      DECORATION: decoration.map((p) => p.id)
-    };
+      const productIdsByCategory = {
+        ACCESSORIES: accessories.map((p) => p.id),
+        FASHION: fashion.map((p) => p.id),
+        MUSIC: music.map((p) => p.id),
+        DIGITAL_BOOK: digitalBooks.map((p) => p.id),
+        MEDITATION: meditation.map((p) => p.id),
+        HOME_LIVING: homeLiving.map((p) => p.id),
+        DECORATION: decoration.map((p) => p.id)
+      };
 
-    const filters: Prisma.OrderItemWhereInput = {
-      OR: Object.entries(productIdsByCategory)
-        .filter(([, ids]) => ids.length)
-        .map(([category, ids]) => ({
-          category: category as ProductCategory,
-          productId: { in: ids }
-        }))
-    };
+      const filters: Prisma.OrderItemWhereInput = {
+        OR: Object.entries(productIdsByCategory)
+          .filter(([, ids]) => ids.length)
+          .map(([category, ids]) => ({
+            category: category as ProductCategory,
+            productId: { in: ids }
+          }))
+      };
 
-    // ✅ Count by status
-    const groupedByStatus = await db.orderItem.groupBy({
-      by: ["status"],
-      _count: { status: true },
-      where: filters
-    });
+      // If no products found, return empty stats
+      if (Object.values(productIdsByCategory).every((ids) => ids.length === 0)) {
+        return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+          totalOrders: 0,
+          ordersByStatus: [],
+          totalRevenue: 0
+        });
+      }
 
-    // ✅ Total count
-    const totalOrders = await db.orderItem.count({ where: filters });
+      // ✅ Count by status
+      const groupedByStatus = await db.orderItem.groupBy({
+        by: ["status"],
+        _count: { status: true },
+        where: filters
+      });
 
-    // ✅ Revenue (if you store price * quantity on orderItem)
-    const revenue = await db.orderItem.aggregate({
-      _sum: { price: true }, // adjust field name if different
-      where: filters
-    });
+      // ✅ Total count
+      const totalOrders = await db.orderItem.count({ where: filters });
 
-    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
-      totalOrders,
-      ordersByStatus: groupedByStatus,
-      totalRevenue: revenue._sum.price || 0
-    });
+      // ✅ Revenue (if you store price * quantity on orderItem)
+      const revenue = await db.orderItem.aggregate({
+        _sum: { price: true }, // adjust field name if different
+        where: filters
+      });
+
+      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+        totalOrders,
+        ordersByStatus: groupedByStatus,
+        totalRevenue: revenue._sum.price || 0
+      });
+    } catch (error) {
+      logger.error(`Error getting vendor order stats: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get vendor order stats");
+    }
   })
 };
