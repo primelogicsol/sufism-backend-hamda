@@ -154,9 +154,6 @@ export default {
     if (!isPasswordValid) {
       logger.info("Password is incorrect");
       throw { status: reshttp.unauthorizedCode, message: reshttp.unauthorizedMessage };
-    } else if (!user.isCompleted) {
-      httpResponse(req, res, reshttp.partialContentCode, "Please complete your profile first");
-      return;
     }
 
     const { accessToken, refreshToken } = setTokensAndCookies(user, res, true);

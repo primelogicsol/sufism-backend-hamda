@@ -6,8 +6,131 @@ import type { _Request } from "../../middleware/authMiddleware.js";
 import type { SearchQuery } from "../../type/types.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
+import logger from "../../utils/loggerUtils.js";
 
 export default {
+  // Get all orders for the authenticated vendor (simplified)
+  getAllVendorOrders: asyncHandler(async (req: _Request, res) => {
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      startDate,
+      endDate
+    } = req.query as {
+      page?: string;
+      limit?: string;
+      status?: string;
+      startDate?: string;
+      endDate?: string;
+    };
+
+    const vendorId = req.userFromToken?.id;
+    if (!vendorId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    // Get vendor's products from all categories
+    const [accessories, fashion, music, digitalBooks, meditation, homeLiving, decoration] = await Promise.all([
+      db.accessories.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.fashion.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.music.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.digitalBook.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.meditation.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.homeAndLiving.findMany({ where: { userId: vendorId }, select: { id: true } }),
+      db.decoration.findMany({ where: { userId: vendorId }, select: { id: true } })
+    ]);
+
+    const productIdsByCategory = {
+      ACCESSORIES: accessories.map((p) => p.id),
+      FASHION: fashion.map((p) => p.id),
+      MUSIC: music.map((p) => p.id),
+      DIGITAL_BOOK: digitalBooks.map((p) => p.id),
+      MEDITATION: meditation.map((p) => p.id),
+      HOME_LIVING: homeLiving.map((p) => p.id),
+      DECORATION: decoration.map((p) => p.id)
+    };
+
+    const orderFilter: Prisma.OrderWhereInput = {
+      paymentStatus: "PAID"
+    };
+
+    if (startDate || endDate) {
+      orderFilter.createdAt = {};
+      if (startDate) {
+        orderFilter.createdAt.gte = new Date(String(startDate));
+      }
+      if (endDate) {
+        orderFilter.createdAt.lte = new Date(String(endDate));
+      }
+    }
+
+    const filters: Prisma.OrderItemWhereInput = {
+      OR: Object.entries(productIdsByCategory)
+        .filter(([, ids]) => ids.length > 0)
+        .map(([category, ids]) => ({ category: category as ProductCategory, productId: { in: ids } })),
+      order: orderFilter
+    };
+
+    if (status) {
+      filters.status = status as OrderStatus;
+    }
+
+    const take = Number(limit);
+    const skip = (Number(page) - 1) * take;
+
+    const [orderItems, total] = await Promise.all([
+      db.orderItem.findMany({
+        where: filters,
+        select: {
+          id: true,
+          orderId: true,
+          category: true,
+          productId: true,
+          quantity: true,
+          price: true,
+          status: true,
+          createdAt: true,
+          order: {
+            select: {
+              id: true,
+              amount: true,
+              status: true,
+              paymentStatus: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              shippingAddress: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  phone: true
+                }
+              }
+            }
+          }
+        },
+        skip,
+        take,
+        orderBy: { createdAt: "desc" }
+      }),
+      db.orderItem.count({ where: filters })
+    ]);
+
+    return httpResponse(req, res, reshttp.okCode, "Vendor orders retrieved successfully", {
+      orders: orderItems,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / take)
+      }
+    });
+  }),
+
   // Get all orders for a vendor
   getVendorOrders: asyncHandler(async (req: _Request, res) => {
     const { id: vendorId } = req.params;
@@ -58,50 +181,55 @@ export default {
       HOME_LIVING: homeLiving.map((p) => p.id),
       DECORATION: decoration.map((p) => p.id)
     };
+    const orderFilter: Prisma.OrderWhereInput = {
+      paymentStatus: "PAID"
+    };
+
+    if (startDate || endDate) {
+      orderFilter.createdAt = {};
+      if (startDate) {
+        orderFilter.createdAt.gte = new Date(String(startDate));
+      }
+      if (endDate) {
+        orderFilter.createdAt.lte = new Date(String(endDate));
+      }
+    }
+
     const filters: Prisma.OrderItemWhereInput = {
       OR: Object.entries(productIdsByCategory)
         .filter(([, ids]) => ids.length)
         .map(([category, ids]) => ({ category: category as ProductCategory, productId: { in: ids } })),
-      order: {
-        paymentStatus: "PAID"
-      }
+      order: orderFilter
     };
 
     if (status) {
       filters.status = status as OrderStatus;
     }
-    if (startDate || endDate) {
-      filters.order = {
-        createdAt: {
-          gte: startDate ? new Date(String(startDate)) : undefined,
-          lte: endDate ? new Date(String(endDate)) : undefined
-        }
-      };
-      // ✅ Pagination
 
-      const take = Number(limit);
-      const skip = (Number(page) - 1) * take;
+    // ✅ Pagination
+    const take = Number(limit);
+    const skip = (Number(page) - 1) * take;
 
-      const [orderItems, total] = await Promise.all([
-        db.orderItem.findMany({
-          where: filters,
-          include: { order: true },
-          skip,
-          take,
-          orderBy: { createdAt: "desc" }
-        }),
-        db.orderItem.count({ where: filters })
-      ]);
-      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
-        orderItems,
-        pagination: {
-          total,
-          page: Number(page),
-          limit: Number(limit),
-          totalPages: Math.ceil(total / take)
-        }
-      });
-    }
+    const [orderItems, total] = await Promise.all([
+      db.orderItem.findMany({
+        where: filters,
+        include: { order: true },
+        skip,
+        take,
+        orderBy: { createdAt: "desc" }
+      }),
+      db.orderItem.count({ where: filters })
+    ]);
+
+    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {
+      orderItems,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / take)
+      }
+    });
   }),
 
   updateOrderItemStatus: asyncHandler(async (req: _Request, res) => {
@@ -123,9 +251,19 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "No valid order item IDs provided");
     }
 
-    // Fetch all order items
+    // Fetch all order items with selective fields
     const orderItems = await db.orderItem.findMany({
-      where: { id: { in: idArray } }
+      where: { id: { in: idArray } },
+      select: {
+        id: true,
+        orderId: true,
+        category: true,
+        productId: true,
+        quantity: true,
+        price: true,
+        status: true,
+        createdAt: true
+      }
     });
 
     if (!orderItems.length) {
@@ -185,49 +323,82 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    // Find the order item
-    const orderItem = await db.orderItem.findUnique({
-      where: { id: Number(orderItemId) },
-      include: {
-        order: true // include parent order info
+    try {
+      // Find the order item with selective fields
+      const orderItem = await db.orderItem.findUnique({
+        where: { id: Number(orderItemId) },
+        select: {
+          id: true,
+          orderId: true,
+          category: true,
+          productId: true,
+          quantity: true,
+          price: true,
+          status: true,
+          createdAt: true,
+          order: {
+            select: {
+              id: true,
+              amount: true,
+              status: true,
+              paymentStatus: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              shippingAddress: true,
+              createdAt: true,
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  phone: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!orderItem) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Order item not found");
       }
-    });
 
-    if (!orderItem) {
-      return httpResponse(req, res, reshttp.notFoundCode, "Order item not found");
+      // Validate ownership: vendors should only see their own product items
+      let productOwner = null;
+      switch (orderItem.category) {
+        case ProductCategory.ACCESSORIES:
+          productOwner = await db.accessories.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.FASHION:
+          productOwner = await db.fashion.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.MUSIC:
+          productOwner = await db.music.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.DIGITAL_BOOK:
+          productOwner = await db.digitalBook.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.MEDITATION:
+          productOwner = await db.meditation.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.HOME_LIVING:
+          productOwner = await db.homeAndLiving.findUnique({ where: { id: orderItem.productId } });
+          break;
+        case ProductCategory.DECORATION:
+          productOwner = await db.decoration.findUnique({ where: { id: orderItem.productId } });
+          break;
+      }
+
+      if (user.role === "vendor" && (!productOwner || productOwner.userId !== user.id)) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, "Unauthorized to view this order item");
+      }
+
+      return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, orderItem);
+    } catch (error) {
+      logger.error(`Error getting order item detail: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get order item detail");
     }
-
-    // Validate ownership: vendors should only see their own product items
-    let productOwner = null;
-    switch (orderItem.category) {
-      case ProductCategory.ACCESSORIES:
-        productOwner = await db.accessories.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.FASHION:
-        productOwner = await db.fashion.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.MUSIC:
-        productOwner = await db.music.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.DIGITAL_BOOK:
-        productOwner = await db.digitalBook.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.MEDITATION:
-        productOwner = await db.meditation.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.HOME_LIVING:
-        productOwner = await db.homeAndLiving.findUnique({ where: { id: orderItem.productId } });
-        break;
-      case ProductCategory.DECORATION:
-        productOwner = await db.decoration.findUnique({ where: { id: orderItem.productId } });
-        break;
-    }
-
-    if (user.role === "vendor" && (!productOwner || productOwner.userId !== user.id)) {
-      return httpResponse(req, res, reshttp.unauthorizedCode, "Unauthorized to view this order item");
-    }
-
-    return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, orderItem);
   }),
 
   // Get vendor order stats

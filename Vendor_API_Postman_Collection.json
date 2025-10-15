@@ -1,0 +1,505 @@
+{
+  "info": {
+    "name": "Sufism Vendor API Collection",
+    "description": "Complete API collection for vendor operations in Sufism Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vendorId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Vendor Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\",\n  \"businessName\": \"Doe Enterprises\",\n  \"businessType\": \"Retail\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-register",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Vendor Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "        pm.collectionVariables.set('vendorId', response.data.user.id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vendor Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe Updated\",\n  \"businessName\": \"Doe Enterprises LLC\",\n  \"businessType\": \"E-commerce\",\n  \"businessLegalStructure\": \"LLC\",\n  \"einNumber\": \"12-3456789\",\n  \"contactPerson\": \"John Doe\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Business St\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zipCode\": \"10001\",\n  \"country\": \"USA\",\n  \"bankName\": \"Chase Bank\",\n  \"accountNumber\": \"1234567890\",\n  \"routingNumber\": \"021000021\",\n  \"isCompleted\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-register/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-register", "{{vendorId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendor Profile",
+      "item": [
+        {
+          "name": "Get Vendor Company Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/company-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "company-profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Vendor Company Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Updated Business Name\",\n  \"email\": \"updated@business.com\",\n  \"address\": \"456 Updated St\",\n  \"city\": \"Los Angeles\",\n  \"state\": \"CA\",\n  \"zipCode\": \"90210\",\n  \"country\": \"USA\",\n  \"phone\": \"+1987654321\",\n  \"businessType\": \"Technology\",\n  \"businessLegalStructure\": \"Corporation\",\n  \"contactPerson\": \"Jane Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/company-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "company-profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "{{vendorId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendor Orders",
+      "item": [
+        {
+          "name": "Get All Vendor Orders (WORKING)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Orders with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/vendor/orders?status=PENDING&dateFrom=2025-01-01&dateTo=2025-01-31&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "vendor", "orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2025-01-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Orders by ID (Legacy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PENDING\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/{{vendorId}}?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "{{vendorId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Item Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DISPATCH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/status/123,456,789",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "status", "123,456,789"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Item Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/item/123",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "item", "123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Vendor Order Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/stats/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "stats", "{{vendorId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendor Analytics",
+      "item": [
+        {
+          "name": "Get Vendor Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/vendor/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "vendor", "analytics"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/123",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "123"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders?status=PENDING&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROCESSING\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/123/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "123", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Out of stock\",\n  \"notes\": \"Item no longer available\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/123/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "123", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Order Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Order processed and ready for shipping\",\n  \"type\": \"INTERNAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/123/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "123", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/123/tracking",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "123", "tracking"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Analytics Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/analytics/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "analytics", "summary"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Update Order Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderIds\": [123, 456, 789],\n  \"status\": \"SHIPPED\",\n  \"notes\": \"Bulk status update\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/orders/bulk-update",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "orders", "bulk-update"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

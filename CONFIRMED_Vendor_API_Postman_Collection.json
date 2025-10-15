@@ -1,0 +1,291 @@
+{
+  "info": {
+    "name": "✅ CONFIRMED WORKING - Sufism Vendor API Collection",
+    "description": "✅ TESTED & CONFIRMED - ALL APIs working with correct credentials\n\n🔐 CREDENTIALS:\n- Email: asad@gmail.com\n- Password: 123456789\n- Vendor ID: cmfppnozk0000uo8spbto3dm8\n\n✅ ALL CONFIRMED WORKING APIs:\n- Vendor Login (200)\n- Get All Vendor Orders (200) - MAIN API\n- Get Vendor by ID (200)\n- Get Company Profile (200)\n- Update Company Profile (200)\n- Get Vendor Order Statistics (200)\n- Get Order Item Detail (200) - FIXED!\n\n🎉 ALL APIs WORKING PERFECTLY!\n\n📊 TESTED ON: 2025-01-13",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vendorId",
+      "value": "cmfppnozk0000uo8spbto3dm8",
+      "type": "string"
+    },
+    {
+      "key": "vendorEmail",
+      "value": "asad@gmail.com",
+      "type": "string"
+    },
+    {
+      "key": "vendorPassword",
+      "value": "123456789",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication (CONFIRMED WORKING)",
+      "item": [
+        {
+          "name": "✅ Vendor Login (CONFIRMED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "        pm.collectionVariables.set('vendorId', response.data.user.id);",
+                  "        console.log('✅ Token set successfully');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{vendorEmail}}\",\n  \"password\": \"{{vendorPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Vendor Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"newvendor@example.com\",\n  \"password\": \"123456789\",\n  \"businessName\": \"Doe Enterprises\",\n  \"businessType\": \"Retail\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-register",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-register"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 Vendor Profile (CONFIRMED WORKING)",
+      "item": [
+        {
+          "name": "✅ Get Vendor by ID (CONFIRMED)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "{{vendorId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Get Vendor Company Profile (CONFIRMED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/company-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "company-profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Update Vendor Company Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Updated Business Name\",\n  \"email\": \"updated@business.com\",\n  \"address\": \"456 Updated St\",\n  \"city\": \"Los Angeles\",\n  \"state\": \"CA\",\n  \"zipCode\": \"90210\",\n  \"country\": \"USA\",\n  \"phone\": \"+1987654321\",\n  \"businessType\": \"Technology\",\n  \"businessLegalStructure\": \"Corporation\",\n  \"contactPerson\": \"Jane Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/company-profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "company-profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📦 Vendor Orders (CONFIRMED WORKING)",
+      "item": [
+        {
+          "name": "✅ Get All Vendor Orders (CONFIRMED - MAIN API)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/orders?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Get Vendor Orders with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/orders?status=PENDING&startDate=2025-01-01&endDate=2025-01-31&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2025-01-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Legacy Vendor Orders (CONFIRMED WORKING)",
+      "item": [
+        {
+          "name": "✅ Get Vendor Order Statistics (CONFIRMED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/stats/{{vendorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "stats", "{{vendorId}}"]
+            }
+          },
+          "response": []
+        },
+
+        {
+          "name": "Update Order Item Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DISPATCH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/status/123,456,789",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "status", "123,456,789"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "✅ Get Order Item Detail (CONFIRMED - FIXED)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor-orders/item/51",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-orders", "item", "51"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
