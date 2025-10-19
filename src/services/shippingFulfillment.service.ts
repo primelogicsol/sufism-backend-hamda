@@ -52,12 +52,7 @@ export class ShippingFulfillmentService {
   /**
    * Calculate shipping rates for user's cart
    */
-  static async calculateShippingRatesFromCart(
-    userId: string,
-    destination: { country: string; zip: string },
-    providedWeight?: number,
-    providedDimensions?: { length: number; width: number; height: number }
-  ): Promise<ShippingRate[]> {
+  static async calculateShippingRatesFromCart(userId: string, destination: { country: string; zip: string }): Promise<ShippingRate[]> {
     try {
       // Get user's cart items with product details
       const cartItems = await db.cart.findMany({
@@ -101,9 +96,9 @@ export class ShippingFulfillmentService {
         }
       }
 
-      // Use provided weight/dimensions if available, otherwise use calculated values
-      const finalWeight = providedWeight || totalWeight;
-      const finalDimensions = providedDimensions || totalDimensions;
+      // Use calculated weight and dimensions from cart
+      const finalWeight = totalWeight;
+      const finalDimensions = totalDimensions;
 
       // Calculate real USPS rates
       const uspsRates = await this.calculateUSPSRatesFromCart(cartItems, destination, finalWeight, finalDimensions);

@@ -3,17 +3,9 @@ import { ShippingMethod, ShippingStatus, Carrier, ReturnStatus, ReturnReason } f
 
 export const shippingRateRequestSchema = z.object({
   destination: z.object({
-    country: z.string().min(1, "Country is required"),
-    zip: z.string().min(1, "ZIP code is required")
-  }),
-  weight: z.number().positive("Weight must be positive").optional(),
-  dimensions: z
-    .object({
-      length: z.number().positive(),
-      width: z.number().positive(),
-      height: z.number().positive()
-    })
-    .optional()
+    country: z.string().min(1, "Country is required").max(2, "Country code must be 2 characters"),
+    zip: z.string().min(1, "ZIP code is required").max(10, "ZIP code too long")
+  })
 });
 
 export const createShipmentSchema = z.object({

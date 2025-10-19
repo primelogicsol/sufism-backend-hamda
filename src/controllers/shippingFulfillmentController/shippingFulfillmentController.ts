@@ -13,10 +13,8 @@ export default {
    * Calculate shipping rates for user's cart
    */
   calculateShippingRates: asyncHandler(async (req: _Request, res) => {
-    const { destination, weight, dimensions } = req.body as {
-      destination?: unknown;
-      weight?: unknown;
-      dimensions?: unknown;
+    const { destination } = req.body as {
+      destination: { country: string; zip: string };
     };
     const userId = req.userFromToken?.id;
 
@@ -29,12 +27,7 @@ export default {
     }
 
     try {
-      const rates = await ShippingFulfillmentService.calculateShippingRatesFromCart(
-        userId,
-        destination as { country: string; zip: string },
-        weight ? Number(weight) : undefined,
-        dimensions as { length: number; width: number; height: number } | undefined
-      );
+      const rates = await ShippingFulfillmentService.calculateShippingRatesFromCart(userId, destination);
 
       return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", rates);
     } catch (error) {
