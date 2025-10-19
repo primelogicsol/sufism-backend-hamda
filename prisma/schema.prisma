@@ -114,6 +114,8 @@ model Order {
   cancelledBy     String?
   shippingMethod  ShippingMethod @default(STANDARD)
   shippingCost    Float        @default(0)
+  selectedShippingService String? @default("")
+  estimatedDeliveryDays Int? @default(0)
   carrier         Carrier?
   shippingStatus  ShippingStatus @default(PENDING)
   createdAt       DateTime     @default(now())

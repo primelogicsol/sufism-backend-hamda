@@ -301,6 +301,9 @@ export default {
                 amount: Number((paymentIntent.amount / 100).toFixed(2)),
                 sPaymentIntentId: paymentIntent.id,
                 paymentStatus: "PAID", // always pending until webhook flips it
+                shippingCost: metadata.shippingCost ? Number(metadata.shippingCost) : 0,
+                selectedShippingService: metadata.selectedShippingService || "",
+                estimatedDeliveryDays: metadata.estimatedDeliveryDays ? Number(metadata.estimatedDeliveryDays) : 0,
                 items: {
                   create: orderData.map((item: OrderItem) => ({
                     category: item.category,

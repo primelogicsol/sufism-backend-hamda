@@ -14,7 +14,11 @@ import logger from "../../utils/loggerUtils.js";
 
 export default {
   createOrder: asyncHandler(async (req: _Request, res) => {
-    const data = req.body as Order;
+    const data = req.body as Order & {
+      shippingCost?: number;
+      selectedShippingService?: string;
+      estimatedDeliveryDays?: number;
+    };
     const userId = req.userFromToken?.id;
 
     const user = await db.user.findFirst({ where: { id: userId } });
@@ -133,6 +137,14 @@ export default {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
+    // 🚚 Get shipping details from frontend
+    const shippingCost = data.shippingCost || 0;
+    const selectedShippingService = data.selectedShippingService || "";
+    const estimatedDeliveryDays = data.estimatedDeliveryDays || 0;
+
+    // Calculate final total amount including shipping
+    const finalTotalAmount = totalAmount + shippingCost;
+
     // 🔑 Stripe Customer
     const customerId = (user as unknown as { customer_id: string | null }).customer_id;
     if (!customerId) {
@@ -155,7 +167,7 @@ export default {
     let paymentIntent;
     try {
       paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(totalAmount * 100),
+        amount: Math.round(finalTotalAmount * 100),
         currency: "usd",
         customer: customerId,
         payment_method: typeof defaultPm === "string" ? defaultPm : defaultPm.id,
@@ -165,7 +177,10 @@ export default {
           userId: user.id.toString(),
           email: user.email,
           cartOrderData: JSON.stringify(orderItemsData),
-          amount: totalAmount,
+          amount: finalTotalAmount,
+          shippingCost: shippingCost,
+          selectedShippingService: selectedShippingService,
+          estimatedDeliveryDays: estimatedDeliveryDays,
           address: JSON.stringify(data)
         }
       });
@@ -193,9 +208,12 @@ export default {
       const newOrder = await db.order.create({
         data: {
           userId: user.id,
-          amount: totalAmount,
+          amount: finalTotalAmount,
           sPaymentIntentId: paymentIntent.id,
           paymentStatus: "PENDING", // always pending until webhook flips it
+          shippingCost: shippingCost,
+          selectedShippingService: selectedShippingService,
+          estimatedDeliveryDays: estimatedDeliveryDays,
           items: {
             create: orderItemsData.map((item) => ({
               category: item.category,

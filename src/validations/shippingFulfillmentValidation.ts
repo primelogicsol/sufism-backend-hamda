@@ -89,3 +89,9 @@ export const getAllReturnsSchema = z.object({
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(10)
 });
+
+export const orderWithShippingSchema = z.object({
+  shippingCost: z.number().min(0, "Shipping cost must be non-negative").optional(),
+  selectedShippingService: z.string().min(1, "Shipping service is required").optional(),
+  estimatedDeliveryDays: z.number().int().min(0, "Estimated delivery days must be non-negative").optional()
+});
