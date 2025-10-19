@@ -50,7 +50,114 @@ export interface ReturnApproval {
 
 export class ShippingFulfillmentService {
   /**
-   * Calculate shipping rates for an order
+   * Calculate shipping rates for user's cart
+   */
+  static async calculateShippingRatesFromCart(
+    userId: string,
+    destination: { country: string; zip: string },
+    providedWeight?: number,
+    providedDimensions?: { length: number; width: number; height: number }
+  ): Promise<ShippingRate[]> {
+    try {
+      // Get user's cart items with product details
+      const cartItems = await db.cart.findMany({
+        where: { userId },
+        include: {
+          music: true,
+          digitalBook: true,
+          meditation: true,
+          fashion: true,
+          living: true,
+          decoration: true,
+          accessories: true
+        }
+      });
+
+      if (!cartItems || cartItems.length === 0) {
+        throw new Error("Cart is empty");
+      }
+
+      // Calculate total weight and dimensions from cart items
+      let totalWeight = 0;
+      const totalDimensions = { length: 0, width: 0, height: 0 };
+
+      for (const item of cartItems) {
+        const product = item.music || item.digitalBook || item.meditation || item.fashion || item.living || item.decoration || item.accessories;
+
+        if (product) {
+          // Add weight for each quantity
+          const itemWeight = (product as { weight?: number }).weight || 1; // Default weight if not specified
+          totalWeight += itemWeight * item.qty;
+
+          // Add dimensions (simplified - in real scenario you'd calculate package dimensions)
+          const itemDimensions = (product as { dimensions?: { length: number; width: number; height: number } }).dimensions || {
+            length: 10,
+            width: 8,
+            height: 2
+          };
+          totalDimensions.length += itemDimensions.length * item.qty;
+          totalDimensions.width += itemDimensions.width * item.qty;
+          totalDimensions.height += itemDimensions.height * item.qty;
+        }
+      }
+
+      // Use provided weight/dimensions if available, otherwise use calculated values
+      const finalWeight = providedWeight || totalWeight;
+      const finalDimensions = providedDimensions || totalDimensions;
+
+      // Calculate real USPS rates
+      const uspsRates = await this.calculateUSPSRatesFromCart(cartItems, destination, finalWeight, finalDimensions);
+
+      // Mock rates for other carriers (to be replaced with real APIs)
+      const otherCarrierRates: ShippingRate[] = [
+        {
+          carrier: "FEDEX",
+          service: "FedEx Ground",
+          cost: 8.99,
+          estimatedDays: 3,
+          trackingAvailable: true
+        },
+        {
+          carrier: "UPS",
+          service: "UPS Ground",
+          cost: 9.5,
+          estimatedDays: 3,
+          trackingAvailable: true
+        },
+        {
+          carrier: "FEDEX",
+          service: "FedEx 2Day",
+          cost: 15.99,
+          estimatedDays: 2,
+          trackingAvailable: true
+        },
+        {
+          carrier: "UPS",
+          service: "UPS 2nd Day Air",
+          cost: 16.5,
+          estimatedDays: 2,
+          trackingAvailable: true
+        }
+      ];
+
+      // Combine USPS rates with other carrier rates
+      const rates: ShippingRate[] = [...uspsRates, ...otherCarrierRates];
+
+      // Filter rates based on destination, weight, and dimensions
+      const filteredRates = rates.filter(() => {
+        // Add business logic for rate filtering
+        return true;
+      });
+
+      return filteredRates;
+    } catch (error) {
+      logger.error(`Error calculating shipping rates from cart: ${String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate shipping rates for an order (kept for backward compatibility)
    */
   static async calculateShippingRates(
     orderId: number,
@@ -118,6 +225,50 @@ export class ShippingFulfillmentService {
     } catch (error) {
       logger.error(`Error calculating shipping rates: ${String(error)}`);
       throw error;
+    }
+  }
+
+  /**
+   * Calculate USPS shipping rates from cart data
+   */
+  private static async calculateUSPSRatesFromCart(
+    _cartItems: unknown[],
+    destination: { country: string; zip: string },
+    weight: number,
+    dimensions?: { length: number; width: number; height: number }
+  ): Promise<ShippingRate[]> {
+    try {
+      // Default origin ZIP (should be configurable)
+      const originZip = process.env.USPS_ORIGIN_ZIP || "10001";
+
+      // Only calculate USPS rates for US destinations
+      if (destination.country !== "US" && destination.country !== "USA") {
+        return [];
+      }
+
+      // Convert weight to ounces if needed
+      const weightInOunces = weight < 10 ? weight * 16 : weight;
+
+      // Get USPS rates
+      const uspsRates = await USPSService.calculateRates({
+        originZip,
+        destinationZip: destination.zip,
+        weight: weightInOunces,
+        dimensions
+      });
+
+      // Convert USPS rates to ShippingRate format
+      return uspsRates.map((rate) => ({
+        carrier: "USPS" as Carrier,
+        service: rate.service,
+        cost: rate.cost,
+        estimatedDays: rate.estimatedDays,
+        trackingAvailable: rate.trackingAvailable
+      }));
+    } catch (error) {
+      logger.error(`Error calculating USPS rates from cart: ${String(error)}`);
+      // Return empty array on error to not break the flow
+      return [];
     }
   }
 

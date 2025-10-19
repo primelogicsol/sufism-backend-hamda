@@ -10,10 +10,9 @@ import logger from "../../utils/loggerUtils.js";
 
 export default {
   /**
-   * Calculate shipping rates for an order
+   * Calculate shipping rates for user's cart
    */
   calculateShippingRates: asyncHandler(async (req: _Request, res) => {
-    const { orderId } = req.params;
     const { destination, weight, dimensions } = req.body as {
       destination?: unknown;
       weight?: unknown;
@@ -25,15 +24,15 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    if (!destination || !weight) {
-      return httpResponse(req, res, reshttp.badRequestCode, "Destination and weight are required");
+    if (!destination) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Destination is required");
     }
 
     try {
-      const rates = await ShippingFulfillmentService.calculateShippingRates(
-        Number(orderId),
+      const rates = await ShippingFulfillmentService.calculateShippingRatesFromCart(
+        userId,
         destination as { country: string; zip: string },
-        Number(weight),
+        weight ? Number(weight) : undefined,
         dimensions as { length: number; width: number; height: number } | undefined
       );
 

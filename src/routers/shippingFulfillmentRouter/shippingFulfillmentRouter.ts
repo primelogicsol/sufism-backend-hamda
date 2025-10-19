@@ -1,10 +1,18 @@
 import { Router } from "express";
 import shippingFulfillmentController from "../../controllers/shippingFulfillmentController/shippingFulfillmentController.js";
+import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
+import { shippingRateRequestSchema } from "../../validations/shippingFulfillmentValidation.js";
+import authMiddleware from "../../middleware/authMiddleware.js";
 
 export const shippingFulfillmentRouter: Router = Router();
 
 // Shipping routes
-shippingFulfillmentRouter.get("/orders/:orderId/rates", shippingFulfillmentController.calculateShippingRates);
+shippingFulfillmentRouter.post(
+  "/rates",
+  authMiddleware.checkToken,
+  validateDataMiddleware(shippingRateRequestSchema),
+  shippingFulfillmentController.calculateShippingRates
+);
 shippingFulfillmentRouter.post("/orders/:orderId/shipments", shippingFulfillmentController.createShipment);
 shippingFulfillmentRouter.put("/shipments/:trackingNumber/status", shippingFulfillmentController.updateShipmentStatus);
 shippingFulfillmentRouter.get("/shipments/:trackingNumber/tracking", shippingFulfillmentController.getShipmentTracking);

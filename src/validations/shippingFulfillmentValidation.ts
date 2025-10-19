@@ -6,7 +6,7 @@ export const shippingRateRequestSchema = z.object({
     country: z.string().min(1, "Country is required"),
     zip: z.string().min(1, "ZIP code is required")
   }),
-  weight: z.number().positive("Weight must be positive"),
+  weight: z.number().positive("Weight must be positive").optional(),
   dimensions: z
     .object({
       length: z.number().positive(),
