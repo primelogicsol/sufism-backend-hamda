@@ -91,39 +91,47 @@ export default {
       .map((item) => {
         let category: ProductCategory | null = null;
         let productId: number | null = null;
+        let vendorId: string | null = null;
         let price = 0;
 
         if (item.musicId) {
           category = "MUSIC";
           productId = item.musicId;
+          vendorId = item.music?.userId ?? null;
           price = item.music?.price ?? 0;
         } else if (item.bookId) {
           category = "DIGITAL_BOOK";
           productId = item.bookId;
+          vendorId = item.digitalBook?.userId ?? null;
           price = item.digitalBook?.price ?? 0;
         } else if (item.fashionId) {
           category = "FASHION";
           productId = item.fashionId;
+          vendorId = item.fashion?.userId ?? null;
           price = item.fashion?.price ?? 0;
         } else if (item.meditationId) {
           category = "MEDITATION";
           productId = item.meditationId;
+          vendorId = item.meditation?.userId ?? null;
           price = item.meditation?.price ?? 0;
         } else if (item.decorationId) {
           category = "DECORATION";
           productId = item.decorationId;
+          vendorId = item.decoration?.userId ?? null;
           price = item.decoration?.price ?? 0;
         } else if (item.livingId) {
           category = "HOME_LIVING";
           productId = item.livingId;
+          vendorId = item.living?.userId ?? null;
           price = item.living?.price ?? 0;
         } else if (item.accessoriesId) {
           category = "ACCESSORIES";
           productId = item.accessoriesId;
+          vendorId = item.accessories?.userId ?? null;
           price = item.accessories?.price ?? 0;
         }
 
-        if (!category || !productId) return null;
+        if (!category || !productId || !vendorId) return null;
 
         const subtotal = price * item.qty;
         totalAmount += subtotal;
@@ -131,6 +139,7 @@ export default {
         return {
           category,
           productId,
+          vendorId,
           quantity: item.qty,
           price
         };
@@ -218,6 +227,7 @@ export default {
             create: orderItemsData.map((item) => ({
               category: item.category,
               productId: item.productId,
+              vendorId: item.vendorId,
               quantity: item.quantity,
               price: item.price
             }))

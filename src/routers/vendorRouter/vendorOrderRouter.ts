@@ -1,15 +1,28 @@
 import { Router } from "express";
-import vendorOrdersControllers from "../../controllers/vendorController/vendorOrdersControllers.js";
+import vendorOrderController from "../../controllers/vendorController/vendorOrderController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
-import { vendorOrderSchema } from "../../validations/zod.js";
+import { vendorOrderValidation } from "../../validations/vendorOrderValidation.js";
 
-export const vendorOrderRouter: Router = Router();
+const router = Router();
 
-vendorOrderRouter
-  .route(`/vendor-orders/:id`)
-  .post(authMiddleware.checkToken, validateDataMiddleware(vendorOrderSchema), vendorOrdersControllers.getVendorOrders);
-vendorOrderRouter.patch("/vendor-orders/status/:ids", authMiddleware.checkToken, vendorOrdersControllers.updateOrderItemStatus);
+// Apply authentication middleware to all routes
+router.use(authMiddleware.checkToken);
 
-vendorOrderRouter.get("/vendor-orders/item/:orderItemId", authMiddleware.checkToken, vendorOrdersControllers.getOrderItemDetail);
-vendorOrderRouter.get("/vendor-orders/stats/:id", authMiddleware.checkToken, vendorOrdersControllers.getVendorOrderStats);
+// Vendor order management routes
+router.get("/orders", vendorOrderController.getAllVendorOrders);
+router.get("/orders/summary", vendorOrderController.getVendorOrderSummary);
+router.get("/orders/analytics", vendorOrderController.getVendorAnalytics);
+router.get("/orders/:orderItemId", vendorOrderController.getOrderItemDetail);
+router.put(
+  "/orders/:orderItemId/status",
+  validateDataMiddleware(vendorOrderValidation.updateOrderItemStatus),
+  vendorOrderController.updateOrderItemStatus
+);
+router.post(
+  "/orders/bulk-update",
+  validateDataMiddleware(vendorOrderValidation.bulkUpdateOrderItemStatus),
+  vendorOrderController.bulkUpdateOrderItemStatus
+);
+
+export default router;

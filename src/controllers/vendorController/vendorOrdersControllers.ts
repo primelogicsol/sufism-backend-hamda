@@ -1,5 +1,5 @@
 // controllers/vendorOrderController.js
-import { type OrderStatus, type Prisma, ProductCategory } from "@prisma/client";
+import { type OrderItemStatus, type Prisma, ProductCategory } from "@prisma/client";
 import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
@@ -71,7 +71,10 @@ export default {
     };
 
     if (status) {
-      filters.status = status as OrderStatus;
+      const validStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
+      if (validStatuses.includes(status)) {
+        filters.status = status as OrderItemStatus;
+      }
     }
 
     const take = Number(limit);
@@ -200,7 +203,10 @@ export default {
     };
 
     if (status) {
-      filters.status = status as OrderStatus;
+      const validStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
+      if (validStatuses.includes(status)) {
+        filters.status = status as OrderItemStatus;
+      }
     }
 
     // ✅ Pagination
@@ -231,7 +237,25 @@ export default {
 
   updateOrderItemStatus: asyncHandler(async (req: _Request, res) => {
     const { ids } = req.params; // can be "5" or "4,5,6"
-    const { status } = req.body as { status: OrderStatus };
+    const { status } = req.body as { status: string };
+
+    // Validate status
+    const validStatuses = [
+      "PENDING",
+      "CONFIRMED",
+      "PROCESSING",
+      "SHIPPED",
+      "IN_TRANSIT",
+      "DELIVERED",
+      "COMPLETED",
+      "FAILED",
+      "CANCELLED",
+      "RETURNED",
+      "REFUNDED"
+    ];
+    if (!validStatuses.includes(status)) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid status provided");
+    }
 
     const user = await db.user.findFirst({ where: { id: req.userFromToken?.id } });
     if (!user) {
@@ -302,7 +326,7 @@ export default {
     // ✅ Update all in one go
     const updated = await db.orderItem.updateMany({
       where: { id: { in: idArray } },
-      data: { status }
+      data: { status: status as OrderItemStatus }
     });
 
     return httpResponse(req, res, reshttp.okCode, reshttp.okMessage, {

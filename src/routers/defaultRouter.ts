@@ -16,7 +16,7 @@ import { stripeRouter } from "./stripe/route.js";
 import { authRouter } from "./userRouter/authRouter.js";
 import { userRouter } from "./userRouter/userRouter.js";
 import { vendorPublicRouter } from "./vendorRouter/publicRouter.js";
-import { vendorOrderRouter } from "./vendorRouter/vendorOrderRouter.js";
+import vendorOrderRouter from "./vendorRouter/vendorOrderRouter.js";
 
 export const defaultRouter: Router = Router();
 

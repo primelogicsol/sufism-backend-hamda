@@ -77,6 +77,7 @@ model User {
   lowStockAlerts LowStockAlert[]
   stockAdjustments StockAdjustment[]
   orderNotes OrderNote[]
+  orderItems OrderItem[]
   returns Return[]
   refunds Refund[]
   storeCredits StoreCredit[]
@@ -173,13 +174,15 @@ model OrderItem {
   orderId    Int
   category   ProductCategory
   productId  Int
+  vendorId   String
   quantity   Int             @default(1)
   price      Float
-  status     OrderStatus     @default(PENDING)
+  status     OrderItemStatus @default(PENDING)
   trackingNumber String?
   shippedAt  DateTime?
   deliveredAt DateTime?
   order      Order           @relation(fields: [orderId], references: [id])
+  vendor     User            @relation(fields: [vendorId], references: [id])
   
   // Product relations based on category
   music      Music?          @relation(fields: [productId], references: [id], map: "order_item_music")
@@ -795,6 +798,16 @@ enum OrderStatus {
   CANCELLED
   RETURNED
   REFUNDED
+}
+
+enum OrderItemStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
 }
 
 enum PaymentStatus {

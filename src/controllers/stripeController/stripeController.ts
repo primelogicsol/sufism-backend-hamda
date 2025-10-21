@@ -22,13 +22,6 @@ import messageSenderUtils from "../../utils/messageSenderUtils.js";
 // Save stripe-logs.log in the same folder as this file
 // const LOG_FILE = path.join(__dirname, "stripe-logs.log");
 
-interface OrderItem {
-  category: string;
-  productId: string;
-  quantity: number;
-  price: number;
-}
-
 interface Address {
   zip: string;
   phone: string;
@@ -291,7 +284,13 @@ export default {
             logger.error(e);
           }
         } else {
-          const orderData = JSON.parse(metadata.cartOrderData) as OrderItem[];
+          const orderData = JSON.parse(metadata.cartOrderData) as Array<{
+            category: string;
+            productId: number;
+            vendorId: string;
+            quantity: number;
+            price: number;
+          }>;
           const address = JSON.parse(metadata.address) as Address;
 
           try {
@@ -305,9 +304,10 @@ export default {
                 selectedShippingService: metadata.selectedShippingService || "",
                 estimatedDeliveryDays: metadata.estimatedDeliveryDays ? Number(metadata.estimatedDeliveryDays) : 0,
                 items: {
-                  create: orderData.map((item: OrderItem) => ({
+                  create: orderData.map((item) => ({
                     category: item.category,
                     productId: item.productId,
+                    vendorId: item.vendorId,
                     quantity: item.quantity,
                     price: item.price
                   }))
@@ -324,9 +324,9 @@ export default {
 
             // 📦 Reserve stock for the confirmed order
             try {
-              const stockReservationItems = orderData.map((item: OrderItem) => ({
-                productId: parseInt(item.productId),
-                productCategory: item.category.toUpperCase() as ProductCategory,
+              const stockReservationItems = orderData.map((item) => ({
+                productId: item.productId,
+                productCategory: item.category as ProductCategory,
                 quantity: item.quantity
               }));
 
