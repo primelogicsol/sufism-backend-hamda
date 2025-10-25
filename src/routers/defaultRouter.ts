@@ -17,6 +17,11 @@ import { authRouter } from "./userRouter/authRouter.js";
 import { userRouter } from "./userRouter/userRouter.js";
 import { vendorPublicRouter } from "./vendorRouter/publicRouter.js";
 import vendorOrderRouter from "./vendorRouter/vendorOrderRouter.js";
+import vendorShippingRouter from "./vendorShippingRouter.js";
+import vendorPayoutRouter from "./vendorPayoutRouter.js";
+import vendorOnboardingRouter from "./vendorOnboardingRouter.js";
+
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
 
 export const defaultRouter: Router = Router();
 
@@ -29,6 +34,9 @@ defaultRouter.use("/admin", adminRouter);
 defaultRouter.use("/", productRouter);
 defaultRouter.use("/", vendorPublicRouter);
 defaultRouter.use("/", vendorOrderRouter);
+defaultRouter.use("/vendor/shipping", vendorShippingRouter as any);
+defaultRouter.use("/vendor/payout", vendorPayoutRouter as any);
+defaultRouter.use("/vendor/onboarding", vendorOnboardingRouter as any);
 defaultRouter.use("/", couponRouter);
 defaultRouter.use("/stripe", stripeRouter);
 defaultRouter.use("/content", contentRouter);

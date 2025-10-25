@@ -22,6 +22,9 @@ interface BaseProductData {
   sku: string;
   tags: string[];
   images: string[];
+  weight?: number;
+  dimensions?: string;
+  shippingClass?: string;
 }
 
 const validCategories: TCategory[] = ["accessories", "decorations", "homeAndLiving", "fashion", "meditation", "digitalBooks"];
@@ -98,7 +101,10 @@ function createAccessoriesData(
   return {
     ...baseData,
     userId,
-    isDelete: false
+    isDelete: false,
+    weight: baseData.weight || 0,
+    dimensions: baseData.dimensions || "",
+    shippingClass: baseData.shippingClass || "STANDARD"
   };
 }
 
@@ -109,7 +115,10 @@ function createDecorationData(
   return {
     ...baseData,
     userId,
-    isDelete: false
+    isDelete: false,
+    weight: baseData.weight || 0,
+    dimensions: baseData.dimensions || "",
+    shippingClass: baseData.shippingClass || "STANDARD"
   };
 }
 
@@ -120,7 +129,10 @@ function createHomeAndLivingData(
   return {
     ...baseData,
     userId,
-    isDelete: false
+    isDelete: false,
+    weight: baseData.weight || 0,
+    dimensions: baseData.dimensions || "",
+    shippingClass: baseData.shippingClass || "STANDARD"
   };
 }
 
@@ -131,7 +143,10 @@ function createFashionData(
   return {
     ...baseData,
     userId,
-    isDelete: false
+    isDelete: false,
+    weight: baseData.weight || 0,
+    dimensions: baseData.dimensions || "",
+    shippingClass: baseData.shippingClass || "STANDARD"
   };
 }
 
@@ -142,7 +157,10 @@ function createMeditationData(
   return {
     ...baseData,
     userId,
-    isDelete: false
+    isDelete: false,
+    weight: baseData.weight || 0,
+    dimensions: baseData.dimensions || "",
+    shippingClass: baseData.shippingClass || "STANDARD"
   };
 }
 

@@ -87,6 +87,15 @@ model User {
   reports Report[]
   dashboards Dashboard[]
   analyticsEvents AnalyticsEvent[]
+  
+  // Vendor Configuration Relations
+  vendorShippingConfig VendorShippingConfig?
+  vendorPayoutConfig   VendorPayoutConfig?
+  
+  // Onboarding completion tracking
+  shippingConfigCompleted Boolean @default(false)
+  payoutConfigCompleted   Boolean @default(false)
+  
   createdAt      DateTime       @default(now())
 
   @@map("users")
@@ -644,6 +653,10 @@ model Accessories {
   tags        String[]   @default([])
   sku         String     @unique
   images      String[]   @default([])
+  // Shipping & Physical Properties
+  weight      Float?     // Weight in kg
+  dimensions  String?    // JSON: {length, width, height} in cm
+  shippingClass String?  // "standard", "fragile", "oversized", etc.
   wishlist    Wishlist[]
   cart        Cart[]
   orderItems  OrderItem[]
@@ -670,6 +683,10 @@ model Decoration {
   tags        String[]   @default([])
   sku         String     @unique
   images      String[]   @default([])
+  // Shipping & Physical Properties
+  weight      Float?     // Weight in kg
+  dimensions  String?    // JSON: {length, width, height} in cm
+  shippingClass String?  // "standard", "fragile", "oversized", etc.
   wishlist    Wishlist[]
   cart        Cart[]
   orderItems  OrderItem[]
@@ -700,6 +717,10 @@ model HomeAndLiving {
   orderItems  OrderItem[]
   reviews     Review[]
   images      String[]   @default([])
+  // Shipping & Physical Properties
+  weight      Float?     // Weight in kg
+  dimensions  String?    // JSON: {length, width, height} in cm
+  shippingClass String?  // "standard", "fragile", "oversized", etc.
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   isDelete    Boolean    @default(false)
@@ -722,6 +743,10 @@ model Fashion {
   tags        String[]   @default([])
   sku         String     @unique
   images      String[]   @default([])
+  // Shipping & Physical Properties
+  weight      Float?     // Weight in kg
+  dimensions  String?    // JSON: {length, width, height} in cm
+  shippingClass String?  // "standard", "fragile", "oversized", etc.
   wishlist    Wishlist[]
   cart        Cart[]
   orderItems  OrderItem[]
@@ -748,6 +773,10 @@ model Meditation {
   tags        String[]   @default([])
   sku         String     @unique
   images      String[]   @default([])
+  // Shipping & Physical Properties
+  weight      Float?     // Weight in kg
+  dimensions  String?    // JSON: {length, width, height} in cm
+  shippingClass String?  // "standard", "fragile", "oversized", etc.
   wishlist    Wishlist[]
   cart        Cart[]
   orderItems  OrderItem[]
@@ -1347,4 +1376,145 @@ enum StockAdjustmentType {
   INCREASE       // Increase stock
   DECREASE       // Decrease stock
   SET            // Set stock to specific value
+}
+
+// Vendor Shipping Configuration Models
+model VendorShippingConfig {
+  id              Int          @id @default(autoincrement())
+  vendorId        String
+  vendor          User         @relation(fields: [vendorId], references: [id])
+  
+  // Shipping Zones
+  shippingZones   VendorShippingZone[]
+  
+  // Default Settings
+  defaultCarrier  Carrier?
+  defaultMethod   ShippingMethod @default(STANDARD)
+  handlingTime    Int           @default(1) // Days to process
+  freeShippingThreshold Float?  // Minimum order for free shipping
+  
+  // Status
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([vendorId])
+  @@map("vendor_shipping_configs")
+}
+
+model VendorShippingZone {
+  id              Int          @id @default(autoincrement())
+  configId        Int
+  config          VendorShippingConfig @relation(fields: [configId], references: [id])
+  
+  // Geographic Coverage
+  country         String?       // "US", "CA", "UK", etc. (null = all countries)
+  state           String?       // Specific state/province
+  zipCodeRanges   String?       // JSON array of zip ranges
+  
+  // Shipping Methods & Rates
+  shippingMethods VendorShippingRate[]
+  
+  // Zone Settings
+  zoneName        String        // "Domestic", "International", "Local"
+  isActive        Boolean       @default(true)
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("vendor_shipping_zones")
+}
+
+model VendorShippingRate {
+  id              Int          @id @default(autoincrement())
+  zoneId          Int
+  zone            VendorShippingZone @relation(fields: [zoneId], references: [id])
+  
+  // Rate Configuration
+  carrier         Carrier
+  method          ShippingMethod
+  rateType        ShippingRateType // FIXED, WEIGHT_BASED, ORDER_VALUE_BASED
+  
+  // Rate Details
+  baseRate        Float         // Base shipping cost
+  perKgRate       Float?        // Additional cost per kg
+  perItemRate     Float?        // Additional cost per item
+  freeShippingThreshold Float? // Free shipping above this amount
+  
+  // Weight/Dimension Limits
+  maxWeight       Float?        // Maximum weight for this rate
+  maxDimensions   String?       // JSON: {length, width, height}
+  
+  // Delivery Time
+  estimatedDays   Int           // Estimated delivery days
+  cutoffTime      String?       // "14:00" for same-day cutoff
+  
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("vendor_shipping_rates")
+}
+
+enum ShippingRateType {
+  FIXED              // Fixed rate regardless of weight/value
+  WEIGHT_BASED       // Rate based on total weight
+  ORDER_VALUE_BASED  // Rate based on order value
+  HYBRID             // Combination of weight and value
+}
+
+// Vendor Payout Configuration Models
+model VendorPayoutConfig {
+  id              Int          @id @default(autoincrement())
+  vendorId        String
+  vendor          User         @relation(fields: [vendorId], references: [id])
+  
+  // Payout Method
+  payoutMethod    PayoutMethod
+  payoutFrequency PayoutFrequency @default(WEEKLY)
+  
+  // Bank Details (if bank transfer)
+  bankName        String?
+  accountNumber   String?
+  routingNumber   String?
+  bankAddress     String?
+  
+  // Digital Wallet Details
+  paypalEmail     String?
+  stripeAccountId String?
+  
+  // Payout Settings
+  minimumPayout   Float        @default(50.0) // Minimum amount for payout
+  autoPayout      Boolean      @default(true)
+  
+  // Tax Information
+  taxId           String?
+  taxForm         String?      // "W9", "1099", etc.
+  
+  // Status
+  isVerified      Boolean      @default(false)
+  isActive        Boolean      @default(true)
+  verifiedAt      DateTime?
+  verifiedBy      String?
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([vendorId])
+  @@map("vendor_payout_configs")
+}
+
+enum PayoutMethod {
+  BANK_TRANSFER
+  PAYPAL
+  STRIPE_CONNECT
+  CHECK
+  WIRE_TRANSFER
+}
+
+enum PayoutFrequency {
+  DAILY
+  WEEKLY
+  BI_WEEKLY
+  MONTHLY
 }

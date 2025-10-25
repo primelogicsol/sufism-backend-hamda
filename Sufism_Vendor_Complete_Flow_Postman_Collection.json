@@ -1,0 +1,1020 @@
+{
+  "info": {
+    "name": "Sufism Vendor Complete Flow - Shipping, Payout & Onboarding",
+    "description": "Complete end-to-end vendor flow including authentication, shipping setup, payout configuration, and onboarding process",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vendor_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payout_config_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shipping_zone_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shipping_rate_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication Flow",
+      "description": "Complete authentication process for vendors",
+      "item": [
+        {
+          "name": "1. Vendor Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('vendor_id', response.data.id);",
+                  "    console.log('Vendor ID saved:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"vendor\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Business St\",\n  \"city\": \"Business City\",\n  \"state\": \"BC\",\n  \"zipCode\": \"12345\",\n  \"country\": \"US\",\n  \"businessName\": \"Doe Enterprises LLC\",\n  \"taxId\": \"12-3456789\",\n  \"businessType\": \"LLC\",\n  \"isCompleted\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user/register",
+              "host": ["{{base_url}}"],
+              "path": ["user", "register"]
+            },
+            "description": "Register a new vendor account"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"vendor\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/user/register",
+                  "host": ["{{base_url}}"],
+                  "path": ["user", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"status\": 201,\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"id\": \"vendor_123\",\n    \"email\": \"vendor@example.com\",\n    \"fullName\": \"John Doe\",\n    \"role\": \"vendor\",\n    \"isVerified\": false,\n    \"createdAt\": \"2025-01-25T10:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Vendor Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', response.data.refreshToken);",
+                  "    console.log('Access token saved:', response.data.accessToken.substring(0, 20) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user/login",
+              "host": ["{{base_url}}"],
+              "path": ["user", "login"]
+            },
+            "description": "Login as vendor to get access token"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/user/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["user", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"The request was successful.\",\n  \"data\": {\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Refresh Access Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{refresh_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/user/refresh-access-token",
+              "host": ["{{base_url}}"],
+              "path": ["user", "refresh-access-token"]
+            },
+            "description": "Refresh expired access token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💰 Payout Configuration Flow",
+      "description": "Complete vendor payout setup process",
+      "item": [
+        {
+          "name": "1. Get Available Payout Methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/methods",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "methods"]
+            },
+            "description": "Get list of available payout methods"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/methods",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "methods"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Available payout methods retrieved successfully\",\n  \"data\": {\n    \"methods\": [\n      {\n        \"id\": \"BANK_TRANSFER\",\n        \"name\": \"Bank Transfer\",\n        \"description\": \"Direct deposit to your bank account\",\n        \"processingTime\": \"1-3 business days\",\n        \"fees\": \"Free\",\n        \"isAvailable\": true,\n        \"requirements\": [\n          \"Valid bank account\",\n          \"Routing number\",\n          \"Account holder verification\"\n        ]\n      },\n      {\n        \"id\": \"PAYPAL\",\n        \"name\": \"PayPal\",\n        \"description\": \"Transfer to PayPal account\",\n        \"processingTime\": \"Instant\",\n        \"fees\": \"2.9% + $0.30\",\n        \"isAvailable\": true,\n        \"requirements\": [\n          \"PayPal Business account\",\n          \"Email verification\",\n          \"Bank account linked\"\n        ]\n      },\n      {\n        \"id\": \"STRIPE_CONNECT\",\n        \"name\": \"Stripe Connect\",\n        \"description\": \"Direct to Stripe account\",\n        \"processingTime\": \"2-7 business days\",\n        \"fees\": \"2.9% + $0.30\",\n        \"isAvailable\": true,\n        \"requirements\": [\n          \"Stripe account\",\n          \"Tax information\",\n          \"Identity verification\"\n        ]\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Create Payout Configuration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('payout_config_id', response.data.id);",
+                  "    console.log('Payout config ID saved:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payoutMethod\": \"BANK_TRANSFER\",\n  \"frequency\": \"WEEKLY\",\n  \"bankDetails\": {\n    \"accountNumber\": \"1234567890\",\n    \"routingNumber\": \"021000021\",\n    \"bankName\": \"Chase Bank\",\n    \"accountHolderName\": \"John Doe\",\n    \"accountType\": \"CHECKING\"\n  },\n  \"taxDetails\": {\n    \"taxId\": \"12-3456789\",\n    \"businessName\": \"Doe Enterprises LLC\",\n    \"businessType\": \"LLC\",\n    \"businessAddress\": {\n      \"street\": \"123 Business St\",\n      \"city\": \"Business City\",\n      \"state\": \"BC\",\n      \"zipCode\": \"12345\",\n      \"country\": \"US\"\n    }\n  },\n  \"preferences\": {\n    \"minimumPayoutAmount\": 25.00,\n    \"autoPayout\": true,\n    \"notifications\": true,\n    \"notificationEmail\": \"vendor@example.com\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "config"]
+            },
+            "description": "Create vendor payout configuration"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payoutMethod\": \"BANK_TRANSFER\",\n  \"frequency\": \"WEEKLY\",\n  \"bankDetails\": {\n    \"accountNumber\": \"1234567890\",\n    \"routingNumber\": \"021000021\",\n    \"bankName\": \"Chase Bank\",\n    \"accountHolderName\": \"John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "config"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Payout configuration created successfully\",\n  \"data\": {\n    \"id\": \"payout_config_123\",\n    \"vendorId\": \"vendor_123\",\n    \"payoutMethod\": \"BANK_TRANSFER\",\n    \"frequency\": \"WEEKLY\",\n    \"isActive\": true,\n    \"isVerified\": false,\n    \"createdAt\": \"2025-01-25T10:00:00Z\",\n    \"updatedAt\": \"2025-01-25T10:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Get Payout Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "config"]
+            },
+            "description": "Get vendor's current payout configuration"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "config"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Payout configuration retrieved successfully\",\n  \"data\": {\n    \"id\": \"payout_config_123\",\n    \"vendorId\": \"vendor_123\",\n    \"payoutMethod\": \"BANK_TRANSFER\",\n    \"frequency\": \"WEEKLY\",\n    \"isActive\": true,\n    \"isVerified\": false,\n    \"bankDetails\": {\n      \"accountNumber\": \"****7890\",\n      \"routingNumber\": \"021000021\",\n      \"bankName\": \"Chase Bank\",\n      \"accountHolderName\": \"John Doe\",\n      \"accountType\": \"CHECKING\"\n    },\n    \"taxDetails\": {\n      \"taxId\": \"12-3456789\",\n      \"businessName\": \"Doe Enterprises LLC\",\n      \"businessType\": \"LLC\"\n    },\n    \"preferences\": {\n      \"minimumPayoutAmount\": 25.00,\n      \"autoPayout\": true,\n      \"notifications\": true,\n      \"notificationEmail\": \"vendor@example.com\"\n    },\n    \"createdAt\": \"2025-01-25T10:00:00Z\",\n    \"updatedAt\": \"2025-01-25T10:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Update Payout Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"isVerified\": true,\n  \"verificationNotes\": \"Bank account verified successfully\",\n  \"verificationDate\": \"2025-01-25T10:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/status",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "status"]
+            },
+            "description": "Update payout configuration status"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isActive\": true,\n  \"isVerified\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "status"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Payout status updated successfully\",\n  \"data\": {\n    \"id\": \"payout_config_123\",\n    \"isActive\": true,\n    \"isVerified\": true,\n    \"verificationNotes\": \"Bank account verified successfully\",\n    \"verificationDate\": \"2025-01-25T10:30:00Z\",\n    \"updatedAt\": \"2025-01-25T10:30:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Verify Payout Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/verify/{{vendor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "verify", "{{vendor_id}}"]
+            },
+            "description": "Verify payout configuration for vendor"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/verify/vendor_123",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "verify", "vendor_123"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Payout configuration verification completed\",\n  \"data\": {\n    \"vendorId\": \"vendor_123\",\n    \"isVerified\": true,\n    \"verificationStatus\": \"APPROVED\",\n    \"verificationDate\": \"2025-01-25T10:30:00Z\",\n    \"verificationNotes\": \"All payout details verified successfully\",\n    \"nextPayoutDate\": \"2025-02-01T00:00:00Z\",\n    \"estimatedPayoutAmount\": 1250.75\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🚚 Shipping Configuration Flow",
+      "description": "Complete vendor shipping setup process",
+      "item": [
+        {
+          "name": "1. Get Shipping Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "config"]
+            },
+            "description": "Get vendor's current shipping configuration"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "config"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Shipping configuration retrieved successfully\",\n  \"data\": {\n    \"vendorId\": \"vendor_123\",\n    \"isConfigured\": true,\n    \"zones\": [\n      {\n        \"id\": \"zone_1\",\n        \"name\": \"Domestic US\",\n        \"country\": \"US\",\n        \"state\": \"CA\",\n        \"zipCodeRanges\": [\"90000-99999\"],\n        \"isActive\": true\n      }\n    ],\n    \"rates\": [\n      {\n        \"id\": \"rate_1\",\n        \"zoneId\": \"zone_1\",\n        \"carrier\": \"FedEx\",\n        \"method\": \"Ground\",\n        \"rateType\": \"FIXED\",\n        \"baseRate\": 10.99,\n        \"perKgRate\": 2.50,\n        \"perItemRate\": 1.00,\n        \"freeShippingThreshold\": 50.00,\n        \"maxWeight\": 70.0,\n        \"estimatedDays\": 3,\n        \"isActive\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Create Shipping Zone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('shipping_zone_id', response.data.id);",
+                  "    console.log('Shipping zone ID saved:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zoneName\": \"Domestic US\",\n  \"country\": \"US\",\n  \"state\": \"CA\",\n  \"zipCodeRanges\": [\n    {\n      \"from\": \"90000\",\n      \"to\": \"99999\"\n    }\n  ],\n  \"isActive\": true,\n  \"description\": \"Domestic shipping within California\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/zones",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "zones"]
+            },
+            "description": "Create a new shipping zone"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"zoneName\": \"Domestic US\",\n  \"country\": \"US\",\n  \"state\": \"CA\",\n  \"zipCodeRanges\": [\n    {\n      \"from\": \"90000\",\n      \"to\": \"99999\"\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/zones",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "zones"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"status\": 201,\n  \"message\": \"Shipping zone created successfully\",\n  \"data\": {\n    \"id\": \"zone_123\",\n    \"vendorId\": \"vendor_123\",\n    \"zoneName\": \"Domestic US\",\n    \"country\": \"US\",\n    \"state\": \"CA\",\n    \"zipCodeRanges\": [\n      {\n        \"from\": \"90000\",\n        \"to\": \"99999\"\n      }\n    ],\n    \"isActive\": true,\n    \"createdAt\": \"2025-01-25T10:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Create Shipping Rate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('shipping_rate_id', response.data.id);",
+                  "    console.log('Shipping rate ID saved:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zoneId\": \"{{shipping_zone_id}}\",\n  \"carrier\": \"FedEx\",\n  \"method\": \"Ground\",\n  \"rateType\": \"HYBRID\",\n  \"baseRate\": 10.99,\n  \"perKgRate\": 2.50,\n  \"perItemRate\": 1.00,\n  \"freeShippingThreshold\": 50.00,\n  \"maxWeight\": 70.0,\n  \"estimatedDays\": 3,\n  \"isActive\": true,\n  \"description\": \"Standard ground shipping\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/zones/{{shipping_zone_id}}/rates",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "zones", "{{shipping_zone_id}}", "rates"]
+            },
+            "description": "Create shipping rate for a zone"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"zoneId\": \"zone_123\",\n  \"carrier\": \"FedEx\",\n  \"method\": \"Ground\",\n  \"rateType\": \"HYBRID\",\n  \"baseRate\": 10.99,\n  \"perKgRate\": 2.50,\n  \"perItemRate\": 1.00\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/zones/zone_123/rates",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "zones", "zone_123", "rates"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"success\": true,\n  \"status\": 201,\n  \"message\": \"Shipping rate created successfully\",\n  \"data\": {\n    \"id\": \"rate_123\",\n    \"zoneId\": \"zone_123\",\n    \"carrier\": \"FedEx\",\n    \"method\": \"Ground\",\n    \"rateType\": \"HYBRID\",\n    \"baseRate\": 10.99,\n    \"perKgRate\": 2.50,\n    \"perItemRate\": 1.00,\n    \"freeShippingThreshold\": 50.00,\n    \"maxWeight\": 70.0,\n    \"estimatedDays\": 3,\n    \"isActive\": true,\n    \"createdAt\": \"2025-01-25T10:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Calculate Shipping Rates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destination\": {\n    \"country\": \"US\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90210\",\n    \"city\": \"Beverly Hills\"\n  },\n  \"items\": [\n    {\n      \"productId\": \"prod_123\",\n      \"category\": \"Fashion\",\n      \"weight\": 0.5,\n      \"quantity\": 2,\n      \"price\": 25.00\n    }\n  ],\n  \"orderValue\": 50.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/calculate",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "calculate"]
+            },
+            "description": "Calculate shipping rates for an order"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"destination\": {\n    \"country\": \"US\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90210\"\n  },\n  \"items\": [\n    {\n      \"productId\": \"prod_123\",\n      \"weight\": 0.5,\n      \"quantity\": 2\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/calculate",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "calculate"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Shipping rates calculated successfully\",\n  \"data\": {\n    \"applicableZone\": {\n      \"id\": \"zone_123\",\n      \"name\": \"Domestic US\"\n    },\n    \"rates\": [\n      {\n        \"id\": \"rate_123\",\n        \"carrier\": \"FedEx\",\n        \"method\": \"Ground\",\n        \"cost\": 12.99,\n        \"estimatedDays\": 3,\n        \"isFree\": false\n      }\n    ],\n    \"totalWeight\": 1.0,\n    \"orderValue\": 50.00,\n    \"freeShippingEligible\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "5. Validate Shipping Configuration",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/validate",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "validate"]
+            },
+            "description": "Validate shipping configuration completeness"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/validate",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "validate"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Shipping configuration validation completed\",\n  \"data\": {\n    \"isValid\": true,\n    \"isComplete\": true,\n    \"missingRequirements\": [],\n    \"warnings\": [],\n    \"summary\": {\n      \"totalZones\": 1,\n      \"totalRates\": 1,\n      \"coveragePercentage\": 100,\n      \"estimatedSetupTime\": \"15 minutes\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Onboarding Status Flow",
+      "description": "Complete vendor onboarding process tracking",
+      "item": [
+        {
+          "name": "1. Get Onboarding Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/onboarding/status",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "onboarding", "status"]
+            },
+            "description": "Get comprehensive vendor onboarding status"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/onboarding/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "onboarding", "status"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Onboarding status retrieved successfully\",\n  \"data\": {\n    \"vendorId\": \"vendor_123\",\n    \"overallProgress\": 100,\n    \"isCompleted\": true,\n    \"canStartSelling\": true,\n    \"steps\": [\n      {\n        \"id\": \"account_setup\",\n        \"name\": \"Account Setup\",\n        \"description\": \"Create vendor account and basic information\",\n        \"isCompleted\": true,\n        \"isRequired\": true,\n        \"completedAt\": \"2025-01-24T10:00:00Z\"\n      },\n      {\n        \"id\": \"payout_setup\",\n        \"name\": \"Payout Configuration\",\n        \"description\": \"Set up payment method for receiving payouts\",\n        \"isCompleted\": true,\n        \"isRequired\": true,\n        \"completedAt\": \"2025-01-25T10:00:00Z\"\n      },\n      {\n        \"id\": \"shipping_setup\",\n        \"name\": \"Shipping Configuration\",\n        \"description\": \"Configure shipping rates and zones\",\n        \"isCompleted\": true,\n        \"isRequired\": true,\n        \"completedAt\": \"2025-01-25T10:30:00Z\"\n      },\n      {\n        \"id\": \"product_catalog\",\n        \"name\": \"Product Catalog\",\n        \"description\": \"Add products to your catalog\",\n        \"isCompleted\": false,\n        \"isRequired\": true,\n        \"completedAt\": null\n      }\n    ],\n    \"nextSteps\": [\n      \"Add your first product\",\n      \"Set up inventory tracking\",\n      \"Configure product categories\"\n    ],\n    \"estimatedCompletionTime\": \"30 minutes\",\n    \"helpResources\": [\n      \"Product catalog tutorial\",\n      \"Inventory management help\",\n      \"Category setup guide\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Get Onboarding Requirements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/onboarding/requirements",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "onboarding", "requirements"]
+            },
+            "description": "Get detailed onboarding requirements checklist"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/onboarding/requirements",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "onboarding", "requirements"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Onboarding requirements retrieved successfully\",\n  \"data\": {\n    \"requirements\": [\n      {\n        \"category\": \"Account Information\",\n        \"items\": [\n          {\n            \"id\": \"business_name\",\n            \"name\": \"Business Name\",\n            \"description\": \"Legal business name\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          },\n          {\n            \"id\": \"tax_id\",\n            \"name\": \"Tax ID/EIN\",\n            \"description\": \"Federal tax identification number\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          },\n          {\n            \"id\": \"business_address\",\n            \"name\": \"Business Address\",\n            \"description\": \"Physical business address\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          }\n        ]\n      },\n      {\n        \"category\": \"Payment Setup\",\n        \"items\": [\n          {\n            \"id\": \"payout_method\",\n            \"name\": \"Payout Method\",\n            \"description\": \"Choose how to receive payments\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          },\n          {\n            \"id\": \"bank_verification\",\n            \"name\": \"Bank Account Verification\",\n            \"description\": \"Verify bank account details\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          }\n        ]\n      },\n      {\n        \"category\": \"Shipping Setup\",\n        \"items\": [\n          {\n            \"id\": \"shipping_zones\",\n            \"name\": \"Shipping Zones\",\n            \"description\": \"Define shipping zones and coverage\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          },\n          {\n            \"id\": \"shipping_rates\",\n            \"name\": \"Shipping Rates\",\n            \"description\": \"Set up shipping rates for each zone\",\n            \"isRequired\": true,\n            \"isCompleted\": true\n          }\n        ]\n      }\n    ],\n    \"summary\": {\n      \"totalRequirements\": 7,\n      \"completedRequirements\": 7,\n      \"remainingRequirements\": 0,\n      \"completionPercentage\": 100\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Get Payout Onboarding Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/onboarding-status",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "onboarding-status"]
+            },
+            "description": "Get payout-specific onboarding status"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/onboarding-status",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "onboarding-status"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Onboarding status retrieved successfully\",\n  \"data\": {\n    \"vendorId\": \"vendor_123\",\n    \"isCompleted\": true,\n    \"payoutConfigCompleted\": true,\n    \"shippingConfigCompleted\": true,\n    \"vendorAccepted\": true,\n    \"steps\": [\n      {\n        \"id\": \"payout_setup\",\n        \"name\": \"Payout Configuration\",\n        \"description\": \"Set up your payment method for receiving payouts\",\n        \"isCompleted\": true,\n        \"isRequired\": true,\n        \"completedAt\": \"2025-01-25T10:00:00Z\"\n      },\n      {\n        \"id\": \"shipping_setup\",\n        \"name\": \"Shipping Configuration\",\n        \"description\": \"Configure your shipping rates and zones\",\n        \"isCompleted\": true,\n        \"isRequired\": true,\n        \"completedAt\": \"2025-01-25T10:30:00Z\"\n      }\n    ],\n    \"nextSteps\": [\n      \"Add product catalog\",\n      \"Set up inventory management\",\n      \"Configure product categories\"\n    ],\n    \"canStartSelling\": true,\n    \"estimatedCompletionTime\": \"15 minutes\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔍 Error Handling Examples",
+      "description": "Examples of error responses and edge cases",
+      "item": [
+        {
+          "name": "Invalid Token Example",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_token_here",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/shipping/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "shipping", "config"]
+            },
+            "description": "Example request with invalid token"
+          },
+          "response": [
+            {
+              "name": "Unauthorized Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/shipping/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "shipping", "config"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"success\": false,\n  \"status\": 401,\n  \"message\": \"Unauthorized access. Invalid or expired token.\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Missing Token Example",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "config"]
+            },
+            "description": "Example request without authorization header"
+          },
+          "response": [
+            {
+              "name": "Unauthorized Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "config"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"success\": false,\n  \"status\": 401,\n  \"message\": \"No access token found\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Validation Error Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payoutMethod\": \"INVALID_METHOD\",\n  \"frequency\": \"INVALID_FREQUENCY\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendor/payout/config",
+              "host": ["{{base_url}}"],
+              "path": ["vendor", "payout", "config"]
+            },
+            "description": "Example request with invalid data"
+          },
+          "response": [
+            {
+              "name": "Validation Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payoutMethod\": \"INVALID_METHOD\",\n  \"frequency\": \"INVALID_FREQUENCY\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/vendor/payout/config",
+                  "host": ["{{base_url}}"],
+                  "path": ["vendor", "payout", "config"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"Validation error\",\n  \"data\": {\n    \"errors\": [\n      {\n        \"field\": \"payoutMethod\",\n        \"message\": \"Invalid payout method. Must be one of: BANK_TRANSFER, PAYPAL, STRIPE_CONNECT\"\n      },\n      {\n        \"field\": \"frequency\",\n        \"message\": \"Invalid frequency. Must be one of: DAILY, WEEKLY, MONTHLY\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-generate timestamp for requests",
+          "pm.globals.set('timestamp', new Date().toISOString());",
+          "",
+          "// Log request details",
+          "console.log('Request URL:', pm.request.url.toString());",
+          "console.log('Request Method:', pm.request.method);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Basic response validation",
+          "pm.test('Response status code is successful', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+          "});",
+          "",
+          "pm.test('Response has success field', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "pm.test('Response has message field', function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('message');",
+          "});",
+          "",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "pm.test('Response Content-Type is application/json', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "});",
+          "",
+          "// Log response details",
+          "console.log('Response Status:', pm.response.status);",
+          "console.log('Response Time:', pm.response.responseTime + 'ms');",
+          "console.log('Response Size:', pm.response.responseSize + ' bytes');"
+        ]
+      }
+    }
+  ]
+}
