@@ -300,6 +300,109 @@ const vendorShippingController = {
   }),
 
   /**
+   * Create shipping zone with rates in one call
+   */
+  createZoneWithRates: asyncHandler(async (req: _Request, res) => {
+    const vendorId = req.userFromToken?.id;
+    const {
+      zoneName,
+      country,
+      state,
+      zipCodeRanges,
+      isActive = true,
+      description,
+      shippingRates
+    } = req.body as {
+      zoneName: string;
+      country: string;
+      state?: string;
+      zipCodeRanges: Array<{ from: string; to: string }>;
+      isActive?: boolean;
+      description?: string;
+      shippingRates: Array<{
+        carrier: string;
+        method: string;
+        rateType: string;
+        baseRate?: number;
+        perKgRate?: number;
+        perItemRate?: number;
+        freeShippingThreshold?: number;
+        maxWeight?: number;
+        estimatedDays?: number;
+        isActive?: boolean;
+        description?: string;
+      }>;
+    };
+
+    try {
+      // Check if vendor exists
+      const vendor = await db.user.findFirst({
+        where: { id: vendorId, role: "vendor" }
+      });
+
+      if (!vendor) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Vendor not found");
+      }
+
+      // Create shipping zone
+      const shippingZone = await (db as any).vendorShippingZone.create({
+        data: {
+          vendorId,
+          zoneName,
+          country,
+          state,
+          zipCodeRanges,
+          isActive,
+          description
+        }
+      });
+
+      // Create shipping rates for the zone
+      const createdRates = [];
+      for (const rate of shippingRates) {
+        const shippingRate = await (db as any).vendorShippingRate.create({
+          data: {
+            zoneId: shippingZone.id,
+            carrier: rate.carrier,
+            method: rate.method,
+            rateType: rate.rateType,
+            baseRate: rate.baseRate,
+            perKgRate: rate.perKgRate,
+            perItemRate: rate.perItemRate,
+            freeShippingThreshold: rate.freeShippingThreshold,
+            maxWeight: rate.maxWeight,
+            estimatedDays: rate.estimatedDays,
+            isActive: rate.isActive ?? true,
+            description: rate.description
+          }
+        });
+        createdRates.push(shippingRate);
+      }
+
+      logger.info(`Shipping zone with rates created: ${shippingZone.id} for vendor ${vendorId}`);
+
+      return httpResponse(req, res, reshttp.createdCode, "Shipping zone with rates created successfully", {
+        zone: {
+          id: shippingZone.id,
+          vendorId: shippingZone.vendorId,
+          zoneName: shippingZone.zoneName,
+          country: shippingZone.country,
+          state: shippingZone.state,
+          zipCodeRanges: shippingZone.zipCodeRanges,
+          isActive: shippingZone.isActive,
+          description: shippingZone.description,
+          createdAt: shippingZone.createdAt
+        },
+        rates: createdRates,
+        totalRates: createdRates.length
+      });
+    } catch (error) {
+      logger.error("Error creating shipping zone with rates:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create shipping zone with rates");
+    }
+  }),
+
+  /**
    * Create shipping rate
    */
   createShippingRate: asyncHandler(async (req: _Request, res) => {

@@ -17,6 +17,7 @@ router.get("/summary", vendorShippingController.getShippingConfigSummary as any)
 
 // Shipping zones routes
 router.post("/zones", vendorShippingController.createShippingZone as any);
+router.post("/zones-with-rates", vendorShippingController.createZoneWithRates as any);
 router.put("/zones/:zoneId", vendorShippingController.updateShippingZone as any);
 router.delete("/zones/:zoneId", vendorShippingController.deleteShippingZone as any);
 
