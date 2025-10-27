@@ -10,19 +10,11 @@ const router = Router();
 router.use(authMiddleware.checkToken);
 
 // Vendor order management routes
-router.get("/orders", vendorOrderController.getAllVendorOrders);
-router.get("/orders/summary", vendorOrderController.getVendorOrderSummary);
-router.get("/orders/analytics", vendorOrderController.getVendorAnalytics);
-router.get("/orders/:orderItemId", vendorOrderController.getOrderItemDetail);
-router.put(
-  "/orders/:orderItemId/status",
-  validateDataMiddleware(vendorOrderValidation.updateOrderItemStatus),
-  vendorOrderController.updateOrderItemStatus
-);
-router.post(
-  "/orders/bulk-update",
-  validateDataMiddleware(vendorOrderValidation.bulkUpdateOrderItemStatus),
-  vendorOrderController.bulkUpdateOrderItemStatus
-);
+router.get("/", vendorOrderController.getAllVendorOrders);
+router.get("/summary", vendorOrderController.getVendorOrderSummary);
+router.get("/analytics", vendorOrderController.getVendorAnalytics);
+router.get("/:orderItemId", vendorOrderController.getOrderItemDetail);
+router.put("/:orderItemId/status", validateDataMiddleware(vendorOrderValidation.updateOrderItemStatus), vendorOrderController.updateOrderItemStatus);
+router.post("/bulk-update", validateDataMiddleware(vendorOrderValidation.bulkUpdateOrderItemStatus), vendorOrderController.bulkUpdateOrderItemStatus);
 
 export default router;

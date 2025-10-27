@@ -24,7 +24,8 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "project:deploy": "bun run db:generate && bun run db:push && bun run start:prod",
-    "seed:admin": "bun run --env-file .env ./dist/scripts/adminSeeder.js"
+    "seed:admin": "bun run --env-file .env ./dist/scripts/adminSeeder.js",
+    "seed:vendor": "bun run --env-file .env ./dist/scripts/vendorSeeder.js"
   },
   "keywords": [],
   "author": "hamda",

@@ -33,7 +33,7 @@ defaultRouter.use("/user", purchaseRouter);
 defaultRouter.use("/admin", adminRouter);
 defaultRouter.use("/", productRouter);
 defaultRouter.use("/", vendorPublicRouter);
-defaultRouter.use("/", vendorOrderRouter);
+defaultRouter.use("/vendor/orders", vendorOrderRouter);
 defaultRouter.use("/vendor/shipping", vendorShippingRouter as any);
 defaultRouter.use("/vendor/payout", vendorPayoutRouter as any);
 defaultRouter.use("/vendor/onboarding", vendorOnboardingRouter as any);
