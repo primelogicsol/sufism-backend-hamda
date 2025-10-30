@@ -30,4 +30,7 @@ router.delete("/rates/:rateId", vendorShippingController.deleteShippingRate as a
 router.post("/calculate", vendorShippingController.calculateShippingRates as any);
 router.get("/validate", vendorShippingController.validateShippingConfig as any);
 
+// Utilities
+router.post("/seed-dummy-config", vendorShippingController.seedDummyShippingConfig as any);
+
 export default router;

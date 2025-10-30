@@ -62,19 +62,41 @@ class ShippingCalculationService {
         }
       });
 
+      // Calculate total weight early so we can still respond even if config/zone is missing
+      const totalWeight = await this.calculateTotalWeight(request.items);
+
       if (!shippingConfig) {
-        throw new Error("Shipping configuration not found");
+        // Return a graceful empty response instead of throwing
+        return {
+          totalWeight,
+          availableRates: [],
+          freeShippingEligible: false,
+          applicableZone: {
+            id: 0,
+            zoneName: "NO_CONFIG",
+            country: undefined,
+            state: undefined
+          }
+        };
       }
 
       // Find applicable shipping zone
       const applicableZone = this.findApplicableZone(shippingConfig.shippingZones, request.destination);
 
       if (!applicableZone) {
-        throw new Error("No shipping zone found for the specified destination");
+        // Return graceful empty response if no zone matches
+        return {
+          totalWeight,
+          availableRates: [],
+          freeShippingEligible: false,
+          applicableZone: {
+            id: 0,
+            zoneName: "NO_MATCHING_ZONE",
+            country: undefined,
+            state: undefined
+          }
+        };
       }
-
-      // Calculate total weight
-      const totalWeight = await this.calculateTotalWeight(request.items);
 
       // Calculate rates for each shipping method
       const availableRates = this.calculateRatesForZone(applicableZone as any, totalWeight, request.items);
@@ -107,7 +129,7 @@ class ShippingCalculationService {
       id: number;
       country?: string | null;
       state?: string | null;
-      zipCodeRanges?: string | null;
+      zipCodeRanges?: unknown;
       zoneName: string;
     }>,
     destination: {
@@ -129,17 +151,34 @@ class ShippingCalculationService {
 
       // Check zip code ranges if specified
       if (zone.zipCodeRanges) {
-        const zipRanges = JSON.parse(zone.zipCodeRanges) as Array<{ from: string; to: string } | string>;
-        const zipCode = destination.zipCode;
-        const isInRange = zipRanges.some((range) => {
-          if (typeof range === "string") {
-            return zipCode.startsWith(range);
-          } else if (typeof range === "object" && range.from && range.to) {
-            return zipCode >= range.from && zipCode <= range.to;
+        let zipRanges: Array<{ from: string; to: string } | string> = [];
+        if (typeof zone.zipCodeRanges === "string") {
+          try {
+            zipRanges = JSON.parse(zone.zipCodeRanges) as Array<{ from: string; to: string } | string>;
+          } catch {
+            zipRanges = [];
           }
-          return false;
-        });
-        if (!isInRange) return false;
+        } else if (Array.isArray(zone.zipCodeRanges)) {
+          zipRanges = zone.zipCodeRanges as Array<{ from: string; to: string } | string>;
+        } else if (typeof zone.zipCodeRanges === "object") {
+          // Some ORMs may return JSON fields as objects; attempt to coerce to expected array shape
+          zipRanges = (zone.zipCodeRanges as unknown as Array<{ from: string; to: string } | string>) || [];
+        }
+
+        if (zipRanges.length > 0) {
+          const zipCode = destination.zipCode;
+          const isInRange = zipRanges.some((range) => {
+            if (typeof range === "string") {
+              return zipCode.startsWith(range);
+            } else if (range && typeof range === "object" && (range as any).from && (range as any).to) {
+              const from = (range as any).from as string;
+              const to = (range as any).to as string;
+              return zipCode >= from && zipCode <= to;
+            }
+            return false;
+          });
+          if (!isInRange) return false;
+        }
       }
 
       return true;

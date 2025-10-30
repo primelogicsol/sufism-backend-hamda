@@ -7,6 +7,48 @@ import logger from "../../utils/loggerUtils.js";
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
 
+// Normalize incoming strings to Prisma enum values
+const toCarrierEnum = (value?: string | null) => {
+  if (!value) return "CUSTOM";
+  const v = String(value).toUpperCase();
+  const allowed = ["FEDEX", "UPS", "DHL", "USPS", "CANADA_POST", "ROYAL_MAIL", "AUSTRALIA_POST", "CUSTOM"];
+  return allowed.includes(v) ? v : "CUSTOM";
+};
+
+const toShippingMethodEnum = (value?: string | null) => {
+  if (!value) return "STANDARD";
+  const raw = String(value).toUpperCase();
+  const alias: Record<string, string> = {
+    GROUND: "STANDARD",
+    ECONOMY: "STANDARD",
+    TWO_DAY: "EXPRESS",
+    "2_DAY": "EXPRESS",
+    "2DAY": "EXPRESS",
+    EXPEDITED: "EXPRESS",
+    NEXT_DAY: "OVERNIGHT",
+    "NEXT-DAY": "OVERNIGHT",
+    SAMEDAY: "SAME_DAY",
+    SAME_DAY: "SAME_DAY",
+    PICK_UP: "PICKUP"
+  };
+  const normalized = alias[raw] || raw;
+  const allowed = ["STANDARD", "EXPRESS", "OVERNIGHT", "SAME_DAY", "PICKUP"];
+  return allowed.includes(normalized) ? normalized : "STANDARD";
+};
+
+const toRateTypeEnum = (value?: string | null) => {
+  if (!value) return "FIXED";
+  const raw = String(value).toUpperCase();
+  const alias: Record<string, string> = {
+    ORDER_VALUE: "ORDER_VALUE_BASED",
+    VALUE_BASED: "ORDER_VALUE_BASED",
+    WEIGHT: "WEIGHT_BASED"
+  };
+  const normalized = alias[raw] || raw;
+  const allowed = ["FIXED", "WEIGHT_BASED", "ORDER_VALUE_BASED", "HYBRID"];
+  return allowed.includes(normalized) ? normalized : "FIXED";
+};
+
 const vendorShippingController = {
   /**
    * Create or update vendor shipping configuration
@@ -35,8 +77,8 @@ const vendorShippingController = {
       const shippingConfig = await (db as any).vendorShippingConfig.upsert({
         where: { vendorId },
         update: {
-          defaultCarrier,
-          defaultMethod,
+          defaultCarrier: toCarrierEnum(defaultCarrier),
+          defaultMethod: toShippingMethodEnum(defaultMethod),
           handlingFee,
           freeShippingThreshold,
           isConfigured: isConfigured ?? true,
@@ -44,8 +86,8 @@ const vendorShippingController = {
         },
         create: {
           vendorId,
-          defaultCarrier,
-          defaultMethod,
+          defaultCarrier: toCarrierEnum(defaultCarrier),
+          defaultMethod: toShippingMethodEnum(defaultMethod),
           handlingFee,
           freeShippingThreshold,
           isConfigured: isConfigured ?? true
@@ -115,6 +157,92 @@ const vendorShippingController = {
     } catch (error) {
       logger.error("Error retrieving shipping configuration:", error);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to retrieve shipping configuration");
+    }
+  }),
+
+  /**
+   * Seed a dummy shipping configuration with a default zone and flat rate
+   */
+  seedDummyShippingConfig: asyncHandler(async (req: _Request, res) => {
+    const vendorId = req.userFromToken?.id;
+
+    try {
+      const vendor = await db.user.findFirst({ where: { id: vendorId, role: "vendor" } });
+      if (!vendor) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Vendor not found");
+      }
+
+      // Upsert base config
+      const shippingConfig = await (db as any).vendorShippingConfig.upsert({
+        where: { vendorId },
+        update: {
+          defaultCarrier: "CUSTOM",
+          defaultMethod: "STANDARD",
+          handlingTime: 1,
+          freeShippingThreshold: null,
+          isConfigured: true,
+          updatedAt: new Date()
+        },
+        create: {
+          vendorId,
+          defaultCarrier: "CUSTOM",
+          defaultMethod: "STANDARD",
+          handlingTime: 1,
+          freeShippingThreshold: null,
+          isActive: true,
+          isConfigured: true
+        }
+      });
+
+      // Create a default zone if none exists
+      const existingZones = await (db as any).vendorShippingZone.findMany({ where: { vendorId } });
+      let zoneId: string | undefined = existingZones[0]?.id;
+      if (!zoneId) {
+        const zone = await (db as any).vendorShippingZone.create({
+          data: {
+            vendorId,
+            zoneName: "Default Zone",
+            country: null,
+            state: null,
+            zipCodeRanges: [],
+            isActive: true,
+            description: "Covers all destinations"
+          }
+        });
+        zoneId = zone.id;
+      }
+
+      // Create a default flat rate if none exists
+      const existingRates = await (db as any).vendorShippingRate.findMany({ where: { zoneId } });
+      let createdRate: any = null;
+      if (!existingRates.length) {
+        createdRate = await (db as any).vendorShippingRate.create({
+          data: {
+            zoneId,
+            carrier: "CUSTOM",
+            method: "STANDARD",
+            rateType: "WEIGHT_BASED",
+            baseRate: 5,
+            perKgRate: 1,
+            perItemRate: null,
+            freeShippingThreshold: null,
+            maxWeight: null,
+            estimatedDays: 5,
+            isActive: true,
+            description: "Default flat rate"
+          }
+        });
+      }
+
+      return httpResponse(req, res, reshttp.okCode, "Dummy shipping configuration seeded", {
+        vendorId,
+        shippingConfigId: shippingConfig.id,
+        zoneId,
+        createdRate
+      });
+    } catch (error) {
+      logger.error("Error seeding dummy shipping config:", error);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to seed dummy shipping configuration");
     }
   }),
 
@@ -344,7 +472,25 @@ const vendorShippingController = {
         return httpResponse(req, res, reshttp.notFoundCode, "Vendor not found");
       }
 
-      // Create shipping zone
+      // Ensure vendor has a shipping config (required relation for zones)
+      await (db as any).vendorShippingConfig.upsert({
+        where: { vendorId },
+        update: {
+          updatedAt: new Date(),
+          isConfigured: true
+        },
+        create: {
+          vendorId,
+          defaultCarrier: toCarrierEnum("CUSTOM"),
+          defaultMethod: toShippingMethodEnum("STANDARD"),
+          handlingTime: 1,
+          freeShippingThreshold: null,
+          isActive: true,
+          isConfigured: true
+        }
+      });
+
+      // Create shipping zone and connect to config
       const shippingZone = await (db as any).vendorShippingZone.create({
         data: {
           vendorId,
@@ -353,7 +499,10 @@ const vendorShippingController = {
           state,
           zipCodeRanges,
           isActive,
-          description
+          description,
+          config: {
+            connect: { vendorId }
+          }
         }
       });
 
@@ -363,9 +512,9 @@ const vendorShippingController = {
         const shippingRate = await (db as any).vendorShippingRate.create({
           data: {
             zoneId: shippingZone.id,
-            carrier: rate.carrier,
-            method: rate.method,
-            rateType: rate.rateType,
+            carrier: toCarrierEnum(rate.carrier),
+            method: toShippingMethodEnum(rate.method),
+            rateType: toRateTypeEnum(rate.rateType),
             baseRate: rate.baseRate,
             perKgRate: rate.perKgRate,
             perItemRate: rate.perItemRate,
@@ -421,7 +570,7 @@ const vendorShippingController = {
       isActive = true,
       description
     } = req.body as {
-      zoneId: string;
+      zoneId: string | number;
       carrier: string;
       method: string;
       rateType: string;
@@ -438,7 +587,7 @@ const vendorShippingController = {
     try {
       // Verify zone belongs to vendor
       const zone = await (db as any).vendorShippingZone.findFirst({
-        where: { id: zoneId, vendorId }
+        where: { id: Number(zoneId), vendorId }
       });
 
       if (!zone) {
@@ -447,10 +596,10 @@ const vendorShippingController = {
 
       const shippingRate = await (db as any).vendorShippingRate.create({
         data: {
-          zoneId,
-          carrier,
-          method,
-          rateType,
+          zoneId: Number(zoneId),
+          carrier: toCarrierEnum(carrier),
+          method: toShippingMethodEnum(method),
+          rateType: toRateTypeEnum(rateType),
           baseRate,
           perKgRate,
           perItemRate,
