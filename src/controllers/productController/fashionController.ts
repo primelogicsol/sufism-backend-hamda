@@ -44,6 +44,7 @@ export default {
         sku: data.sku,
         userId: user.id,
         stock: Number(data.stock) || 0,
+        weight: data.weight !== undefined ? Number(data.weight) : undefined,
         images: images.images?.map((file) => file.path) || []
       }
     });
@@ -191,6 +192,7 @@ export default {
     if (data.tags) updateData.tags = data.tags;
     if (data.sku) updateData.sku = data.sku;
     if (data.stock !== undefined) updateData.stock = Number(data.stock);
+    if (data.weight !== undefined) updateData.weight = Number(data.weight);
     if (images && images.images.length > 0) {
       updateData.images = images.images.map((file) => file.path);
     }

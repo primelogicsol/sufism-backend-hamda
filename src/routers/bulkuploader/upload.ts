@@ -58,6 +58,7 @@ interface RowData {
   fileType?: string;
   coverImage?: string;
   overviewImages?: string;
+  weight?: string | number;
 }
 
 type Category = "accessories" | "decorations" | "homeAndLiving" | "fashion" | "meditation" | "digitalBooks";
@@ -311,7 +312,8 @@ uploadRouter.post("/upload-bulk", authMiddleware.checkToken, upload.single("file
         stock,
         sku: row.sku || "",
         tags: parseCommaSeparatedArray(row.tags),
-        images: parseCommaSeparatedArray(row.images)
+        images: parseCommaSeparatedArray(row.images),
+        weight: typeof row.weight === "string" ? parseFloat(row.weight) : (row.weight ?? undefined)
       };
 
       try {

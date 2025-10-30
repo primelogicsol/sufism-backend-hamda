@@ -202,6 +202,7 @@ export interface T_ITEM {
   tags?: string[];
   sku: string;
   stock?: number;
+  weight?: number;
 }
 
 export interface SearchQuery {

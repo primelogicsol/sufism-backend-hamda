@@ -595,35 +595,121 @@ const vendorShippingController = {
   calculateShippingRates: asyncHandler(async (req: _Request, res) => {
     const vendorId = req.userFromToken?.id;
 
-    const { destination, items } = req.body as {
+    const { destination } = req.body as {
       destination: {
         country: string;
         state?: string;
         zipCode: string;
         city?: string;
       };
-      items: Array<{
-        productId: string;
-        category: string;
-        weight: number;
-        quantity: number;
-        price: number;
-      }>;
     };
 
     try {
+      // Validate auth
+      const userId = req.userFromToken?.id;
+      if (!userId) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+      }
+
+      if (!destination?.country || !destination?.zipCode) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Destination is required");
+      }
+
+      // Fetch user's cart with related product records
+      const cartItems = await db.cart.findMany({
+        where: { userId },
+        include: {
+          music: true,
+          digitalBook: true,
+          meditation: true,
+          fashion: true,
+          living: true,
+          decoration: true,
+          accessories: true
+        }
+      });
+
+      if (!cartItems.length) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Cart is empty");
+      }
+
+      // Map cart items to shipping service items format
+      const toServiceCategory = (key: string): string => {
+        switch (key) {
+          case "accessories":
+            return "ACCESSORIES";
+          case "decoration":
+            return "DECORATION";
+          case "fashion":
+            return "FASHION";
+          case "living":
+            return "HOME_LIVING";
+          case "meditation":
+            return "MEDITATION";
+          case "music":
+            return "MUSIC";
+          case "digitalBook":
+          case "book":
+            return "DIGITAL_BOOK";
+          default:
+            return "ACCESSORIES"; // fallback to any valid category
+        }
+      };
+
+      const builtItems = [] as Array<{
+        productId: number;
+        category: string;
+        quantity: number;
+        weight?: number;
+      }>;
+
+      for (const c of cartItems) {
+        const entry = c.accessories || c.decoration || c.fashion || c.living || c.meditation || c.music || c.digitalBook;
+
+        if (!entry) continue;
+
+        // Determine category key and id
+        let categoryKey = "";
+        let productId = 0;
+        if (c.accessories) {
+          categoryKey = "accessories";
+          productId = c.accessories.id;
+        } else if (c.decoration) {
+          categoryKey = "decoration";
+          productId = c.decoration.id;
+        } else if (c.fashion) {
+          categoryKey = "fashion";
+          productId = c.fashion.id;
+        } else if (c.living) {
+          categoryKey = "living";
+          productId = c.living.id;
+        } else if (c.meditation) {
+          categoryKey = "meditation";
+          productId = c.meditation.id;
+        } else if (c.music) {
+          categoryKey = "music";
+          productId = (c.music as any).id;
+        } else if (c.digitalBook) {
+          categoryKey = "digitalBook";
+          productId = c.digitalBook.id;
+        }
+
+        const weight = (entry as any).weight as number | undefined;
+        builtItems.push({
+          productId: Number(productId) || 0,
+          category: toServiceCategory(categoryKey),
+          quantity: c.qty,
+          // weight is optional; service will fetch from DB if absent
+          weight: typeof weight === "number" ? weight : undefined
+        });
+      }
+
       // Import and use shipping calculation service
       const shippingService = await import("../../services/shippingCalculationService.js");
       const rates = await shippingService.default.calculateShippingRates({
         vendorId: vendorId || "",
         destination,
-        items: items.map((item) => ({
-          productId: parseInt(item.productId) || 0,
-          category: item.category,
-          quantity: item.quantity,
-          weight: item.weight,
-          dimensions: undefined
-        }))
+        items: builtItems
       });
 
       return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", rates);
