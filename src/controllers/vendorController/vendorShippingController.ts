@@ -952,12 +952,19 @@ const vendorShippingController = {
       // Calculate shipping rates for each vendor
       const shippingService = await import("../../services/shippingCalculationService.js");
 
-      const vendorRates = [];
       const errors = [];
+      let totalStandardCost = 0;
+      let totalExpressCost = 0;
+      let standardMaxDays = 0;
+      let expressMaxDays = 0;
+      let standardAvailable = false;
+      let expressAvailable = false;
+
+      // Track vendors with issues
+      const vendorsWithoutShipping: Array<{ vendorId: string; vendorName: string; error: string }> = [];
 
       for (const [vendorId, items] of itemsByVendor.entries()) {
         try {
-          const firstItem = items[0];
           const rates = await shippingService.default.calculateShippingRates({
             vendorId,
             destination,
@@ -975,55 +982,114 @@ const vendorShippingController = {
             rates.applicableZone?.zoneName === "NO_MATCHING_ZONE" ||
             rates.availableRates.length === 0
           ) {
+            const firstItem = items[0];
+            const errorMsg =
+              rates.applicableZone?.zoneName === "NO_CONFIG"
+                ? "No shipping configuration found"
+                : rates.applicableZone?.zoneName === "NO_MATCHING_ZONE"
+                  ? "No matching shipping zone found for destination"
+                  : "No available shipping rates";
             errors.push({
               vendorId,
               vendorName: firstItem.vendorName,
               vendorEmail: firstItem.vendorEmail,
-              error:
-                rates.applicableZone?.zoneName === "NO_CONFIG"
-                  ? "No shipping configuration found"
-                  : rates.applicableZone?.zoneName === "NO_MATCHING_ZONE"
-                    ? "No matching shipping zone found for destination"
-                    : "No available shipping rates"
+              error: errorMsg
             });
-          } else {
-            vendorRates.push({
+            vendorsWithoutShipping.push({
               vendorId,
               vendorName: firstItem.vendorName,
-              vendorEmail: firstItem.vendorEmail,
-              products: items.map((item) => ({
-                productId: item.productId,
-                category: item.category,
-                quantity: item.quantity
-              })),
-              totalWeight: rates.totalWeight,
-              availableRates: rates.availableRates,
-              freeShippingEligible: rates.freeShippingEligible,
-              applicableZone: rates.applicableZone
+              error: errorMsg
             });
+          } else {
+            // Filter rates to only STANDARD and EXPRESS methods
+            const standardRates = rates.availableRates.filter((rate) => rate.method === "STANDARD");
+            const expressRates = rates.availableRates.filter((rate) => rate.method === "EXPRESS");
+
+            // Get cheapest STANDARD rate (or first if multiple)
+            if (standardRates.length > 0) {
+              const cheapestStandard = standardRates.reduce((prev, current) => (prev.cost < current.cost ? prev : current));
+              totalStandardCost += cheapestStandard.cost;
+              standardMaxDays = Math.max(standardMaxDays, cheapestStandard.estimatedDays);
+              standardAvailable = true;
+            }
+
+            // Get cheapest EXPRESS rate (or first if multiple) - treat as BASIC
+            if (expressRates.length > 0) {
+              const cheapestExpress = expressRates.reduce((prev, current) => (prev.cost < current.cost ? prev : current));
+              totalExpressCost += cheapestExpress.cost;
+              expressMaxDays = Math.max(expressMaxDays, cheapestExpress.estimatedDays);
+              expressAvailable = true;
+            }
+
+            // If no EXPRESS but has STANDARD, use cheapest STANDARD as BASIC too
+            if (expressRates.length === 0 && standardRates.length > 0 && !expressAvailable) {
+              const cheapestStandard = standardRates.reduce((prev, current) => (prev.cost < current.cost ? prev : current));
+              totalExpressCost += cheapestStandard.cost;
+              expressMaxDays = Math.max(expressMaxDays, cheapestStandard.estimatedDays);
+              expressAvailable = true;
+            }
           }
         } catch (error) {
           logger.error(`Error calculating rates for vendor ${vendorId}:`, error);
           const firstItem = items[0];
+          const errorMsg = `Failed to calculate shipping rates: ${error instanceof Error ? error.message : String(error)}`;
           errors.push({
             vendorId,
             vendorName: firstItem.vendorName,
             vendorEmail: firstItem.vendorEmail,
-            error: `Failed to calculate shipping rates: ${error instanceof Error ? error.message : String(error)}`
+            error: errorMsg
+          });
+          vendorsWithoutShipping.push({
+            vendorId,
+            vendorName: firstItem.vendorName,
+            error: errorMsg
           });
         }
       }
 
-      // Return response with vendor-specific rates and errors
+      // If any vendor has errors, return error response
+      if (vendorsWithoutShipping.length > 0) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Cannot calculate shipping: Some vendors have not configured shipping", {
+          errors: vendorsWithoutShipping,
+          message: "Please remove products from vendors without shipping configuration or contact support"
+        });
+      }
+
+      // Build simple response with only STANDARD and BASIC options
+      // Only include options with shipping cost > 0
+      const deliveryOptions = [];
+
+      if (standardAvailable && totalStandardCost > 0) {
+        deliveryOptions.push({
+          type: "STANDARD",
+          name: "Standard Delivery",
+          shippingCost: Number(totalStandardCost.toFixed(2)),
+          selectedShippingService: "STANDARD",
+          estimatedDeliveryDays: standardMaxDays,
+          description: `Standard delivery in ${standardMaxDays} business days`
+        });
+      }
+
+      if (expressAvailable && totalExpressCost > 0) {
+        deliveryOptions.push({
+          type: "BASIC",
+          name: "Basic Delivery",
+          shippingCost: Number(totalExpressCost.toFixed(2)),
+          selectedShippingService: "BASIC",
+          estimatedDeliveryDays: expressMaxDays,
+          description: `Basic delivery in ${expressMaxDays} business days`
+        });
+      }
+
+      if (deliveryOptions.length === 0) {
+        return httpResponse(req, res, reshttp.badRequestCode, "No shipping options available for your destination");
+      }
+
+      // Return simple response with only 2 options: STANDARD and BASIC
+      // User can select one and send these fields directly to order creation endpoint
       return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", {
-        vendorRates,
-        errors,
-        summary: {
-          totalVendors: itemsByVendor.size,
-          vendorsWithRates: vendorRates.length,
-          vendorsWithErrors: errors.length,
-          hasErrors: errors.length > 0
-        }
+        deliveryOptions,
+        totalVendors: itemsByVendor.size
       });
     } catch (error) {
       logger.error("Error calculating shipping rates:", error);
