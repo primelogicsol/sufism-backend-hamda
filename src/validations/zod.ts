@@ -336,17 +336,18 @@ export const audioSchema = z.object({
 });
 
 export const reviewSchema = z.object({
-  review: z.string({
-    message: "Review must be string"
+  category: z.enum(["fashion", "decoration", "meditation", "accessories", "digital-books", "living", "audio"], {
+    required_error: "Category is required",
+    invalid_type_error: "Invalid category"
   }),
   productId: z.number({ message: "Product id is required" }),
   rating: z
     .number({
       message: "Rating must be a number"
     })
-    .min(0, "Rating cannot be negative")
-    .max(5, "Rating cannot exceed 100")
-    .optional()
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot exceed 5"),
+  content: z.string({ message: "Review content is required" }).min(10, "Review content must be at least 10 characters")
 });
 export const cartSchema = z.object({
   productId: z.number({ message: "Product Id is required" }),

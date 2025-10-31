@@ -8,11 +8,12 @@ import digitalBookController from "../../controllers/productController/digitalBo
 import fashionController from "../../controllers/productController/fashionController.js";
 import livingController from "../../controllers/productController/livingController.js";
 import meditationController from "../../controllers/productController/meditationController.js";
+import reviewController from "../../controllers/productController/reviewController.js";
 import interviewSlotController from "../../controllers/userController/interviewSlotController.js";
 import authMiddleware from "../../middleware/authMiddleware.js";
 import fileUploader from "../../middleware/multerMiddleware.js";
 import { validateDataMiddleware } from "../../middleware/validateMiddleware.js";
-import { audioSchema, bookSchema, productSchema } from "../../validations/zod.js";
+import { audioSchema, bookSchema, productSchema, reviewSchema } from "../../validations/zod.js";
 
 // const upload = multer({ storage: multer.memoryStorage() });
 
@@ -27,6 +28,11 @@ productRouter.route("/decoration/:id").delete(authMiddleware.checkToken, decorat
 productRouter.route("/decoration").get(authMiddleware.checkToken, decorationController.getAll);
 productRouter.route("/decoration/:id").get(authMiddleware.checkToken, decorationController.getById);
 
+// Unified Review Endpoints - Single API for all product categories
+productRouter.route("/review").post(authMiddleware.checkToken, validateDataMiddleware(reviewSchema), reviewController.addReview);
+productRouter.route("/review").get(authMiddleware.checkToken, reviewController.getReviews);
+
+// Legacy review endpoints (kept for backward compatibility, will be deprecated)
 productRouter.route("/review-decoration/:id").post(authMiddleware.checkToken, decorationController.addReview);
 productRouter.route("/review-decoration/:id").get(authMiddleware.checkToken, decorationController.getReviews);
 
