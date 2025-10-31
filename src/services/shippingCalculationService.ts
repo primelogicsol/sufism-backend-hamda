@@ -144,8 +144,8 @@ class ShippingCalculationService {
         return false;
       }
 
-      // Check state match
-      if (zone.state && zone.state !== destination.state) {
+      // Check state match - only enforce if both zone and destination have state
+      if (zone.state && destination.state && zone.state !== destination.state) {
         return false;
       }
 

@@ -10,7 +10,7 @@ type MulterFiles = Record<string, Express.Multer.File[]>;
 
 export default {
   create: asyncHandler(async (req: _Request, res) => {
-    const images = req.files as MulterFiles;
+    const images = (req.files as MulterFiles) || ({} as MulterFiles);
     const data = req.body as T_ITEM;
 
     const user = await db.user.findFirst({
@@ -45,7 +45,7 @@ export default {
         userId: user.id,
         stock: Number(data.stock) || 0,
         weight: data.weight !== undefined ? Number(data.weight) : undefined,
-        images: images.images?.map((file) => file.path) || []
+        images: Array.isArray(images?.images) ? images.images.map((file) => file.path) : []
       }
     });
 
@@ -150,7 +150,7 @@ export default {
   // Update fashion
   update: asyncHandler(async (req: _Request, res) => {
     const { id } = req.params;
-    const images = req.files as MulterFiles;
+    const images = (req.files as MulterFiles) || ({} as MulterFiles);
     const data = req.body as Partial<T_ITEM>;
 
     const user = await db.user.findFirst({
@@ -193,7 +193,7 @@ export default {
     if (data.sku) updateData.sku = data.sku;
     if (data.stock !== undefined) updateData.stock = Number(data.stock);
     if (data.weight !== undefined) updateData.weight = Number(data.weight);
-    if (images && images.images.length > 0) {
+    if (Array.isArray(images?.images) && images.images.length > 0) {
       updateData.images = images.images.map((file) => file.path);
     }
 
