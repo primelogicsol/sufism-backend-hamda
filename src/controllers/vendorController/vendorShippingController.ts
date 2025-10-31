@@ -742,8 +742,6 @@ const vendorShippingController = {
    * Calculate shipping rates for an order
    */
   calculateShippingRates: asyncHandler(async (req: _Request, res) => {
-    const vendorId = req.userFromToken?.id;
-
     const { destination } = req.body as {
       destination: {
         country: string;
@@ -768,13 +766,83 @@ const vendorShippingController = {
       const cartItems = await db.cart.findMany({
         where: { userId },
         include: {
-          music: true,
-          digitalBook: true,
-          meditation: true,
-          fashion: true,
-          living: true,
-          decoration: true,
-          accessories: true
+          music: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          digitalBook: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          meditation: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          fashion: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          living: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          decoration: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          },
+          accessories: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          }
         }
       });
 
@@ -805,17 +873,34 @@ const vendorShippingController = {
         }
       };
 
-      const builtItems = [] as Array<{
+      // Group cart items by vendor (product.userId)
+      type CartItemWithVendor = {
+        vendorId: string;
+        vendorName: string;
+        vendorEmail: string;
         productId: number;
         category: string;
         quantity: number;
         weight?: number;
-      }>;
+      };
+
+      const itemsByVendor = new Map<string, CartItemWithVendor[]>();
 
       for (const c of cartItems) {
         const entry = c.accessories || c.decoration || c.fashion || c.living || c.meditation || c.music || c.digitalBook;
 
         if (!entry) continue;
+
+        // Extract vendor info from product
+        const productVendor = (entry as any).user;
+        if (!productVendor || !productVendor.id) {
+          logger.warn(`Product missing vendor info: ${JSON.stringify(entry)}`);
+          continue;
+        }
+
+        const vendorId = productVendor.id;
+        const vendorName = productVendor.fullName || "Unknown Vendor";
+        const vendorEmail = productVendor.email || "";
 
         // Determine category key and id
         let categoryKey = "";
@@ -844,24 +929,102 @@ const vendorShippingController = {
         }
 
         const weight = (entry as any).weight as number | undefined;
-        builtItems.push({
+
+        if (!itemsByVendor.has(vendorId)) {
+          itemsByVendor.set(vendorId, []);
+        }
+
+        itemsByVendor.get(vendorId)!.push({
+          vendorId,
+          vendorName,
+          vendorEmail,
           productId: Number(productId) || 0,
           category: toServiceCategory(categoryKey),
           quantity: c.qty,
-          // weight is optional; service will fetch from DB if absent
           weight: typeof weight === "number" ? weight : undefined
         });
       }
 
-      // Import and use shipping calculation service
-      const shippingService = await import("../../services/shippingCalculationService.js");
-      const rates = await shippingService.default.calculateShippingRates({
-        vendorId: vendorId || "",
-        destination,
-        items: builtItems
-      });
+      if (itemsByVendor.size === 0) {
+        return httpResponse(req, res, reshttp.badRequestCode, "No valid products found in cart");
+      }
 
-      return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", rates);
+      // Calculate shipping rates for each vendor
+      const shippingService = await import("../../services/shippingCalculationService.js");
+
+      const vendorRates = [];
+      const errors = [];
+
+      for (const [vendorId, items] of itemsByVendor.entries()) {
+        try {
+          const firstItem = items[0];
+          const rates = await shippingService.default.calculateShippingRates({
+            vendorId,
+            destination,
+            items: items.map((item) => ({
+              productId: item.productId,
+              category: item.category,
+              quantity: item.quantity,
+              weight: item.weight
+            }))
+          });
+
+          // Check if vendor has valid shipping configuration
+          if (
+            rates.applicableZone?.zoneName === "NO_CONFIG" ||
+            rates.applicableZone?.zoneName === "NO_MATCHING_ZONE" ||
+            rates.availableRates.length === 0
+          ) {
+            errors.push({
+              vendorId,
+              vendorName: firstItem.vendorName,
+              vendorEmail: firstItem.vendorEmail,
+              error:
+                rates.applicableZone?.zoneName === "NO_CONFIG"
+                  ? "No shipping configuration found"
+                  : rates.applicableZone?.zoneName === "NO_MATCHING_ZONE"
+                    ? "No matching shipping zone found for destination"
+                    : "No available shipping rates"
+            });
+          } else {
+            vendorRates.push({
+              vendorId,
+              vendorName: firstItem.vendorName,
+              vendorEmail: firstItem.vendorEmail,
+              products: items.map((item) => ({
+                productId: item.productId,
+                category: item.category,
+                quantity: item.quantity
+              })),
+              totalWeight: rates.totalWeight,
+              availableRates: rates.availableRates,
+              freeShippingEligible: rates.freeShippingEligible,
+              applicableZone: rates.applicableZone
+            });
+          }
+        } catch (error) {
+          logger.error(`Error calculating rates for vendor ${vendorId}:`, error);
+          const firstItem = items[0];
+          errors.push({
+            vendorId,
+            vendorName: firstItem.vendorName,
+            vendorEmail: firstItem.vendorEmail,
+            error: `Failed to calculate shipping rates: ${error instanceof Error ? error.message : String(error)}`
+          });
+        }
+      }
+
+      // Return response with vendor-specific rates and errors
+      return httpResponse(req, res, reshttp.okCode, "Shipping rates calculated successfully", {
+        vendorRates,
+        errors,
+        summary: {
+          totalVendors: itemsByVendor.size,
+          vendorsWithRates: vendorRates.length,
+          vendorsWithErrors: errors.length,
+          hasErrors: errors.length > 0
+        }
+      });
     } catch (error) {
       logger.error("Error calculating shipping rates:", error);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to calculate shipping rates");
