@@ -1,7 +1,7 @@
 import { db } from "../configs/database.js";
 import logger from "../utils/loggerUtils.js";
 
-/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access */
 
 export interface ShippingCalculationRequest {
   vendorId: string;
@@ -81,9 +81,42 @@ class ShippingCalculationService {
       }
 
       // Find applicable shipping zone
+      logger.info(`Finding zone for destination:`, {
+        country: request.destination.country,
+        state: request.destination.state,
+        zipCode: request.destination.zipCode,
+        zonesCount: shippingConfig.shippingZones.length
+      });
+
+      // Log all zones for debugging
+      shippingConfig.shippingZones.forEach((zone) => {
+        const shippingMethods = "shippingMethods" in zone && Array.isArray(zone.shippingMethods) ? zone.shippingMethods : [];
+        logger.info(`Zone ${zone.id} (${zone.zoneName}):`, {
+          country: zone.country,
+          state: zone.state,
+          zipCodeRanges: zone.zipCodeRanges,
+          shippingMethodsCount: shippingMethods.length
+        });
+      });
+
       const applicableZone = this.findApplicableZone(shippingConfig.shippingZones, request.destination);
 
       if (!applicableZone) {
+        // Log detailed information about why zones didn't match
+        logger.warn(`No zone matched for destination:`, {
+          destination: request.destination,
+          totalZones: shippingConfig.shippingZones.length,
+          activeZones: shippingConfig.shippingZones.length,
+          zones: shippingConfig.shippingZones.map((z) => ({
+            id: z.id,
+            name: z.zoneName,
+            country: z.country,
+            state: z.state,
+            hasZipRanges: !!z.zipCodeRanges,
+            zipRanges: z.zipCodeRanges
+          }))
+        });
+
         // Return graceful empty response if no zone matches
         return {
           totalWeight,
@@ -98,8 +131,34 @@ class ShippingCalculationService {
         };
       }
 
+      const zoneShippingMethods =
+        "shippingMethods" in applicableZone && Array.isArray(applicableZone.shippingMethods) ? applicableZone.shippingMethods : [];
+      logger.info(`Found applicable zone:`, {
+        id: applicableZone.id,
+        zoneName: applicableZone.zoneName,
+        country: applicableZone.country,
+        state: applicableZone.state,
+        shippingMethodsCount: zoneShippingMethods.length
+      });
+
       // Calculate rates for each shipping method
-      const availableRates = this.calculateRatesForZone(applicableZone as any, totalWeight, request.items);
+      // Prisma includes add shippingMethods dynamically, so we need to assert the type
+      const zoneWithMethods = applicableZone as typeof applicableZone & {
+        shippingMethods: Array<{
+          id: number;
+          carrier: string;
+          method: string;
+          rateType: string;
+          baseRate: number;
+          perKgRate?: number | null;
+          perItemRate?: number | null;
+          freeShippingThreshold?: number | null;
+          maxWeight?: number | null;
+          estimatedDays: number;
+        }>;
+      };
+
+      const availableRates = this.calculateRatesForZone(zoneWithMethods, totalWeight, request.items);
 
       // Check for global free shipping threshold
       const freeShippingEligible = shippingConfig.freeShippingThreshold ? totalWeight >= shippingConfig.freeShippingThreshold : false;
@@ -138,51 +197,169 @@ class ShippingCalculationService {
       zipCode: string;
     }
   ) {
-    return zones.find((zone) => {
-      // Check country match
-      if (zone.country && zone.country !== destination.country) {
-        return false;
+    // Normalize destination values for comparison
+    const destCountry = (destination.country || "").trim().toUpperCase();
+    const destState = destination.state ? destination.state.trim().toUpperCase() : "";
+    const destZip = (destination.zipCode || "").trim();
+
+    logger.info(`Finding zone - normalized destination:`, {
+      destCountry,
+      destState: destState || "(not provided)",
+      destZip,
+      zonesToCheck: zones.length
+    });
+
+    // Sort zones by specificity (most specific first)
+    // Priority: has state + has zip ranges > has state > has zip ranges > country only
+    const sortedZones = [...zones].sort((a, b) => {
+      const aScore = (a.state ? 2 : 0) + (this.hasValidZipRanges(a.zipCodeRanges) ? 1 : 0);
+      const bScore = (b.state ? 2 : 0) + (this.hasValidZipRanges(b.zipCodeRanges) ? 1 : 0);
+      return bScore - aScore;
+    });
+
+    logger.info(`Zones sorted by specificity (most specific first)`);
+
+    return sortedZones.find((zone) => {
+      let matches = true;
+      let reason = "";
+
+      logger.info(`Checking zone ${zone.id} (${zone.zoneName}):`, {
+        zoneCountry: zone.country,
+        zoneState: zone.state,
+        hasZipRanges: !!zone.zipCodeRanges
+      });
+
+      // Check country match (case-insensitive)
+      if (zone.country) {
+        const zoneCountry = zone.country.trim().toUpperCase();
+        if (zoneCountry !== destCountry) {
+          matches = false;
+          reason = `Country mismatch: ${zoneCountry} != ${destCountry}`;
+          logger.debug(`Zone ${zone.id} rejected: ${reason}`);
+          return false;
+        }
       }
 
-      // Check state match - only enforce if both zone and destination have state
-      if (zone.state && destination.state && zone.state !== destination.state) {
-        return false;
+      // Check state match (state is optional - zone can match even if destination doesn't have state)
+      if (matches && zone.state) {
+        const zoneState = zone.state.trim().toUpperCase();
+        // If destination has state, it must match zone's state
+        // If destination doesn't have state, zone can still match (state is optional)
+        if (destState && zoneState !== destState) {
+          matches = false;
+          reason = `State mismatch: ${zoneState} != ${destState}`;
+          logger.debug(`Zone ${zone.id} rejected: ${reason}`);
+          return false;
+        }
+        // If zone has state but destination doesn't, allow match (state is optional)
+        logger.debug(`Zone ${zone.id} has state "${zoneState}" but destination has no state - allowing match (state is optional)`);
       }
 
       // Check zip code ranges if specified
-      if (zone.zipCodeRanges) {
-        let zipRanges: Array<{ from: string; to: string } | string> = [];
-        if (typeof zone.zipCodeRanges === "string") {
-          try {
-            zipRanges = JSON.parse(zone.zipCodeRanges) as Array<{ from: string; to: string } | string>;
-          } catch {
-            zipRanges = [];
-          }
-        } else if (Array.isArray(zone.zipCodeRanges)) {
-          zipRanges = zone.zipCodeRanges as Array<{ from: string; to: string } | string>;
-        } else if (typeof zone.zipCodeRanges === "object") {
-          // Some ORMs may return JSON fields as objects; attempt to coerce to expected array shape
-          zipRanges = (zone.zipCodeRanges as unknown as Array<{ from: string; to: string } | string>) || [];
-        }
+      if (matches && zone.zipCodeRanges) {
+        const zipRanges = this.parseZipCodeRanges(zone.zipCodeRanges);
+        const validRanges = this.filterValidZipRanges(zipRanges);
 
-        if (zipRanges.length > 0) {
-          const zipCode = destination.zipCode;
-          const isInRange = zipRanges.some((range) => {
+        // Only check zip code if there are valid ranges
+        if (validRanges.length > 0) {
+          const isInRange = validRanges.some((range) => {
             if (typeof range === "string") {
-              return zipCode.startsWith(range);
-            } else if (range && typeof range === "object" && (range as any).from && (range as any).to) {
-              const from = (range as any).from as string;
-              const to = (range as any).to as string;
-              return zipCode >= from && zipCode <= to;
+              const prefix = range.trim();
+              return destZip.startsWith(prefix);
+            } else if (range && typeof range === "object") {
+              const from = String((range as any).from || "").trim();
+              const to = String((range as any).to || "").trim();
+
+              // Normalize zip codes to same length for comparison (pad with zeros if needed)
+              const normalizedDest = this.normalizeZipCode(destZip);
+              const normalizedFrom = this.normalizeZipCode(from);
+              const normalizedTo = this.normalizeZipCode(to);
+
+              const matches = normalizedDest >= normalizedFrom && normalizedDest <= normalizedTo;
+              logger.debug(
+                `Zip range check: ${destZip} in [${from}, ${to}] = ${matches} (normalized: ${normalizedDest} in [${normalizedFrom}, ${normalizedTo}])`
+              );
+              return matches;
             }
             return false;
           });
-          if (!isInRange) return false;
+
+          if (!isInRange) {
+            matches = false;
+            reason = `Zip code "${destZip}" not in any valid ranges`;
+            logger.debug(`Zone ${zone.id} rejected: ${reason}. Valid ranges:`, validRanges);
+            return false;
+          }
+        } else {
+          // Zone has zipCodeRanges defined but all are empty/invalid, skip zip check (allow zone)
+          logger.debug(`Zone ${zone.id} has zipCodeRanges but all are invalid/empty, skipping zip check`);
         }
       }
 
-      return true;
+      if (matches) {
+        logger.info(`✅ Zone ${zone.id} (${zone.zoneName}) MATCHES destination`);
+      }
+
+      return matches;
     });
+  }
+
+  /**
+   * Check if zipCodeRanges has valid ranges
+   */
+  private hasValidZipRanges(zipCodeRanges?: unknown): boolean {
+    if (!zipCodeRanges) return false;
+    const ranges = this.parseZipCodeRanges(zipCodeRanges);
+    const valid = this.filterValidZipRanges(ranges);
+    return valid.length > 0;
+  }
+
+  /**
+   * Parse zip code ranges from various formats
+   */
+  private parseZipCodeRanges(zipCodeRanges: unknown): Array<{ from: string; to: string } | string> {
+    let zipRanges: Array<{ from: string; to: string } | string> = [];
+
+    if (typeof zipCodeRanges === "string") {
+      try {
+        zipRanges = JSON.parse(zipCodeRanges) as Array<{ from: string; to: string } | string>;
+      } catch {
+        zipRanges = [];
+      }
+    } else if (Array.isArray(zipCodeRanges)) {
+      zipRanges = zipCodeRanges as Array<{ from: string; to: string } | string>;
+    } else if (typeof zipCodeRanges === "object" && zipCodeRanges !== null) {
+      // Some ORMs may return JSON fields as objects; attempt to coerce to expected array shape
+      zipRanges = (zipCodeRanges as unknown as Array<{ from: string; to: string } | string>) || [];
+    }
+
+    return zipRanges;
+  }
+
+  /**
+   * Filter out empty or invalid zip code ranges
+   */
+  private filterValidZipRanges(zipRanges: Array<{ from: string; to: string } | string>): Array<{ from: string; to: string } | string> {
+    return zipRanges.filter((range) => {
+      if (typeof range === "string") {
+        return range.trim().length > 0;
+      } else if (range && typeof range === "object" && (range as any).from !== undefined && (range as any).to !== undefined) {
+        const from = String((range as any).from || "").trim();
+        const to = String((range as any).to || "").trim();
+        // Both must be non-empty
+        return from.length > 0 && to.length > 0;
+      }
+      return false;
+    });
+  }
+
+  /**
+   * Normalize zip code for comparison (pad to 5 digits, handle US zip codes)
+   */
+  private normalizeZipCode(zip: string): string {
+    const cleaned = zip.trim().replace(/[^0-9]/g, ""); // Remove non-numeric chars
+    // Pad to at least 5 digits for comparison (US standard)
+    return cleaned.padStart(5, "0");
   }
 
   /**
@@ -314,8 +491,31 @@ class ShippingCalculationService {
         }
 
         // Check for free shipping threshold
-        if (rate.freeShippingThreshold && totalWeight <= rate.freeShippingThreshold) {
-          cost = 0;
+        // For ORDER_VALUE_BASED and HYBRID: check order value
+        // For WEIGHT_BASED: check weight
+        if (rate.freeShippingThreshold) {
+          if (rate.rateType === "ORDER_VALUE_BASED" || rate.rateType === "HYBRID") {
+            // Calculate order value for value-based thresholds
+            const orderValue = items.reduce((sum, item) => {
+              return sum + (item.price || 0) * item.quantity;
+            }, 0);
+            if (orderValue >= rate.freeShippingThreshold) {
+              cost = 0;
+            }
+          } else if (rate.rateType === "WEIGHT_BASED") {
+            // For weight-based rates, use weight threshold
+            if (totalWeight >= rate.freeShippingThreshold) {
+              cost = 0;
+            }
+          } else {
+            // For FIXED rates, assume threshold is for order value
+            const orderValue = items.reduce((sum, item) => {
+              return sum + (item.price || 0) * item.quantity;
+            }, 0);
+            if (orderValue >= rate.freeShippingThreshold) {
+              cost = 0;
+            }
+          }
         }
 
         // Check weight limits

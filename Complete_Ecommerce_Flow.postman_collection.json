@@ -1,0 +1,884 @@
+{
+  "info": {
+    "name": "Complete E-commerce Flow",
+    "description": "Complete flow from vendor setup, product creation, shipping configuration, cart management, order creation to product review",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6015/v1",
+      "type": "string"
+    },
+    {
+      "key": "vendorToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "zoneId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rateId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cartItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Vendor Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('vendorToken', response.data.accessToken);",
+                  "        console.log('Vendor token saved:', response.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vendor@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor-login"]
+            },
+            "description": "Login as vendor to get access token. Update email/password with your vendor credentials."
+          }
+        },
+        {
+          "name": "Customer Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('customerToken', response.data.accessToken);",
+                  "        console.log('Customer token saved:', response.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["login"]
+            },
+            "description": "Login as customer to get access token. Update email/password with your customer credentials."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Vendor - Product Management",
+      "item": [
+        {
+          "name": "Create Fashion Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.id) {",
+                  "        pm.collectionVariables.set('productId', response.data.id.toString());",
+                  "        console.log('Product ID saved:', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Premium Cotton T-Shirt",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "High quality cotton t-shirt, comfortable and durable",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "29.99",
+                  "type": "text"
+                },
+                {
+                  "key": "stock",
+                  "value": "100",
+                  "type": "text"
+                },
+                {
+                  "key": "sku",
+                  "value": "FASH-TEE-001",
+                  "type": "text"
+                },
+                {
+                  "key": "tags",
+                  "value": "[\"fashion\", \"tee\", \"cotton\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "discount",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "deliveryTime",
+                  "value": "3-5 days",
+                  "type": "text"
+                },
+                {
+                  "key": "note",
+                  "value": "Machine wash cold",
+                  "type": "text"
+                },
+                {
+                  "key": "returnPolicy",
+                  "value": "30-day returns",
+                  "type": "text"
+                },
+                {
+                  "key": "weight",
+                  "value": "0.5",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload product images (multiple files supported)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/fashion",
+              "host": ["{{baseUrl}}"],
+              "path": ["fashion"]
+            },
+            "description": "Create a fashion product. You can add multiple images. Product will be created by the logged-in vendor."
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fashion/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["fashion", "{{productId}}"]
+            },
+            "description": "Get product details by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Vendor - Shipping Configuration",
+      "item": [
+        {
+          "name": "Create Shipping Config",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isShippingEnabled\": true,\n  \"handlingTime\": 2,\n  \"processingTime\": 1,\n  \"freeShippingThreshold\": 100,\n  \"defaultShippingMethod\": \"STANDARD\",\n  \"allowExpressShipping\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "config"]
+            },
+            "description": "Create or update shipping configuration for the vendor"
+          }
+        },
+        {
+          "name": "Get Shipping Config",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "config"]
+            },
+            "description": "Get current shipping configuration"
+          }
+        },
+        {
+          "name": "Create Zone with Rates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.zone && response.data.zone.id) {",
+                  "        pm.collectionVariables.set('zoneId', response.data.zone.id.toString());",
+                  "        console.log('Zone ID saved:', response.data.zone.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zoneName\": \"California Zone\",\n  \"country\": \"US\",\n  \"state\": \"CA\",\n  \"zipCodes\": [\"90210\", \"94016\", \"90001\"],\n  \"isActive\": true,\n  \"rates\": [\n    {\n      \"carrier\": \"FEDEX\",\n      \"method\": \"STANDARD\",\n      \"serviceName\": \"FEDEX STANDARD\",\n      \"rateType\": \"FIXED\",\n      \"fixedCost\": 15.99,\n      \"estimatedDays\": 5,\n      \"isActive\": true\n    },\n    {\n      \"carrier\": \"FEDEX\",\n      \"method\": \"EXPRESS\",\n      \"serviceName\": \"FEDEX EXPRESS\",\n      \"rateType\": \"FIXED\",\n      \"fixedCost\": 25.99,\n      \"estimatedDays\": 2,\n      \"isActive\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/zones-with-rates",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "zones-with-rates"]
+            },
+            "description": "Create a shipping zone with rates in one API call. This is the easiest way to set up shipping."
+          }
+        },
+        {
+          "name": "Create Shipping Zone Only",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zoneName\": \"New York Zone\",\n  \"country\": \"US\",\n  \"state\": \"NY\",\n  \"zipCodes\": [\"10001\", \"10002\"],\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/zones",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "zones"]
+            },
+            "description": "Create a shipping zone without rates (you'll need to add rates separately)"
+          }
+        },
+        {
+          "name": "Add Shipping Rate to Zone",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zoneId\": {{zoneId}},\n  \"carrier\": \"UPS\",\n  \"method\": \"STANDARD\",\n  \"serviceName\": \"UPS GROUND\",\n  \"rateType\": \"FIXED\",\n  \"fixedCost\": 12.99,\n  \"estimatedDays\": 4,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/rates",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "rates"]
+            },
+            "description": "Add a shipping rate to an existing zone. Replace {{zoneId}} with actual zone ID."
+          }
+        },
+        {
+          "name": "Validate Shipping Config",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "validate"]
+            },
+            "description": "Validate if shipping configuration is complete and ready"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Customer - Cart Management",
+      "item": [
+        {
+          "name": "Add Product to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.id) {",
+                  "        pm.collectionVariables.set('cartItemId', response.data.id.toString());",
+                  "        console.log('Cart item ID saved:', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"category\": \"fashion\",\n  \"qty\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Add a product to cart. Make sure productId is set from previous step."
+          }
+        },
+        {
+          "name": "View Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "View all items in cart"
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"category\": \"fashion\",\n  \"qty\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Update quantity of a cart item"
+          }
+        },
+        {
+          "name": "Delete Cart Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"category\": \"fashion\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/{{cartItemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "{{cartItemId}}"]
+            },
+            "description": "Remove an item from cart"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Clear all items from cart"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Customer - Shipping Calculation",
+      "item": [
+        {
+          "name": "Calculate Shipping Rates",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destination\": {\n    \"country\": \"US\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90210\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/shipping/calculate",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "shipping", "calculate"]
+            },
+            "description": "Calculate shipping rates for items in cart. Returns STANDARD and BASIC delivery options with aggregated costs across all vendors."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Customer - Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.orderId) {",
+                  "        pm.collectionVariables.set('orderId', response.data.orderId.toString());",
+                  "        console.log('Order ID saved:', response.data.orderId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"shippingAddress\": \"123 Main Street\",\n  \"zip\": \"90210\",\n  \"country\": \"US\",\n  \"phone\": \"+1234567890\",\n  \"email\": \"customer@example.com\",\n  \"shippingCost\": 15.99,\n  \"selectedShippingService\": \"STANDARD\",\n  \"estimatedDeliveryDays\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/order",
+              "host": ["{{baseUrl}}"],
+              "path": ["order"]
+            },
+            "description": "Create an order from cart items. Shipping details should match the selected option from calculate shipping rates. Returns Stripe payment intent."
+          }
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{orderId}}"]
+            },
+            "description": "Get order details by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Customer - Product Review",
+      "item": [
+        {
+          "name": "Write Product Review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"fashion\",\n  \"productId\": {{productId}},\n  \"rating\": 5,\n  \"content\": \"Excellent product! Great quality and fast shipping. Highly recommended!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["review"]
+            },
+            "description": "Write a review for a product. Requires: 1) Product must be purchased, 2) Order status must be DELIVERED. Make sure order is delivered before reviewing."
+          }
+        },
+        {
+          "name": "Get Product Reviews",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/review?category=fashion&productId={{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["review"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "fashion"
+                },
+                {
+                  "key": "productId",
+                  "value": "{{productId}}"
+                }
+              ]
+            },
+            "description": "Get all reviews for a product"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Vendor - Order Management",
+      "item": [
+        {
+          "name": "Get Vendor Orders",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vendor/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "orders"]
+            },
+            "description": "Get all orders for the logged-in vendor"
+          }
+        },
+        {
+          "name": "Update Order Item Status to DELIVERED",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vendorToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendor/orders/:orderItemId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendor", "orders", ":orderItemId", "status"],
+              "variable": [
+                {
+                  "key": "orderItemId",
+                  "value": "",
+                  "description": "Replace with actual order item ID"
+                }
+              ]
+            },
+            "description": "Update order item status to DELIVERED. This is required before customer can review the product."
+          }
+        }
+      ]
+    }
+  ]
+}

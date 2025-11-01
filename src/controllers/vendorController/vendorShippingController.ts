@@ -108,7 +108,7 @@ const vendorShippingController = {
         isConfigured: shippingConfig.isConfigured,
         defaultCarrier: shippingConfig.defaultCarrier,
         defaultMethod: shippingConfig.defaultMethod,
-        handlingFee: shippingConfig.handlingFee,
+        handlingTime: shippingConfig.handlingTime,
         freeShippingThreshold: shippingConfig.freeShippingThreshold,
         createdAt: shippingConfig.createdAt,
         updatedAt: shippingConfig.updatedAt
@@ -127,12 +127,12 @@ const vendorShippingController = {
 
     try {
       // Get shipping configuration
-      const shippingConfig = await (db as any).vendorShippingConfig.findUnique({
+      const shippingConfig = await db.vendorShippingConfig.findUnique({
         where: { vendorId },
         include: {
-          zones: {
+          shippingZones: {
             include: {
-              rates: true
+              shippingMethods: true
             }
           }
         }
@@ -145,12 +145,13 @@ const vendorShippingController = {
       return httpResponse(req, res, reshttp.okCode, "Shipping configuration retrieved successfully", {
         id: shippingConfig.id,
         vendorId: shippingConfig.vendorId,
-        isConfigured: shippingConfig.isConfigured,
+        isConfigured: (shippingConfig as any).isConfigured ?? false,
         defaultCarrier: shippingConfig.defaultCarrier,
         defaultMethod: shippingConfig.defaultMethod,
-        handlingFee: shippingConfig.handlingFee,
+        handlingTime: shippingConfig.handlingTime,
         freeShippingThreshold: shippingConfig.freeShippingThreshold,
-        zones: shippingConfig.zones,
+        isActive: shippingConfig.isActive,
+        zones: shippingConfig.shippingZones,
         createdAt: shippingConfig.createdAt,
         updatedAt: shippingConfig.updatedAt
       });
@@ -882,6 +883,7 @@ const vendorShippingController = {
         category: string;
         quantity: number;
         weight?: number;
+        price?: number;
       };
 
       const itemsByVendor = new Map<string, CartItemWithVendor[]>();
@@ -929,6 +931,7 @@ const vendorShippingController = {
         }
 
         const weight = (entry as any).weight as number | undefined;
+        const price = (entry as any).price as number | undefined;
 
         if (!itemsByVendor.has(vendorId)) {
           itemsByVendor.set(vendorId, []);
@@ -941,7 +944,8 @@ const vendorShippingController = {
           productId: Number(productId) || 0,
           category: toServiceCategory(categoryKey),
           quantity: c.qty,
-          weight: typeof weight === "number" ? weight : undefined
+          weight: typeof weight === "number" ? weight : undefined,
+          price: typeof price === "number" ? price : undefined
         });
       }
 
@@ -965,6 +969,7 @@ const vendorShippingController = {
 
       for (const [vendorId, items] of itemsByVendor.entries()) {
         try {
+          logger.info(`Calculating shipping for vendor ${vendorId} with destination:`, destination);
           const rates = await shippingService.default.calculateShippingRates({
             vendorId,
             destination,
@@ -972,8 +977,16 @@ const vendorShippingController = {
               productId: item.productId,
               category: item.category,
               quantity: item.quantity,
-              weight: item.weight
+              weight: item.weight,
+              price: item.price
             }))
+          });
+
+          logger.info(`Shipping calculation result for vendor ${vendorId}:`, {
+            applicableZone: rates.applicableZone,
+            availableRatesCount: rates.availableRates.length,
+            totalWeight: rates.totalWeight,
+            rates: rates.availableRates
           });
 
           // Check if vendor has valid shipping configuration
@@ -989,6 +1002,7 @@ const vendorShippingController = {
                 : rates.applicableZone?.zoneName === "NO_MATCHING_ZONE"
                   ? "No matching shipping zone found for destination"
                   : "No available shipping rates";
+            logger.warn(`Vendor ${vendorId} shipping issue:`, errorMsg, rates);
             errors.push({
               vendorId,
               vendorName: firstItem.vendorName,
@@ -1105,12 +1119,12 @@ const vendorShippingController = {
 
     try {
       // Get shipping configuration
-      const shippingConfig = await (db as any).vendorShippingConfig.findUnique({
+      const shippingConfig = await db.vendorShippingConfig.findUnique({
         where: { vendorId },
         include: {
-          zones: {
+          shippingZones: {
             include: {
-              rates: true
+              shippingMethods: true
             }
           }
         }
@@ -1120,8 +1134,8 @@ const vendorShippingController = {
         return httpResponse(req, res, reshttp.notFoundCode, "Shipping configuration not found");
       }
 
-      const zones = shippingConfig.zones || [];
-      const allRates = zones.flatMap((zone: any) => zone.rates || []);
+      const zones = shippingConfig.shippingZones || [];
+      const allRates = zones.flatMap((zone: any) => zone.shippingMethods || []);
 
       const missingRequirements = [];
       const warnings = [];
@@ -1137,7 +1151,7 @@ const vendorShippingController = {
 
       // Check for zones without rates
       zones.forEach((zone: any) => {
-        if (!zone.rates || zone.rates.length === 0) {
+        if (!zone.shippingMethods || zone.shippingMethods.length === 0) {
           warnings.push(`Zone "${zone.zoneName}" has no shipping rates`);
         }
       });
@@ -1160,7 +1174,9 @@ const vendorShippingController = {
           totalZones: zones.length,
           totalRates: allRates.length,
           coveragePercentage:
-            zones.length > 0 ? Math.round((zones.filter((z: any) => z.rates && z.rates.length > 0).length / zones.length) * 100) : 0,
+            zones.length > 0
+              ? Math.round((zones.filter((z: any) => z.shippingMethods && z.shippingMethods.length > 0).length / zones.length) * 100)
+              : 0,
           estimatedSetupTime: zones.length > 0 ? "15 minutes" : "30 minutes"
         }
       });
@@ -1192,15 +1208,15 @@ const vendorShippingController = {
         return httpResponse(req, res, reshttp.notFoundCode, "Shipping configuration not found");
       }
 
-      const zones = shippingConfig.zones || [];
-      const allRates = zones.flatMap((zone: any) => zone.rates || []);
+      const zones = shippingConfig.shippingZones || [];
+      const allRates = zones.flatMap((zone: any) => zone.shippingMethods || []);
 
       return httpResponse(req, res, reshttp.okCode, "Shipping configuration summary retrieved successfully", {
         vendorId,
         isConfigured: shippingConfig.isConfigured,
         defaultCarrier: shippingConfig.defaultCarrier,
         defaultMethod: shippingConfig.defaultMethod,
-        handlingFee: shippingConfig.handlingFee,
+        handlingTime: shippingConfig.handlingTime,
         freeShippingThreshold: shippingConfig.freeShippingThreshold,
         zones: {
           total: zones.length,
