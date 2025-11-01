@@ -339,28 +339,11 @@ export class ShippingFulfillmentService {
             }
           },
           items: {
-            include: {
-              music: {
-                select: { userId: true }
-              },
-              digitalBook: {
-                select: { userId: true }
-              },
-              fashion: {
-                select: { userId: true }
-              },
-              meditation: {
-                select: { userId: true }
-              },
-              decoration: {
-                select: { userId: true }
-              },
-              homeAndLiving: {
-                select: { userId: true }
-              },
-              accessories: {
-                select: { userId: true }
-              }
+            select: {
+              id: true,
+              category: true,
+              productId: true,
+              vendorId: true
             }
           }
         }
@@ -371,7 +354,8 @@ export class ShippingFulfillmentService {
       }
 
       // Determine vendor from order items (assuming all items are from the same vendor)
-      const vendorId = this.getVendorIdFromOrderItems(order.items);
+      // Use vendorId directly from order items (already stored in OrderItem model)
+      const vendorId = order.items.length > 0 ? order.items[0].vendorId : null;
       if (!vendorId) {
         return { success: false, label: null, message: "Unable to determine vendor for this order" };
       }
@@ -491,33 +475,6 @@ export class ShippingFulfillmentService {
       logger.error(`Error generating USPS label: ${String(error)}`);
       return { success: false, label: null, message: "Failed to generate USPS label" };
     }
-  }
-
-  /**
-   * Get vendor ID from order items
-   */
-  private static getVendorIdFromOrderItems(
-    items: Array<{
-      music?: { userId: string } | null;
-      digitalBook?: { userId: string } | null;
-      fashion?: { userId: string } | null;
-      meditation?: { userId: string } | null;
-      decoration?: { userId: string } | null;
-      homeAndLiving?: { userId: string } | null;
-      accessories?: { userId: string } | null;
-    }>
-  ): string | null {
-    for (const item of items) {
-      // Check each product category for vendor ID
-      if (item.music?.userId) return item.music.userId;
-      if (item.digitalBook?.userId) return item.digitalBook.userId;
-      if (item.fashion?.userId) return item.fashion.userId;
-      if (item.meditation?.userId) return item.meditation.userId;
-      if (item.decoration?.userId) return item.decoration.userId;
-      if (item.homeAndLiving?.userId) return item.homeAndLiving.userId;
-      if (item.accessories?.userId) return item.accessories.userId;
-    }
-    return null;
   }
 
   /**
@@ -1086,18 +1043,11 @@ export class ShippingFulfillmentService {
       }
 
       if (vendorId) {
+        // Filter by vendorId directly - no need for product relations
         where.order = {
           items: {
             some: {
-              OR: [
-                { category: "MUSIC", music: { userId: vendorId } },
-                { category: "DIGITAL_BOOK", digitalBook: { userId: vendorId } },
-                { category: "FASHION", fashion: { userId: vendorId } },
-                { category: "MEDITATION", meditation: { userId: vendorId } },
-                { category: "DECORATION", decoration: { userId: vendorId } },
-                { category: "HOME_LIVING", homeAndLiving: { userId: vendorId } },
-                { category: "ACCESSORIES", accessories: { userId: vendorId } }
-              ]
+              vendorId: vendorId
             }
           }
         };

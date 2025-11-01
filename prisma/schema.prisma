@@ -196,17 +196,25 @@ model OrderItem {
   order          Order           @relation(fields: [orderId], references: [id])
   vendor         User            @relation(fields: [vendorId], references: [id])
 
-  // Product relations based on category
-  music         Music?         @relation(fields: [productId], references: [id], map: "order_item_music")
-  digitalBook   DigitalBook?   @relation(fields: [productId], references: [id], map: "order_item_digital_book")
-  meditation    Meditation?    @relation(fields: [productId], references: [id], map: "order_item_meditation")
-  fashion       Fashion?       @relation(fields: [productId], references: [id], map: "order_item_fashion")
-  decoration    Decoration?    @relation(fields: [productId], references: [id], map: "order_item_decoration")
-  homeAndLiving HomeAndLiving? @relation(fields: [productId], references: [id], map: "order_item_home_living")
-  accessories   Accessories?   @relation(fields: [productId], references: [id], map: "order_item_accessories")
+  // Note: Product relations removed - query products directly using category + productId
+  // This avoids foreign key constraint conflicts across multiple product tables
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime?      @updatedAt
+  Accessories     Accessories?   @relation(fields: [accessoriesId], references: [id])
+  accessoriesId   Int?
+  Decoration      Decoration?    @relation(fields: [decorationId], references: [id])
+  decorationId    Int?
+  HomeAndLiving   HomeAndLiving? @relation(fields: [homeAndLivingId], references: [id])
+  homeAndLivingId Int?
+  Fashion         Fashion?       @relation(fields: [fashionId], references: [id])
+  fashionId       Int?
+  Meditation      Meditation?    @relation(fields: [meditationId], references: [id])
+  meditationId    Int?
+  DigitalBook     DigitalBook?   @relation(fields: [digitalBookId], references: [id])
+  digitalBookId   Int?
+  Music           Music?         @relation(fields: [musicId], references: [id])
+  musicId         Int?
 
   @@map("order_items")
 }

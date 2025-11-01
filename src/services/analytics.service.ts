@@ -86,17 +86,10 @@ export class AnalyticsService {
       }
 
       if (vendorId) {
+        // Filter by vendorId directly - no need for product relations
         where.items = {
           some: {
-            OR: [
-              { category: "MUSIC", music: { userId: vendorId } },
-              { category: "DIGITAL_BOOK", digitalBook: { userId: vendorId } },
-              { category: "FASHION", fashion: { userId: vendorId } },
-              { category: "MEDITATION", meditation: { userId: vendorId } },
-              { category: "DECORATION", decoration: { userId: vendorId } },
-              { category: "HOME_LIVING", homeAndLiving: { userId: vendorId } },
-              { category: "ACCESSORIES", accessories: { userId: vendorId } }
-            ]
+            vendorId: vendorId
           }
         };
       }
@@ -308,15 +301,7 @@ export class AnalyticsService {
         createdAt: { gte: dateFrom },
         items: {
           some: {
-            OR: [
-              { category: "MUSIC", music: { userId: vendorId } },
-              { category: "DIGITAL_BOOK", digitalBook: { userId: vendorId } },
-              { category: "FASHION", fashion: { userId: vendorId } },
-              { category: "MEDITATION", meditation: { userId: vendorId } },
-              { category: "DECORATION", decoration: { userId: vendorId } },
-              { category: "HOME_LIVING", homeAndLiving: { userId: vendorId } },
-              { category: "ACCESSORIES", accessories: { userId: vendorId } }
-            ]
+            vendorId: vendorId
           }
         }
       };
