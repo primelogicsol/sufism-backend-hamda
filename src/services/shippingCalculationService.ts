@@ -198,9 +198,12 @@ class ShippingCalculationService {
     }
   ) {
     // Normalize destination values for comparison
-    const destCountry = (destination.country || "").trim().toUpperCase();
-    const destState = destination.state ? destination.state.trim().toUpperCase() : "";
-    const destZip = (destination.zipCode || "").trim();
+    // Ensure zipCode is converted to string (it might come as number from JSON)
+    const destCountry = String(destination.country || "")
+      .trim()
+      .toUpperCase();
+    const destState = destination.state ? String(destination.state).trim().toUpperCase() : "";
+    const destZip = String(destination.zipCode || "").trim();
 
     logger.info(`Finding zone - normalized destination:`, {
       destCountry,
@@ -230,8 +233,10 @@ class ShippingCalculationService {
       });
 
       // Check country match (case-insensitive)
+      // Handle null/undefined and ensure both are normalized to uppercase for comparison
       if (zone.country) {
-        const zoneCountry = zone.country.trim().toUpperCase();
+        const zoneCountry = String(zone.country).trim().toUpperCase();
+        // Both destCountry and zoneCountry are already uppercase, so comparison is case-insensitive
         if (zoneCountry !== destCountry) {
           matches = false;
           reason = `Country mismatch: ${zoneCountry} != ${destCountry}`;
@@ -241,9 +246,10 @@ class ShippingCalculationService {
       }
 
       // Check state match (state is optional - zone can match even if destination doesn't have state)
+      // Case-insensitive comparison: both normalized to uppercase
       if (matches && zone.state) {
-        const zoneState = zone.state.trim().toUpperCase();
-        // If destination has state, it must match zone's state
+        const zoneState = String(zone.state).trim().toUpperCase();
+        // If destination has state, it must match zone's state (case-insensitive)
         // If destination doesn't have state, zone can still match (state is optional)
         if (destState && zoneState !== destState) {
           matches = false;
@@ -356,8 +362,10 @@ class ShippingCalculationService {
   /**
    * Normalize zip code for comparison (pad to 5 digits, handle US zip codes)
    */
-  private normalizeZipCode(zip: string): string {
-    const cleaned = zip.trim().replace(/[^0-9]/g, ""); // Remove non-numeric chars
+  private normalizeZipCode(zip: string | number): string {
+    // Convert to string first (handles both string and number inputs)
+    const zipStr = String(zip);
+    const cleaned = zipStr.trim().replace(/[^0-9]/g, ""); // Remove non-numeric chars
     // Pad to at least 5 digits for comparison (US standard)
     return cleaned.padStart(5, "0");
   }

@@ -214,6 +214,9 @@ export default {
 
     // 🛒 Create Order as PENDING
     if (paymentIntent.status === "succeeded") {
+      // Normalize country code to uppercase (case-insensitive)
+      const normalizedCountry = data.country ? String(data.country).trim().toUpperCase() : undefined;
+
       const newOrder = await db.order.create({
         data: {
           userId: user.id,
@@ -236,7 +239,7 @@ export default {
           phone: data.phone,
           fullName: data.fullName,
           shippingAddress: data.shippingAddress,
-          country: data.country
+          country: normalizedCountry
         } as unknown as Prisma.OrderCreateInput
       });
 
@@ -273,13 +276,16 @@ export default {
     }
     try {
       if (user.customer_id) {
+        // Normalize country code to uppercase (case-insensitive)
+        const normalizedCountry = data.country ? String(data.country).trim().toUpperCase() : "US";
+
         await stripe.customers.update(user.customer_id, {
           name: data.fullName,
           phone: data.phone,
           address: {
             line1: data.address,
             postal_code: data.zip,
-            country: data.country ?? "US"
+            country: normalizedCountry
           }
         });
       }

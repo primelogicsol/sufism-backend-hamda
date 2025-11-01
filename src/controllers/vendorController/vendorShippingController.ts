@@ -307,12 +307,16 @@ const vendorShippingController = {
         return httpResponse(req, res, reshttp.notFoundCode, "Vendor not found");
       }
 
+      // Normalize country and state to uppercase (case-insensitive)
+      const normalizedCountry = country ? String(country).trim().toUpperCase() : null;
+      const normalizedState = state ? String(state).trim().toUpperCase() : null;
+
       const shippingZone = await (db as any).vendorShippingZone.create({
         data: {
           vendorId,
           zoneName,
-          country,
-          state,
+          country: normalizedCountry,
+          state: normalizedState,
           zipCodeRanges,
           isActive,
           description
@@ -363,17 +367,28 @@ const vendorShippingController = {
         return httpResponse(req, res, reshttp.notFoundCode, "Shipping zone not found");
       }
 
+      // Normalize country and state to uppercase (case-insensitive)
+      const normalizedCountry = country !== undefined ? (country ? String(country).trim().toUpperCase() : null) : undefined;
+      const normalizedState = state !== undefined ? (state ? String(state).trim().toUpperCase() : null) : undefined;
+
+      const updateData: Record<string, unknown> = {
+        zoneName,
+        zipCodeRanges,
+        isActive,
+        description,
+        updatedAt: new Date()
+      };
+
+      if (normalizedCountry !== undefined) {
+        updateData.country = normalizedCountry;
+      }
+      if (normalizedState !== undefined) {
+        updateData.state = normalizedState;
+      }
+
       const updatedZone = await (db as any).vendorShippingZone.update({
         where: { id: zoneId },
-        data: {
-          zoneName,
-          country,
-          state,
-          zipCodeRanges,
-          isActive,
-          description,
-          updatedAt: new Date()
-        }
+        data: updateData
       });
 
       return httpResponse(req, res, reshttp.okCode, "Shipping zone updated successfully", {
@@ -491,13 +506,17 @@ const vendorShippingController = {
         }
       });
 
+      // Normalize country and state to uppercase (case-insensitive)
+      const normalizedCountry = country ? String(country).trim().toUpperCase() : null;
+      const normalizedState = state ? String(state).trim().toUpperCase() : null;
+
       // Create shipping zone and connect to config
       const shippingZone = await (db as any).vendorShippingZone.create({
         data: {
           vendorId,
           zoneName,
-          country,
-          state,
+          country: normalizedCountry,
+          state: normalizedState,
           zipCodeRanges,
           isActive,
           description,
@@ -747,7 +766,7 @@ const vendorShippingController = {
       destination: {
         country: string;
         state?: string;
-        zipCode: string;
+        zipCode: string | number;
         city?: string;
       };
     };
@@ -756,11 +775,42 @@ const vendorShippingController = {
       // Validate auth
       const userId = req.userFromToken?.id;
       if (!userId) {
+        logger.warn(`Shipping calculate - Unauthorized: No user ID found in token`);
         return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
       }
 
-      if (!destination?.country || !destination?.zipCode) {
-        return httpResponse(req, res, reshttp.badRequestCode, "Destination is required");
+      // Enhanced validation with detailed logging
+      logger.info(`Shipping calculate request received:`, {
+        userId,
+        hasDestination: !!destination,
+        destinationCountry: destination?.country,
+        destinationState: destination?.state,
+        destinationZipCode: destination?.zipCode,
+        requestBody: req.body
+      });
+
+      if (!destination) {
+        logger.warn(`Shipping calculate - Missing destination object`, { userId, body: req.body });
+        return httpResponse(req, res, reshttp.badRequestCode, "Destination is required", {
+          error: "destination object is missing",
+          receivedBody: req.body
+        });
+      }
+
+      if (!destination.country) {
+        logger.warn(`Shipping calculate - Missing country`, { userId, destination });
+        return httpResponse(req, res, reshttp.badRequestCode, "Destination country is required", {
+          error: "destination.country is missing",
+          receivedDestination: destination
+        });
+      }
+
+      if (!destination.zipCode) {
+        logger.warn(`Shipping calculate - Missing zipCode`, { userId, destination });
+        return httpResponse(req, res, reshttp.badRequestCode, "Destination zipCode is required", {
+          error: "destination.zipCode is missing",
+          receivedDestination: destination
+        });
       }
 
       // Fetch user's cart with related product records
@@ -848,7 +898,11 @@ const vendorShippingController = {
       });
 
       if (!cartItems.length) {
-        return httpResponse(req, res, reshttp.badRequestCode, "Cart is empty");
+        logger.warn(`Shipping calculate - Cart is empty`, { userId });
+        return httpResponse(req, res, reshttp.badRequestCode, "Cart is empty", {
+          error: "User's cart is empty",
+          userId
+        });
       }
 
       // Map cart items to shipping service items format
@@ -950,7 +1004,18 @@ const vendorShippingController = {
       }
 
       if (itemsByVendor.size === 0) {
-        return httpResponse(req, res, reshttp.badRequestCode, "No valid products found in cart");
+        logger.warn(`Shipping calculate - No valid products found`, {
+          userId,
+          cartItemsCount: cartItems.length,
+          cartItems: cartItems.map((c) => ({
+            id: c.id,
+            hasProduct: !!(c.accessories || c.decoration || c.fashion || c.living || c.meditation || c.music || c.digitalBook)
+          }))
+        });
+        return httpResponse(req, res, reshttp.badRequestCode, "No valid products found in cart", {
+          error: "Cart items do not have valid product references or vendor information",
+          cartItemsCount: cartItems.length
+        });
       }
 
       // Calculate shipping rates for each vendor
@@ -970,9 +1035,15 @@ const vendorShippingController = {
       for (const [vendorId, items] of itemsByVendor.entries()) {
         try {
           logger.info(`Calculating shipping for vendor ${vendorId} with destination:`, destination);
+          // Normalize destination - ensure zipCode is string (might come as number)
+          const normalizedDestination = {
+            country: String(destination.country || ""),
+            state: destination.state ? String(destination.state) : undefined,
+            zipCode: String(destination.zipCode || "")
+          };
           const rates = await shippingService.default.calculateShippingRates({
             vendorId,
-            destination,
+            destination: normalizedDestination,
             items: items.map((item) => ({
               productId: item.productId,
               category: item.category,
@@ -1096,7 +1167,31 @@ const vendorShippingController = {
       }
 
       if (deliveryOptions.length === 0) {
-        return httpResponse(req, res, reshttp.badRequestCode, "No shipping options available for your destination");
+        logger.warn(`Shipping calculate - No delivery options available`, {
+          userId,
+          destination,
+          totalStandardCost,
+          totalExpressCost,
+          standardAvailable,
+          expressAvailable,
+          vendorsWithShipping: itemsByVendor.size,
+          vendorsWithoutShipping: vendorsWithoutShipping.length,
+          deliveryOptionsLength: deliveryOptions.length
+        });
+        return httpResponse(req, res, reshttp.badRequestCode, "No shipping options available for your destination", {
+          error: "No shipping options calculated (all costs are 0 or no rates available)",
+          destination,
+          shippingInfo: {
+            totalStandardCost,
+            totalExpressCost,
+            standardAvailable,
+            expressAvailable
+          },
+          vendorsInfo: {
+            total: itemsByVendor.size,
+            withoutShipping: vendorsWithoutShipping.length
+          }
+        });
       }
 
       // Return simple response with only 2 options: STANDARD and BASIC
@@ -1106,8 +1201,18 @@ const vendorShippingController = {
         totalVendors: itemsByVendor.size
       });
     } catch (error) {
-      logger.error("Error calculating shipping rates:", error);
-      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to calculate shipping rates");
+      logger.error("Error calculating shipping rates:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: req.userFromToken?.id,
+        destination: req.body?.destination,
+        body: req.body,
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      });
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to calculate shipping rates", {
+        error: error instanceof Error ? error.message : String(error),
+        requestBody: req.body
+      });
     }
   }),
 
