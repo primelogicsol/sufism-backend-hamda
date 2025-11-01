@@ -330,45 +330,16 @@ export default {
             selectedShippingService: selectedShippingService,
             estimatedDeliveryDays: estimatedDeliveryDays,
             items: {
-              create: orderItemsData.map((item) => {
-                // Build base order item data - Prisma will enforce foreign key on the matching relation
-                // The foreign key constraint will only fail if the product doesn't exist in the correct table
-                const orderItemData: Record<string, unknown> = {
-                  category: item.category,
-                  productId: item.productId,
-                  vendorId: item.vendorId,
-                  quantity: item.quantity,
-                  price: item.price
-                };
-
-                // Explicitly connect only the relevant product relation to ensure foreign key validation
-                // This ensures Prisma validates the product exists in the correct table
-                switch (item.category) {
-                  case "MUSIC":
-                    orderItemData.music = { connect: { id: item.productId } };
-                    break;
-                  case "DIGITAL_BOOK":
-                    orderItemData.digitalBook = { connect: { id: item.productId } };
-                    break;
-                  case "FASHION":
-                    orderItemData.fashion = { connect: { id: item.productId } };
-                    break;
-                  case "MEDITATION":
-                    orderItemData.meditation = { connect: { id: item.productId } };
-                    break;
-                  case "DECORATION":
-                    orderItemData.decoration = { connect: { id: item.productId } };
-                    break;
-                  case "HOME_LIVING":
-                    orderItemData.homeAndLiving = { connect: { id: item.productId } };
-                    break;
-                  case "ACCESSORIES":
-                    orderItemData.accessories = { connect: { id: item.productId } };
-                    break;
-                }
-
-                return orderItemData;
-              })
+              create: orderItemsData.map((item) => ({
+                category: item.category,
+                productId: item.productId,
+                vendorId: item.vendorId,
+                quantity: item.quantity,
+                price: item.price
+                // Note: Product relations (music, fashion, etc.) are implicit via productId
+                // Prisma automatically creates the relation based on productId matching the id in the respective table
+                // No need to use connect - the foreign key constraint ensures the product exists
+              }))
             },
             zip: data.zip,
             phone: data.phone,
