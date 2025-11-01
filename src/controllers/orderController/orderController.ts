@@ -183,6 +183,78 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "No valid products found in cart. Please check your cart items.");
     }
 
+    // 🔍 Final validation: Verify all products still exist in database before order creation
+    const productValidationErrors: string[] = [];
+    for (const item of orderItemsData) {
+      try {
+        let productExists = false;
+        switch (item.category) {
+          case "MUSIC": {
+            const music = await db.music.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!music;
+            break;
+          }
+          case "DIGITAL_BOOK": {
+            const book = await db.digitalBook.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!book;
+            break;
+          }
+          case "FASHION": {
+            const fashion = await db.fashion.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!fashion;
+            break;
+          }
+          case "MEDITATION": {
+            const meditation = await db.meditation.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!meditation;
+            break;
+          }
+          case "DECORATION": {
+            const decoration = await db.decoration.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!decoration;
+            break;
+          }
+          case "HOME_LIVING": {
+            const homeLiving = await db.homeAndLiving.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!homeLiving;
+            break;
+          }
+          case "ACCESSORIES": {
+            const accessories = await db.accessories.findFirst({ where: { id: item.productId, isDelete: false } });
+            productExists = !!accessories;
+            break;
+          }
+        }
+
+        if (!productExists) {
+          productValidationErrors.push(`Product ID ${item.productId} (${item.category}) no longer exists or was deleted`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : typeof error === "string" ? error : JSON.stringify(error);
+        productValidationErrors.push(`Error validating product ID ${item.productId} (${item.category}): ${errorMessage}`);
+      }
+    }
+
+    if (productValidationErrors.length > 0) {
+      logger.warn("Product validation failed before order creation:", {
+        userId,
+        errors: productValidationErrors,
+        orderItems: orderItemsData.map((i) => ({ category: i.category, productId: i.productId }))
+      });
+      return httpResponse(
+        req,
+        res,
+        reshttp.badRequestCode,
+        "One or more products in your cart no longer exist or were deleted. Please update your cart and try again.",
+        {
+          error: "Product validation failed",
+          message: "Some products in your cart may have been deleted",
+          suggestion: "Please refresh your cart and remove any invalid items",
+          details: productValidationErrors
+        }
+      );
+    }
+
     // 🚚 Get shipping details from frontend
     const shippingCost = data.shippingCost || 0;
     const selectedShippingService = data.selectedShippingService || "";
