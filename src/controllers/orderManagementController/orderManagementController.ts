@@ -3,6 +3,7 @@ import reshttp from "reshttp";
 import { db } from "../../configs/database.js";
 import type { _Request } from "../../middleware/authMiddleware.js";
 import { OrderManagementService } from "../../services/orderManagement.service.js";
+import { ReturnsRefundsService } from "../../services/returnsRefunds.service.js";
 import { httpResponse } from "../../utils/apiResponseUtils.js";
 import { asyncHandler } from "../../utils/asyncHandlerUtils.js";
 import logger from "../../utils/loggerUtils.js";
@@ -19,8 +20,18 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
+    // Validate orderId parameter
+    if (!orderId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Order ID is required");
+    }
+
+    const parsedOrderId = Number(orderId);
+    if (isNaN(parsedOrderId) || parsedOrderId <= 0) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid order ID");
+    }
+
     try {
-      const order = await OrderManagementService.getOrderById(Number(orderId), userId);
+      const order = await OrderManagementService.getOrderById(parsedOrderId, userId);
 
       if (!order) {
         return httpResponse(req, res, reshttp.notFoundCode, "Order not found");
@@ -147,15 +158,24 @@ export default {
    */
   cancelOrder: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { reason, notes, refundAmount } = req.body as {
+    const { reason, notes } = req.body as {
       reason?: unknown;
       notes?: unknown;
-      refundAmount?: unknown;
     };
     const userId = req.userFromToken?.id;
 
     if (!userId) {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    // Validate orderId parameter
+    if (!orderId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Order ID is required");
+    }
+
+    const parsedOrderId = Number(orderId);
+    if (isNaN(parsedOrderId) || parsedOrderId <= 0) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid order ID");
     }
 
     if (!reason) {
@@ -164,11 +184,10 @@ export default {
 
     try {
       const cancellationParams = {
-        orderId: Number(orderId),
+        orderId: parsedOrderId,
         reason: reason as CancellationReason,
         notes: notes as string | undefined,
-        cancelledBy: userId,
-        refundAmount: refundAmount ? Number(refundAmount) : undefined
+        cancelledBy: userId
       };
 
       const result = await OrderManagementService.cancelOrder(cancellationParams);
@@ -178,7 +197,8 @@ export default {
       }
 
       return httpResponse(req, res, reshttp.okCode, result.message, {
-        refundAmount: result.refundAmount
+        refundAmount: result.refundAmount || 0,
+        orderId: parsedOrderId
       });
     } catch (error) {
       logger.error(`Error cancelling order: ${String(error)}`);
@@ -414,6 +434,107 @@ export default {
     } catch (error) {
       logger.error(`Error getting vendor analytics: ${String(error)}`);
       return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get vendor analytics");
+    }
+  }),
+
+  /**
+   * Cancel a single order item
+   */
+  cancelOrderItem: asyncHandler(async (req: _Request, res) => {
+    const { cancelItemId } = req.params;
+    const { reason, notes } = req.body as {
+      reason?: unknown;
+      notes?: unknown;
+    };
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!cancelItemId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Order item ID is required");
+    }
+
+    const parsedOrderItemId = Number(cancelItemId);
+    if (isNaN(parsedOrderItemId) || parsedOrderItemId <= 0) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid order item ID");
+    }
+
+    if (!reason) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Cancellation reason is required");
+    }
+
+    try {
+      const cancellationParams = {
+        orderItemId: parsedOrderItemId,
+        reason: reason as CancellationReason,
+        notes: notes as string | undefined,
+        cancelledBy: userId
+      };
+
+      const result = await OrderManagementService.cancelOrderItem(cancellationParams);
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.badRequestCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, {
+        refundAmount: result.refundAmount || 0,
+        orderItemId: parsedOrderItemId
+      });
+    } catch (error) {
+      logger.error(`Error cancelling order item: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to cancel order item");
+    }
+  }),
+
+  /**
+   * Create return request for an order item
+   */
+  createReturnRequestForItem: asyncHandler(async (req: _Request, res) => {
+    const { returnItemId } = req.params;
+    const { reason, notes } = req.body as {
+      reason?: unknown;
+      notes?: unknown;
+    };
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    if (!returnItemId) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Order item ID is required");
+    }
+
+    const parsedOrderItemId = Number(returnItemId);
+    if (isNaN(parsedOrderItemId) || parsedOrderItemId <= 0) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Invalid order item ID");
+    }
+
+    if (!reason || typeof reason !== "string" || reason.trim().length === 0) {
+      return httpResponse(req, res, reshttp.badRequestCode, "Return reason is required");
+    }
+
+    try {
+      const returnRequestData = {
+        orderItemId: parsedOrderItemId,
+        userId,
+        reason: String(reason).trim(),
+        notes: typeof notes === "string" ? notes.trim() : typeof notes === "number" || typeof notes === "boolean" ? String(notes).trim() : undefined
+      };
+
+      const result = await ReturnsRefundsService.createReturnRequestForItem(returnRequestData);
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.badRequestCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, result.return);
+    } catch (error) {
+      logger.error(`Error creating return request for item: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to create return request");
     }
   })
 };

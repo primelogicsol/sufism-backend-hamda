@@ -201,6 +201,20 @@ model OrderItem {
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime?      @updatedAt
+  // Accessories     Accessories?   @relation(fields: [accessoriesId], references: [id])
+  // accessoriesId   Int?
+  // Decoration      Decoration?    @relation(fields: [decorationId], references: [id])
+  // decorationId    Int?
+  // HomeAndLiving   HomeAndLiving? @relation(fields: [homeAndLivingId], references: [id])
+  // homeAndLivingId Int?
+  // Fashion         Fashion?       @relation(fields: [fashionId], references: [id])
+  // fashionId       Int?
+  // Meditation      Meditation?    @relation(fields: [meditationId], references: [id])
+  // meditationId    Int?
+  // DigitalBook     DigitalBook?   @relation(fields: [digitalBookId], references: [id])
+  // digitalBookId   Int?
+  // Music           Music?         @relation(fields: [musicId], references: [id])
+  // musicId         Int?
   Accessories     Accessories?   @relation(fields: [accessoriesId], references: [id])
   accessoriesId   Int?
   Decoration      Decoration?    @relation(fields: [decorationId], references: [id])

@@ -21,7 +21,13 @@ export interface OrderCancellationParams {
   reason: CancellationReason;
   notes?: string;
   cancelledBy: string;
-  refundAmount?: number;
+}
+
+export interface OrderItemCancellationParams {
+  orderItemId: number;
+  reason: CancellationReason;
+  notes?: string;
+  cancelledBy: string;
 }
 
 export interface OrderSearchParams {
@@ -52,6 +58,11 @@ export class OrderManagementService {
    */
   static async getOrderById(orderId: number, userId?: string): Promise<unknown> {
     try {
+      // Validate orderId
+      if (!orderId || isNaN(orderId) || orderId <= 0) {
+        throw new Error("Invalid order ID");
+      }
+
       const where: Prisma.OrderWhereInput = { id: orderId };
 
       if (userId) {
@@ -60,7 +71,36 @@ export class OrderManagementService {
 
       const order = await db.order.findFirst({
         where,
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          amount: true,
+          stripeSessionId: true,
+          fullName: true,
+          country: true,
+          email: true,
+          sPaymentIntentId: true,
+          shippingAddress: true,
+          zip: true,
+          phone: true,
+          status: true,
+          paymentStatus: true,
+          priority: true,
+          trackingNumber: true,
+          estimatedDelivery: true,
+          actualDelivery: true,
+          cancellationReason: true,
+          cancellationNotes: true,
+          cancelledAt: true,
+          cancelledBy: true,
+          shippingMethod: true,
+          shippingCost: true,
+          selectedShippingService: true,
+          estimatedDeliveryDays: true,
+          carrier: true,
+          shippingStatus: true,
+          createdAt: true,
+          updatedAt: true,
           user: {
             select: {
               id: true,
@@ -70,16 +110,57 @@ export class OrderManagementService {
             }
           },
           items: {
-            include: {
-              order: true
+            select: {
+              id: true,
+              orderId: true,
+              category: true,
+              productId: true,
+              vendorId: true,
+              quantity: true,
+              price: true,
+              status: true,
+              trackingNumber: true,
+              shippedAt: true,
+              deliveredAt: true,
+              createdAt: true,
+              updatedAt: true
             }
           },
-          transactions: true,
+          transactions: {
+            select: {
+              id: true,
+              orderId: true,
+              amount: true,
+              status: true,
+              paymentMethod: true,
+              stripePaymentIntentId: true,
+              stripeClientSecret: true,
+              gatewayData: true,
+              createdAt: true,
+              updatedAt: true
+            }
+          },
           orderHistory: {
+            select: {
+              id: true,
+              orderId: true,
+              status: true,
+              previousStatus: true,
+              changedBy: true,
+              reason: true,
+              notes: true,
+              createdAt: true
+            },
             orderBy: { createdAt: "desc" }
           },
           orderNotes: {
-            include: {
+            select: {
+              id: true,
+              orderId: true,
+              userId: true,
+              note: true,
+              isInternal: true,
+              createdAt: true,
               user: {
                 select: {
                   id: true,
@@ -91,6 +172,19 @@ export class OrderManagementService {
             orderBy: { createdAt: "desc" }
           },
           inventoryLogs: {
+            select: {
+              id: true,
+              orderId: true,
+              productId: true,
+              productCategory: true,
+              changeType: true,
+              quantityChange: true,
+              previousStock: true,
+              newStock: true,
+              reason: true,
+              userId: true,
+              createdAt: true
+            },
             orderBy: { createdAt: "desc" }
           }
         }
@@ -300,18 +394,35 @@ export class OrderManagementService {
    * Cancel order and handle refunds
    */
   static async cancelOrder(params: OrderCancellationParams): Promise<{ success: boolean; message: string; refundAmount?: number }> {
-    const { orderId, reason, notes, cancelledBy, refundAmount } = params;
+    const { orderId, reason, notes, cancelledBy } = params;
 
     try {
-      // Get order with items
+      // Get order with items and transactions
       const order = await db.order.findUnique({
         where: { id: orderId },
-        include: {
-          items: true,
+        select: {
+          id: true,
+          userId: true,
+          amount: true,
+          paymentStatus: true,
+          status: true,
+          items: {
+            select: {
+              id: true,
+              productId: true,
+              category: true,
+              quantity: true
+            }
+          },
           transactions: {
             where: { status: "SUCCEEDED" },
             orderBy: { createdAt: "desc" },
-            take: 1
+            take: 1,
+            select: {
+              id: true,
+              amount: true,
+              status: true
+            }
           }
         }
       });
@@ -321,8 +432,9 @@ export class OrderManagementService {
       }
 
       // Check if order can be cancelled
-      if (!this.canCancelOrder(order.status)) {
-        return { success: false, message: `Order cannot be cancelled in ${order.status} status` };
+      const cancellationCheck = this.canCancelOrder(order.status);
+      if (!cancellationCheck.allowed) {
+        return { success: false, message: cancellationCheck.message || `Order cannot be cancelled in ${order.status} status` };
       }
 
       // Release reserved stock
@@ -334,6 +446,25 @@ export class OrderManagementService {
 
       await InventoryService.releaseStock(stockReleaseItems, orderId, order.userId, `Order cancelled: ${reason}`);
 
+      // Calculate refund amount automatically from order payment
+      let actualRefundAmount = 0;
+      const shouldRefund = order.paymentStatus === "PAID" || order.transactions.length > 0;
+
+      if (shouldRefund) {
+        // Use transaction amount if available (most accurate), otherwise use order amount
+        if (order.transactions.length > 0 && order.transactions[0]) {
+          actualRefundAmount = order.transactions[0].amount;
+        } else {
+          actualRefundAmount = order.amount;
+        }
+
+        logger.info(`Calculated refund amount for order ${orderId}: $${actualRefundAmount}`, {
+          orderAmount: order.amount,
+          transactionAmount: order.transactions[0]?.amount,
+          paymentStatus: order.paymentStatus
+        });
+      }
+
       // Update order status
       await db.order.update({
         where: { id: orderId },
@@ -342,7 +473,8 @@ export class OrderManagementService {
           cancellationReason: reason,
           cancellationNotes: notes,
           cancelledAt: new Date(),
-          cancelledBy
+          cancelledBy,
+          ...(shouldRefund && actualRefundAmount > 0 ? { paymentStatus: "REFUNDED" } : {})
         }
       });
 
@@ -358,28 +490,205 @@ export class OrderManagementService {
         }
       });
 
-      // Process refund if payment was made
-      let actualRefundAmount = 0;
-      if (order.transactions.length > 0 && refundAmount) {
-        // In a real implementation, you would integrate with Stripe refund API here
-        actualRefundAmount = refundAmount;
+      // Note: Stripe refund API integration should be added here
+      // Example: await stripe.refunds.create({ payment_intent: order.sPaymentIntentId, amount: actualRefundAmount * 100 })
 
-        // Update payment status
-        await db.order.update({
-          where: { id: orderId },
-          data: { paymentStatus: "REFUNDED" }
-        });
-      }
-
-      logger.info(`Order ${orderId} cancelled by ${cancelledBy}, reason: ${reason}`);
+      logger.info(`Order ${orderId} cancelled by ${cancelledBy}, reason: ${reason}`, {
+        refundAmount: actualRefundAmount,
+        paymentStatus: order.paymentStatus
+      });
 
       return {
         success: true,
         message: "Order cancelled successfully",
-        refundAmount: actualRefundAmount
+        refundAmount: actualRefundAmount > 0 ? actualRefundAmount : undefined
       };
     } catch (error) {
       logger.error(`Error cancelling order: ${String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel a single order item and handle refunds (item amount + proportional shipping)
+   */
+  static async cancelOrderItem(params: OrderItemCancellationParams): Promise<{ success: boolean; message: string; refundAmount?: number }> {
+    const { orderItemId, reason, notes, cancelledBy } = params;
+
+    try {
+      // Get order item with order details
+      const orderItem = await db.orderItem.findFirst({
+        where: { id: orderItemId },
+        select: {
+          id: true,
+          orderId: true,
+          productId: true,
+          category: true,
+          quantity: true,
+          price: true,
+          status: true,
+          order: {
+            select: {
+              id: true,
+              userId: true,
+              amount: true,
+              shippingCost: true,
+              paymentStatus: true,
+              status: true,
+              items: {
+                select: {
+                  id: true,
+                  productId: true,
+                  quantity: true,
+                  price: true,
+                  status: true
+                }
+              },
+              transactions: {
+                where: { status: "SUCCEEDED" },
+                orderBy: { createdAt: "desc" },
+                take: 1,
+                select: {
+                  id: true,
+                  amount: true,
+                  status: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!orderItem) {
+        return { success: false, message: "Order item not found" };
+      }
+
+      const order = orderItem.order;
+
+      // Verify ownership
+      if (order.userId !== cancelledBy) {
+        return { success: false, message: "Unauthorized access" };
+      }
+
+      // Check if order item is already cancelled
+      if (orderItem.status === "CANCELLED" || orderItem.status === "RETURNED") {
+        return { success: false, message: "Order item is already cancelled or returned" };
+      }
+
+      // Check if order can have items cancelled
+      const cancellationCheck = this.canCancelOrder(order.status);
+      if (!cancellationCheck.allowed) {
+        return { success: false, message: cancellationCheck.message || `Order items cannot be cancelled in ${order.status} status` };
+      }
+
+      // Calculate item value
+      const itemValue = orderItem.price * orderItem.quantity;
+
+      // Calculate proportional shipping cost for this item
+      // Formula: (item_value / total_order_items_value) * shipping_cost
+      const totalItemsValue = order.items.reduce((sum, item) => {
+        // Only count non-cancelled items
+        if (item.status !== "CANCELLED" && item.status !== "RETURNED") {
+          return sum + item.price * item.quantity;
+        }
+        return sum;
+      }, 0);
+
+      let proportionalShippingCost = 0;
+      if (totalItemsValue > 0 && order.shippingCost > 0) {
+        proportionalShippingCost = (itemValue / totalItemsValue) * order.shippingCost;
+        // Round to 2 decimal places
+        proportionalShippingCost = Math.round(proportionalShippingCost * 100) / 100;
+      }
+
+      // Calculate total refund amount (item value + proportional shipping)
+      const refundAmount = itemValue + proportionalShippingCost;
+
+      // Release stock for this item only
+      await InventoryService.releaseStock(
+        [
+          {
+            productId: orderItem.productId,
+            productCategory: orderItem.category,
+            quantity: orderItem.quantity
+          }
+        ],
+        order.id,
+        order.userId,
+        `Order item cancelled: ${reason}`
+      );
+
+      // Update order item status (update only, don't fetch related data to avoid non-existent columns)
+      await db.orderItem.update({
+        where: { id: orderItemId },
+        data: {
+          status: "CANCELLED"
+        },
+        select: {
+          id: true,
+          status: true
+        }
+      });
+
+      // Check if all items are cancelled
+      const remainingItems = order.items.filter((item) => item.id !== orderItemId && item.status !== "CANCELLED" && item.status !== "RETURNED");
+
+      // If all items are cancelled, update order status
+      if (remainingItems.length === 0) {
+        await db.order.update({
+          where: { id: order.id },
+          data: {
+            status: "CANCELLED",
+            cancellationReason: reason,
+            cancellationNotes: notes,
+            cancelledAt: new Date(),
+            cancelledBy,
+            // Update order amount (subtract cancelled item + shipping)
+            amount: order.amount - refundAmount,
+            shippingCost: order.shippingCost - proportionalShippingCost,
+            ...(order.paymentStatus === "PAID" && refundAmount > 0 ? { paymentStatus: "REFUNDED" } : {})
+          }
+        });
+      } else {
+        // Partial cancellation - update order amount and shipping cost
+        await db.order.update({
+          where: { id: order.id },
+          data: {
+            amount: order.amount - refundAmount,
+            shippingCost: order.shippingCost - proportionalShippingCost,
+            ...(order.paymentStatus === "PAID" && refundAmount > 0 ? { paymentStatus: "PARTIALLY_REFUNDED" } : {})
+          }
+        });
+      }
+
+      // Create order history
+      await db.orderHistory.create({
+        data: {
+          orderId: order.id,
+          status: remainingItems.length === 0 ? "CANCELLED" : order.status,
+          previousStatus: order.status,
+          changedBy: cancelledBy,
+          reason: `Order item ${orderItemId} cancelled: ${reason}`,
+          notes: `Item: ${orderItem.productId}, Quantity: ${orderItem.quantity}, Refund: $${refundAmount.toFixed(2)} (Item: $${itemValue.toFixed(2)} + Shipping: $${proportionalShippingCost.toFixed(2)})${notes ? ` - ${notes}` : ""}`
+        }
+      });
+
+      logger.info(`Order item ${orderItemId} cancelled by ${cancelledBy}`, {
+        orderId: order.id,
+        itemValue,
+        proportionalShippingCost,
+        refundAmount,
+        remainingItems: remainingItems.length,
+        orderStatus: remainingItems.length === 0 ? "CANCELLED" : order.status
+      });
+
+      return {
+        success: true,
+        message: "Order item cancelled successfully",
+        refundAmount: refundAmount > 0 ? refundAmount : undefined
+      };
+    } catch (error) {
+      logger.error(`Error cancelling order item: ${String(error)}`);
       throw error;
     }
   }
@@ -580,10 +889,31 @@ export class OrderManagementService {
   /**
    * Check if order can be cancelled
    */
-  private static canCancelOrder(status: OrderStatus): boolean {
+  private static canCancelOrder(status: OrderStatus): { allowed: boolean; message?: string } {
+    // Orders that CAN be cancelled
     const cancellableStatuses: OrderStatus[] = ["PENDING", "CONFIRMED", "PROCESSING"];
 
-    return cancellableStatuses.includes(status);
+    if (cancellableStatuses.includes(status)) {
+      return { allowed: true };
+    }
+
+    // Orders that CANNOT be cancelled (with specific messages)
+    const nonCancellableStatuses: Partial<Record<OrderStatus, string>> = {
+      SHIPPED: "Order has already been shipped and cannot be cancelled. Please contact support for returns.",
+      IN_TRANSIT: "Order is in transit and cannot be cancelled. Please contact support for returns.",
+      DELIVERED: "Order has been delivered and cannot be cancelled. Please initiate a return request instead.",
+      COMPLETED: "Order has been completed and cannot be cancelled. Please initiate a return request instead.",
+      CANCELLED: "Order is already cancelled.",
+      RETURNED: "Order has been returned and cannot be cancelled.",
+      REFUNDED: "Order has been refunded and cannot be cancelled.",
+      FAILED: "Order failed and cannot be cancelled."
+    };
+
+    const specificMessage = nonCancellableStatuses[status];
+    return {
+      allowed: false,
+      message: specificMessage || `Order cannot be cancelled in ${status} status`
+    };
   }
 
   /**

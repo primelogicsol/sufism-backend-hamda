@@ -20,6 +20,13 @@ export interface ReturnRequestData {
   notes?: string;
 }
 
+export interface ReturnItemRequestData {
+  orderItemId: number;
+  userId: string;
+  reason: string; // Custom reason string
+  notes?: string;
+}
+
 export interface ReturnApprovalData {
   returnId: number;
   approvedBy: string;
@@ -81,7 +88,7 @@ export class ReturnsRefundsService {
       }
 
       // Check if order is eligible for return
-      const returnWindowDays = 30; // Default 30 days
+      const returnWindowDays = 15; // 15 days return window
       const returnDeadline = new Date(order.createdAt);
       returnDeadline.setDate(returnDeadline.getDate() + returnWindowDays);
 
@@ -154,6 +161,160 @@ export class ReturnsRefundsService {
       };
     } catch (error) {
       logger.error(`Error creating return request: ${String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a return request for a single order item
+   */
+  static async createReturnRequestForItem(data: ReturnItemRequestData): Promise<{ success: boolean; return: unknown; message: string }> {
+    try {
+      const { orderItemId, userId, reason, notes } = data;
+
+      // Find the order item with its order using select to avoid non-existent columns
+      const orderItem = await db.orderItem.findFirst({
+        where: { id: orderItemId },
+        select: {
+          id: true,
+          orderId: true,
+          category: true,
+          productId: true,
+          vendorId: true,
+          quantity: true,
+          price: true,
+          status: true,
+          trackingNumber: true,
+          shippedAt: true,
+          deliveredAt: true,
+          createdAt: true,
+          updatedAt: true,
+          order: {
+            select: {
+              id: true,
+              userId: true,
+              amount: true,
+              status: true,
+              paymentStatus: true,
+              createdAt: true,
+              updatedAt: true,
+              items: {
+                select: {
+                  id: true,
+                  orderId: true,
+                  category: true,
+                  productId: true,
+                  vendorId: true,
+                  quantity: true,
+                  price: true,
+                  status: true,
+                  trackingNumber: true,
+                  shippedAt: true,
+                  deliveredAt: true,
+                  createdAt: true,
+                  updatedAt: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!orderItem) {
+        return { success: false, return: null, message: "Order item not found" };
+      }
+
+      const order = orderItem.order;
+
+      // Verify ownership
+      if (order.userId !== userId) {
+        return { success: false, return: null, message: "Unauthorized access" };
+      }
+
+      // Check if order item already has a return request
+      const existingReturn = await db.return.findFirst({
+        where: {
+          orderId: order.id,
+          status: { in: ["REQUESTED", "APPROVED", "PROCESSING"] }
+        },
+        include: {
+          items: {
+            where: {
+              productId: orderItem.productId
+            }
+          }
+        }
+      });
+
+      if (existingReturn && existingReturn.items.length > 0) {
+        return { success: false, return: null, message: "A return request already exists for this item" };
+      }
+
+      // Check if order is eligible for return
+      const returnWindowDays = 15; // 15 days return window
+      const returnDeadline = new Date(order.createdAt);
+      returnDeadline.setDate(returnDeadline.getDate() + returnWindowDays);
+
+      if (new Date() > returnDeadline) {
+        return { success: false, return: null, message: "Return window has expired" };
+      }
+
+      if (!["DELIVERED", "COMPLETED"].includes(order.status)) {
+        return { success: false, return: null, message: "Order must be delivered before requesting return" };
+      }
+
+      // Calculate refund amount for this single item
+      const refundAmount = orderItem.price * orderItem.quantity;
+
+      // Create return request for single item
+      const returnRecord = await db.return.create({
+        data: {
+          orderId: order.id,
+          userId,
+          reason: "OTHER", // Use OTHER enum since reason is custom string
+          description: reason, // Store custom reason in description
+          refundAmount,
+          status: "REQUESTED",
+          isExpedited: false,
+          priority: "NORMAL",
+          returnWindow: returnWindowDays,
+          returnDeadline,
+          notes,
+          items: {
+            create: {
+              productId: orderItem.productId,
+              quantity: orderItem.quantity,
+              reason: "OTHER", // Use OTHER enum
+              refundAmount,
+              notes
+            }
+          }
+        },
+        include: {
+          items: true,
+          order: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  email: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      logger.info(`Return requested for order item ${orderItemId} (order ${order.id}) by user ${userId}`);
+
+      return {
+        success: true,
+        return: returnRecord,
+        message: "Return request submitted successfully"
+      };
+    } catch (error) {
+      logger.error(`Error creating return request for item: ${String(error)}`);
       throw error;
     }
   }

@@ -11,9 +11,11 @@ orderManagementRouter.get("/vendor/analytics", authMiddleware.checkToken, orderM
 // Order management routes
 orderManagementRouter.get("/analytics/summary", orderManagementController.getOrderAnalytics);
 orderManagementRouter.post("/bulk-update", orderManagementController.bulkUpdateOrderStatus);
-orderManagementRouter.get("/", orderManagementController.searchOrders);
-orderManagementRouter.get("/:orderId", orderManagementController.getOrderById);
-orderManagementRouter.put("/:orderId/status", orderManagementController.updateOrderStatus);
-orderManagementRouter.post("/:orderId/cancel", orderManagementController.cancelOrder);
-orderManagementRouter.post("/:orderId/notes", orderManagementController.addOrderNote);
-orderManagementRouter.get("/:orderId/tracking", orderManagementController.getOrderTracking);
+orderManagementRouter.get("/", authMiddleware.checkToken, orderManagementController.searchOrders);
+orderManagementRouter.post("/:cancelItemId/cancel", authMiddleware.checkToken, orderManagementController.cancelOrderItem);
+orderManagementRouter.post("/:returnItemId/return", authMiddleware.checkToken, orderManagementController.createReturnRequestForItem);
+orderManagementRouter.get("/:orderId", authMiddleware.checkToken, orderManagementController.getOrderById);
+orderManagementRouter.put("/:orderId/status", authMiddleware.checkToken, orderManagementController.updateOrderStatus);
+orderManagementRouter.post("/:orderId/cancel-order", authMiddleware.checkToken, orderManagementController.cancelOrder);
+orderManagementRouter.post("/:orderId/notes", authMiddleware.checkToken, orderManagementController.addOrderNote);
+orderManagementRouter.get("/:orderId/tracking", authMiddleware.checkToken, orderManagementController.getOrderTracking);

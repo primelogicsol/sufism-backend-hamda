@@ -37,12 +37,44 @@ export const purchaseController = {
 
       const purchasedItems = await db.order.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          amount: true,
+          status: true,
+          paymentStatus: true,
+          shippingCost: true,
+          selectedShippingService: true,
+          estimatedDeliveryDays: true,
+          fullName: true,
+          email: true,
+          shippingAddress: true,
+          zip: true,
+          phone: true,
+          country: true,
+          trackingNumber: true,
+          createdAt: true,
+          updatedAt: true,
           items: {
-            include: {
-              order: true
+            select: {
+              id: true,
+              orderId: true,
+              category: true,
+              productId: true,
+              vendorId: true,
+              quantity: true,
+              price: true,
+              status: true,
+              trackingNumber: true,
+              shippedAt: true,
+              deliveredAt: true,
+              createdAt: true,
+              updatedAt: true
             }
           }
+        },
+        orderBy: {
+          createdAt: "desc"
         }
       });
 
