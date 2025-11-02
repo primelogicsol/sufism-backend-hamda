@@ -16,7 +16,17 @@ export default {
         id: req.userFromToken?.id
       }
     });
+
     if (!user) return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+
+    const existingInterview = await db.interview.findUnique({
+      where: { userId: user.id }
+    });
+
+    if (existingInterview) {
+      return httpResponse(req, res, reshttp.conflictCode, "Interview already booked", existingInterview);
+    }
+
     const interView = await db.interview.create({
       data: {
         userId: user.id,
@@ -51,10 +61,11 @@ export default {
       }
     });
     if (!user) return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+
     const interView = await db.interview.findMany({
       where: {
-        userId: user.id,
-        status: 1
+        userId: user.id
+        // status: 1
       }
     });
     if (!interView.length) return httpResponse(req, res, reshttp.okCode, "No interviews found", interView);
