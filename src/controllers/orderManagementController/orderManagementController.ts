@@ -465,11 +465,31 @@ export default {
       return httpResponse(req, res, reshttp.badRequestCode, "Cancellation reason is required");
     }
 
+    // Validate and normalize cancellation reason
+    const validReasons: CancellationReason[] = ["CUSTOMER_REQUEST", "OUT_OF_STOCK", "PAYMENT_FAILED", "VENDOR_CANCELLED", "SYSTEM_ERROR", "OTHER"];
+    let normalizedReason: CancellationReason = "OTHER"; // Default fallback
+    let finalNotes: string | undefined =
+      typeof notes === "string" ? notes.trim() : typeof notes === "number" || typeof notes === "boolean" ? String(notes).trim() : undefined;
+
+    if (typeof reason === "string") {
+      const upperReason = reason.toUpperCase();
+      // Check if it matches any enum value (case-insensitive)
+      const matchedReason = validReasons.find((r) => r === upperReason);
+      if (matchedReason) {
+        normalizedReason = matchedReason;
+      } else {
+        // If custom reason provided, use "OTHER" and store original in notes
+        normalizedReason = "OTHER";
+        const originalReasonText = `Original reason: ${reason}`;
+        finalNotes = finalNotes ? `${finalNotes}\n${originalReasonText}` : originalReasonText;
+      }
+    }
+
     try {
       const cancellationParams = {
         orderItemId: parsedOrderItemId,
-        reason: reason as CancellationReason,
-        notes: notes as string | undefined,
+        reason: normalizedReason,
+        notes: finalNotes,
         cancelledBy: userId
       };
 

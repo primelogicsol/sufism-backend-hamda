@@ -639,7 +639,7 @@ export class OrderManagementService {
           where: { id: order.id },
           data: {
             status: "CANCELLED",
-            cancellationReason: reason,
+            cancellationReason: reason, // Already validated as CancellationReason enum in controller
             cancellationNotes: notes,
             cancelledAt: new Date(),
             cancelledBy,
