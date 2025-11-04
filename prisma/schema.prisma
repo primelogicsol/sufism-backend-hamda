@@ -92,6 +92,9 @@ model User {
   vendorShippingConfig VendorShippingConfig?
   vendorPayoutConfig   VendorPayoutConfig?
 
+  // Vendor shipments (for per-vendor labeling)
+  vendorShipments Shipment[] @relation("VendorShipments")
+
   // Onboarding completion tracking
   shippingConfigCompleted Boolean @default(false)
   payoutConfigCompleted   Boolean @default(false)
@@ -264,6 +267,8 @@ model Shipment {
   id                Int            @id @default(autoincrement())
   orderId           Int
   order             Order          @relation(fields: [orderId], references: [id])
+  vendorId          String?        // NEW: Which vendor this shipment belongs to (for per-vendor labeling)
+  vendor            User?          @relation("VendorShipments", fields: [vendorId], references: [id])
   trackingNumber    String
   carrier           Carrier
   shippingMethod    ShippingMethod

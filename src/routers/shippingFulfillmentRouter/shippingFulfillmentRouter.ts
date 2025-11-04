@@ -14,6 +14,7 @@ shippingFulfillmentRouter.post(
   shippingFulfillmentController.calculateShippingRates
 );
 shippingFulfillmentRouter.post("/orders/:orderId/shipments", shippingFulfillmentController.createShipment);
+shippingFulfillmentRouter.get("/orders/:orderId/shipments", authMiddleware.checkToken, shippingFulfillmentController.getOrderShipments);
 shippingFulfillmentRouter.put("/shipments/:trackingNumber/status", shippingFulfillmentController.updateShipmentStatus);
 shippingFulfillmentRouter.get("/shipments/:trackingNumber/tracking", authMiddleware.checkToken, shippingFulfillmentController.getShipmentTracking);
 

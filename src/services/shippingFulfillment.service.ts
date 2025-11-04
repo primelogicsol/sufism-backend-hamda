@@ -312,16 +312,80 @@ export class ShippingFulfillmentService {
   }
 
   /**
-   * Generate USPS shipping label
+   * Get product weight from database by category and productId
+   */
+  private static async getProductWeight(productId: number, category: string): Promise<number> {
+    try {
+      type ProductWithWeight = { weight?: number | null };
+      let product: ProductWithWeight | null = null;
+
+      switch (category) {
+        case "ACCESSORIES":
+          product = await db.accessories.findUnique({ where: { id: productId } });
+          break;
+        case "DECORATION":
+          product = await db.decoration.findUnique({ where: { id: productId } });
+          break;
+        case "FASHION":
+          product = await db.fashion.findUnique({ where: { id: productId } });
+          break;
+        case "HOME_LIVING":
+          product = await db.homeAndLiving.findUnique({ where: { id: productId } });
+          break;
+        case "MEDITATION":
+          product = await db.meditation.findUnique({ where: { id: productId } });
+          break;
+        case "MUSIC": {
+          const musicProduct = await db.music.findUnique({ where: { id: productId } });
+          product = musicProduct as ProductWithWeight | null;
+          break;
+        }
+        case "DIGITAL_BOOK": {
+          const bookProduct = await db.digitalBook.findUnique({ where: { id: productId } });
+          product = bookProduct as ProductWithWeight | null;
+          break;
+        }
+      }
+
+      return product?.weight ?? 0;
+    } catch (error) {
+      logger.error(`Error fetching product weight for ${category} ID ${productId}:`, error);
+      return 0;
+    }
+  }
+
+  /**
+   * Calculate total weight for order items
+   */
+  private static async calculateItemsWeight(items: Array<{ category: string; productId: number; quantity: number }>): Promise<number> {
+    let totalWeight = 0;
+    for (const item of items) {
+      const productWeight = await this.getProductWeight(item.productId, item.category);
+      totalWeight += productWeight * item.quantity;
+    }
+    return totalWeight;
+  }
+
+  /**
+   * Generate USPS shipping label - Per-Vendor Labeling
+   *
+   * Always generates label for the specified vendorId only (authenticated vendor)
+   * If vendorId is provided: Generates label for that vendor's items only
+   * If vendorId is NOT provided: Should not happen (controller ensures vendorId is always provided)
    */
   static async generateUSPSLabel(params: {
     orderId: number;
-    weight: number;
+    weight?: number; // Optional: If provided, used for single vendor. If not, calculated per vendor
     dimensions?: { length: number; width: number; height: number };
     serviceType?: string;
+    vendorId: string; // Required: Always generate label for this vendor only
   }): Promise<{ success: boolean; label: unknown; message: string }> {
     try {
-      const { orderId, weight, dimensions, serviceType } = params;
+      const { orderId, weight, dimensions, serviceType, vendorId } = params;
+
+      if (!vendorId) {
+        return { success: false, label: null, message: "Vendor ID is required" };
+      }
 
       // Fetch order with items and user information
       const order = await db.order.findUnique({
@@ -343,7 +407,9 @@ export class ShippingFulfillmentService {
               id: true,
               category: true,
               productId: true,
-              vendorId: true
+              vendorId: true,
+              quantity: true,
+              status: true
             }
           }
         }
@@ -353,45 +419,8 @@ export class ShippingFulfillmentService {
         return { success: false, label: null, message: "Order not found" };
       }
 
-      // Determine vendor from order items (assuming all items are from the same vendor)
-      // Use vendorId directly from order items (already stored in OrderItem model)
-      const vendorId = order.items.length > 0 ? order.items[0].vendorId : null;
-      if (!vendorId) {
-        return { success: false, label: null, message: "Unable to determine vendor for this order" };
-      }
-
-      // Fetch vendor address
-      const vendor = await db.user.findUnique({
-        where: { id: vendorId },
-        select: {
-          id: true,
-          fullName: true,
-          businessName: true,
-          address: true,
-          city: true,
-          state: true,
-          zipCode: true,
-          country: true
-        }
-      });
-
-      if (!vendor) {
-        return { success: false, label: null, message: "Vendor not found" };
-      }
-
-      // Validate vendor address
-      const missingFields: string[] = [];
-      if (!vendor.address) missingFields.push("address");
-      if (!vendor.city) missingFields.push("city");
-      if (!vendor.state) missingFields.push("state");
-      if (!vendor.zipCode) missingFields.push("zipCode");
-
-      if (missingFields.length > 0) {
-        return {
-          success: false,
-          label: null,
-          message: `Vendor address is incomplete. Missing fields: ${missingFields.join(", ")}. Please update your vendor profile with complete address information.`
-        };
+      if (order.items.length === 0) {
+        return { success: false, label: null, message: "Order has no items" };
       }
 
       // Validate order shipping address
@@ -399,86 +428,246 @@ export class ShippingFulfillmentService {
         return { success: false, label: null, message: "Order shipping address is incomplete" };
       }
 
-      // Create USPS addresses
-      const fromAddress: USPSAddress = {
-        name: vendor.businessName || vendor.fullName,
-        address1: vendor.address || "",
-        city: vendor.city || "",
-        state: vendor.state || "",
-        zip: vendor.zipCode || ""
-      };
-
-      const toAddress: USPSAddress = {
-        name: order.fullName,
-        address1: order.shippingAddress || "",
-        city: order.user.city || "",
-        state: order.user.state || "",
-        zip: order.zip || ""
-      };
-
-      // Generate USPS label
-      const uspsLabel = await USPSService.generateLabel({
-        fromAddress,
-        toAddress,
-        weight,
-        dimensions,
-        serviceType
-      });
-
-      if (!uspsLabel) {
-        return { success: false, label: null, message: "Failed to generate USPS label" };
+      // Group items by vendor
+      const itemsByVendor = new Map<string, typeof order.items>();
+      for (const item of order.items) {
+        if (!itemsByVendor.has(item.vendorId)) {
+          itemsByVendor.set(item.vendorId, []);
+        }
+        itemsByVendor.get(item.vendorId)!.push(item);
       }
 
-      // Create shipment record
-      const shipment = await db.shipment.create({
-        data: {
-          orderId,
-          trackingNumber: uspsLabel.trackingNumber,
-          carrier: "USPS",
-          shippingMethod: "STANDARD",
-          weight,
-          dimensions: dimensions ? JSON.stringify(dimensions) : null,
-          cost: uspsLabel.cost,
-          labelUrl: uspsLabel.labelUrl,
-          trackingUrl: uspsLabel.trackingUrl,
-          status: "LABEL_CREATED"
+      // Always generate label for the specified vendor only (authenticated vendor)
+      if (!itemsByVendor.has(vendorId)) {
+        return {
+          success: false,
+          label: null,
+          message: `Vendor ${vendorId} has no items in this order`
+        };
+      }
+
+      const vendorsToProcess = [vendorId];
+
+      const generatedLabels: Array<{
+        vendorId: string;
+        vendorName: string;
+        items: Array<{ id: number; category: string; productId: number; quantity: number }>;
+        shipmentId: number;
+        trackingNumber: string;
+        labelUrl: string;
+        trackingUrl: string;
+        cost: number;
+        service: string;
+        fromAddress: USPSAddress;
+        toAddress: USPSAddress;
+      }> = [];
+
+      const errors: Array<{ vendorId: string; vendorName: string; error: string }> = [];
+
+      // Process each vendor
+      for (const targetVendorId of vendorsToProcess) {
+        try {
+          const vendorItems = itemsByVendor.get(targetVendorId)!;
+
+          // Fetch vendor information
+          const vendor = await db.user.findUnique({
+            where: { id: targetVendorId },
+            select: {
+              id: true,
+              fullName: true,
+              businessName: true,
+              address: true,
+              city: true,
+              state: true,
+              zipCode: true,
+              country: true
+            }
+          });
+
+          if (!vendor) {
+            errors.push({
+              vendorId: targetVendorId,
+              vendorName: "Unknown Vendor",
+              error: "Vendor not found"
+            });
+            continue;
+          }
+
+          // Validate vendor address
+          const missingFields: string[] = [];
+          if (!vendor.address) missingFields.push("address");
+          if (!vendor.city) missingFields.push("city");
+          if (!vendor.state) missingFields.push("state");
+          if (!vendor.zipCode) missingFields.push("zipCode");
+
+          if (missingFields.length > 0) {
+            errors.push({
+              vendorId: targetVendorId,
+              vendorName: vendor.businessName || vendor.fullName || "Unknown Vendor",
+              error: `Vendor address is incomplete. Missing fields: ${missingFields.join(", ")}`
+            });
+            continue;
+          }
+
+          // Calculate weight for this vendor's items
+          const vendorWeight = weight || (await this.calculateItemsWeight(vendorItems));
+
+          // Create USPS addresses
+          const fromAddress: USPSAddress = {
+            name: vendor.businessName || vendor.fullName,
+            address1: vendor.address || "",
+            city: vendor.city || "",
+            state: vendor.state || "",
+            zip: vendor.zipCode || ""
+          };
+
+          const toAddress: USPSAddress = {
+            name: order.fullName,
+            address1: order.shippingAddress || "",
+            city: order.user.city || "",
+            state: order.user.state || "",
+            zip: order.zip || ""
+          };
+
+          // Generate USPS label
+          const uspsLabel = await USPSService.generateLabel({
+            fromAddress,
+            toAddress,
+            weight: vendorWeight,
+            dimensions,
+            serviceType
+          });
+
+          if (!uspsLabel) {
+            errors.push({
+              vendorId: targetVendorId,
+              vendorName: vendor.businessName || vendor.fullName || "Unknown Vendor",
+              error: "Failed to generate USPS label"
+            });
+            continue;
+          }
+
+          // Create shipment record
+          const shipment = await db.shipment.create({
+            data: {
+              orderId,
+              vendorId: targetVendorId,
+              trackingNumber: uspsLabel.trackingNumber,
+              carrier: "USPS",
+              shippingMethod: "STANDARD",
+              weight: vendorWeight,
+              dimensions: dimensions ? JSON.stringify(dimensions) : null,
+              cost: uspsLabel.cost,
+              labelUrl: uspsLabel.labelUrl,
+              trackingUrl: uspsLabel.trackingUrl,
+              status: "LABEL_CREATED"
+            } as Prisma.ShipmentUncheckedCreateInput
+          });
+
+          // Update order items status for this vendor
+          await db.orderItem.updateMany({
+            where: {
+              orderId,
+              vendorId: targetVendorId,
+              status: { not: "CANCELLED" }
+            },
+            data: {
+              status: "SHIPPED",
+              trackingNumber: uspsLabel.trackingNumber,
+              shippedAt: new Date()
+            }
+          });
+
+          // Create order history entry
+          await db.orderHistory.create({
+            data: {
+              orderId,
+              status: "SHIPPED",
+              previousStatus: order.status,
+              changedBy: "system",
+              reason: "USPS label generated",
+              notes: `USPS ${uspsLabel.service} label generated for vendor ${vendor.businessName || vendor.fullName} - ${uspsLabel.trackingNumber}`
+            }
+          });
+
+          generatedLabels.push({
+            vendorId: targetVendorId,
+            vendorName: vendor.businessName || vendor.fullName,
+            items: vendorItems.map((item) => ({
+              id: item.id,
+              category: item.category,
+              productId: item.productId,
+              quantity: item.quantity
+            })),
+            shipmentId: shipment.id,
+            trackingNumber: uspsLabel.trackingNumber,
+            labelUrl: uspsLabel.labelUrl || "",
+            trackingUrl: uspsLabel.trackingUrl || "",
+            cost: uspsLabel.cost,
+            service: uspsLabel.service,
+            fromAddress,
+            toAddress
+          });
+
+          logger.info(`USPS label generated for order ${orderId}, vendor ${targetVendorId}: ${uspsLabel.trackingNumber}`);
+        } catch (error) {
+          logger.error(`Error generating label for vendor ${targetVendorId}:`, error);
+          errors.push({
+            vendorId: targetVendorId,
+            vendorName: "Unknown Vendor",
+            error: `Failed to generate label: ${String(error)}`
+          });
         }
+      }
+
+      // If no labels were generated, return error
+      if (generatedLabels.length === 0) {
+        return {
+          success: false,
+          label: null,
+          message: errors.length > 0 ? errors.map((e) => `${e.vendorName}: ${e.error}`).join("; ") : "Failed to generate any labels"
+        };
+      }
+
+      // Check if all items are shipped (fetch fresh status from database)
+      const orderItemsWithStatus = await db.orderItem.findMany({
+        where: { orderId },
+        select: { id: true, status: true }
       });
 
-      // Update order status
-      await db.order.update({
-        where: { id: orderId },
-        data: {
-          status: "SHIPPED",
-          shippingStatus: "LABEL_CREATED",
-          trackingNumber: uspsLabel.trackingNumber,
-          carrier: "USPS",
-          shippingCost: uspsLabel.cost
-        }
-      });
+      const allItemsShipped = orderItemsWithStatus.every((item) => item.status === "SHIPPED" || item.status === "CANCELLED");
 
-      // Create order history entry
-      await db.orderHistory.create({
-        data: {
-          orderId,
-          status: "SHIPPED",
-          previousStatus: "PROCESSING",
-          changedBy: "system",
-          reason: "USPS label generated",
-          notes: `USPS ${uspsLabel.service} label generated - ${uspsLabel.trackingNumber}`
-        }
-      });
+      if (allItemsShipped) {
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            status: "SHIPPED",
+            shippingStatus: "LABEL_CREATED"
+          }
+        });
+      } else {
+        // Update order to reflect partial shipment
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            shippingStatus: "LABEL_CREATED"
+          }
+        });
+      }
 
-      logger.info(`USPS label generated for order ${orderId}: ${uspsLabel.trackingNumber}`);
+      // Return response - always single label format (authenticated vendor only)
+      if (generatedLabels.length === 0) {
+        return {
+          success: false,
+          label: null,
+          message: errors.length > 0 ? errors[0]?.error || "Failed to generate label" : "Failed to generate label"
+        };
+      }
 
+      // Always return single label format (we only process one vendor)
       return {
         success: true,
-        label: {
-          ...uspsLabel,
-          shipmentId: shipment.id,
-          fromAddress,
-          toAddress
-        },
+        label: generatedLabels[0],
         message: "USPS label generated successfully"
       };
     } catch (error) {
@@ -681,6 +870,104 @@ export class ShippingFulfillmentService {
     } catch (error) {
       logger.error(`Error updating shipment status: ${String(error)}`);
       throw error;
+    }
+  }
+
+  /**
+   * Get all shipments for an order
+   */
+  static async getOrderShipments(orderId: number): Promise<{ success: boolean; shipments: unknown; message: string }> {
+    try {
+      // Use raw query or fetch without vendor relation for now
+      const shipments = await db.shipment.findMany({
+        where: { orderId },
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+
+      // Type for shipment with vendorId (extends Prisma Shipment type)
+      type ShipmentWithVendorId = (typeof shipments)[0] & { vendorId?: string | null };
+
+      // Fetch vendor details separately if vendorId exists
+      const shipmentsWithVendor = await Promise.all(
+        shipments.map(
+          async (
+            shipment
+          ): Promise<{
+            id: number;
+            orderId: number;
+            vendorId: string | null;
+            trackingNumber: string;
+            carrier: string;
+            shippingMethod: string;
+            status: string;
+            labelUrl: string | null;
+            trackingUrl: string | null;
+            estimatedDelivery: Date | null;
+            actualDelivery: Date | null;
+            weight: number | null;
+            dimensions: string | null;
+            cost: number;
+            notes: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            vendor: { id: string; fullName: string; businessName: string | null; email: string } | null;
+          }> => {
+            let vendor: { id: string; fullName: string; businessName: string | null; email: string } | null = null;
+
+            // Type assertion for vendorId (exists in database but not in Prisma types yet)
+            const shipmentWithVendorId = shipment as ShipmentWithVendorId;
+            const vendorId = shipmentWithVendorId.vendorId;
+
+            if (vendorId && typeof vendorId === "string") {
+              const vendorData = await db.user.findUnique({
+                where: { id: vendorId },
+                select: {
+                  id: true,
+                  fullName: true,
+                  businessName: true,
+                  email: true
+                }
+              });
+
+              if (vendorData) {
+                vendor = vendorData;
+              }
+            }
+
+            return {
+              id: shipment.id,
+              orderId: shipment.orderId,
+              vendorId: vendorId && typeof vendorId === "string" ? vendorId : null,
+              trackingNumber: shipment.trackingNumber,
+              carrier: shipment.carrier,
+              shippingMethod: shipment.shippingMethod,
+              status: shipment.status,
+              labelUrl: shipment.labelUrl,
+              trackingUrl: shipment.trackingUrl,
+              estimatedDelivery: shipment.estimatedDelivery,
+              actualDelivery: shipment.actualDelivery,
+              weight: shipment.weight,
+              dimensions: shipment.dimensions,
+              cost: shipment.cost,
+              notes: shipment.notes,
+              createdAt: shipment.createdAt,
+              updatedAt: shipment.updatedAt,
+              vendor
+            };
+          }
+        )
+      );
+
+      return {
+        success: true,
+        shipments: shipmentsWithVendor,
+        message: shipments.length > 0 ? `Found ${shipments.length} shipment(s)` : "No shipments found for this order"
+      };
+    } catch (error) {
+      logger.error(`Error fetching order shipments: ${String(error)}`);
+      return { success: false, shipments: [], message: "Failed to fetch order shipments" };
     }
   }
 

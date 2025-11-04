@@ -92,6 +92,76 @@ export default {
   }),
 
   /**
+   * Get all shipments for an order
+   */
+  getOrderShipments: asyncHandler(async (req: _Request, res) => {
+    const { orderId } = req.params;
+    const userId = req.userFromToken?.id;
+
+    if (!userId) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
+    }
+
+    try {
+      const orderIdNum = Number(orderId);
+      if (isNaN(orderIdNum)) {
+        return httpResponse(req, res, reshttp.badRequestCode, "Invalid order ID");
+      }
+
+      // Verify user has access to this order (either customer or vendor)
+      const order = await db.order.findUnique({
+        where: { id: orderIdNum },
+        select: {
+          id: true,
+          userId: true,
+          items: {
+            select: {
+              vendorId: true
+            }
+          }
+        }
+      });
+
+      if (!order) {
+        return httpResponse(req, res, reshttp.notFoundCode, "Order not found");
+      }
+
+      // Check if user is the customer or a vendor with items in this order
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true }
+      });
+
+      if (!user) {
+        return httpResponse(req, res, reshttp.unauthorizedCode, "User not found");
+      }
+
+      // Allow access if:
+      // 1. User is the customer who placed the order
+      // 2. User is a vendor with items in this order
+      // 3. User is an admin
+      const isCustomer = order.userId === userId;
+      const isVendorWithItems = user.role === "vendor" && order.items.some((item) => item.vendorId === userId);
+      const isAdmin = user.role === "admin";
+
+      if (!isCustomer && !isVendorWithItems && !isAdmin) {
+        return httpResponse(req, res, reshttp.forbiddenCode, "You don't have access to this order's shipments");
+      }
+
+      const result = await ShippingFulfillmentService.getOrderShipments(orderIdNum);
+
+      if (!result.success) {
+        return httpResponse(req, res, reshttp.badRequestCode, result.message);
+      }
+
+      return httpResponse(req, res, reshttp.okCode, result.message, result.shipments);
+    } catch (error) {
+      logger.error(`Error getting order shipments: ${String(error)}`);
+      return httpResponse(req, res, reshttp.internalServerErrorCode, "Failed to get order shipments");
+    }
+  }),
+
+  /**
    * Update shipment status (webhook from carrier)
    */
   updateShipmentStatus: asyncHandler(async (req: _Request, res) => {
@@ -536,13 +606,17 @@ export default {
 
   /**
    * Generate USPS shipping label
+   * Supports per-vendor labeling:
+   * - If vendorId is provided: Generates label for that vendor's items only (must match authenticated vendor)
+   * - If vendorId is NOT provided: Generates label for authenticated vendor's items only
    */
   generateUSPSLabel: asyncHandler(async (req: _Request, res) => {
     const { orderId } = req.params;
-    const { weight, dimensions, serviceType } = req.body as {
+    const { weight, dimensions, serviceType, vendorId } = req.body as {
       weight?: unknown;
       dimensions?: unknown;
       serviceType?: unknown;
+      vendorId?: unknown;
     };
     const userId = req.userFromToken?.id;
 
@@ -550,16 +624,36 @@ export default {
       return httpResponse(req, res, reshttp.unauthorizedCode, reshttp.unauthorizedMessage);
     }
 
-    if (!weight) {
-      return httpResponse(req, res, reshttp.badRequestCode, "Weight is required");
+    // Get authenticated user to verify vendor role
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true }
+    });
+
+    if (!user) {
+      return httpResponse(req, res, reshttp.unauthorizedCode, "User not found");
     }
+
+    // Verify user is a vendor
+    if (user.role !== "vendor") {
+      return httpResponse(req, res, reshttp.forbiddenCode, "Only vendors can generate shipping labels");
+    }
+
+    // If vendorId is provided in body, verify it matches authenticated vendor
+    if (vendorId && vendorId !== userId) {
+      return httpResponse(req, res, reshttp.forbiddenCode, "You can only generate labels for your own items");
+    }
+
+    // Use authenticated vendor ID (always use the authenticated vendor)
+    const authenticatedVendorId = userId;
 
     try {
       const result = await ShippingFulfillmentService.generateUSPSLabel({
         orderId: Number(orderId),
-        weight: Number(weight),
+        weight: weight ? Number(weight) : undefined,
         dimensions: dimensions as { length: number; width: number; height: number } | undefined,
-        serviceType: serviceType as string | undefined
+        serviceType: serviceType as string | undefined,
+        vendorId: authenticatedVendorId // Always use authenticated vendor
       });
 
       if (!result.success) {
