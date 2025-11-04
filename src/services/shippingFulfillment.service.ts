@@ -380,8 +380,18 @@ export class ShippingFulfillmentService {
       }
 
       // Validate vendor address
-      if (!vendor.address || !vendor.city || !vendor.state || !vendor.zipCode) {
-        return { success: false, label: null, message: "Vendor address is incomplete" };
+      const missingFields: string[] = [];
+      if (!vendor.address) missingFields.push("address");
+      if (!vendor.city) missingFields.push("city");
+      if (!vendor.state) missingFields.push("state");
+      if (!vendor.zipCode) missingFields.push("zipCode");
+
+      if (missingFields.length > 0) {
+        return {
+          success: false,
+          label: null,
+          message: `Vendor address is incomplete. Missing fields: ${missingFields.join(", ")}. Please update your vendor profile with complete address information.`
+        };
       }
 
       // Validate order shipping address
@@ -392,18 +402,18 @@ export class ShippingFulfillmentService {
       // Create USPS addresses
       const fromAddress: USPSAddress = {
         name: vendor.businessName || vendor.fullName,
-        address1: vendor.address,
-        city: vendor.city,
-        state: vendor.state,
-        zip: vendor.zipCode
+        address1: vendor.address || "",
+        city: vendor.city || "",
+        state: vendor.state || "",
+        zip: vendor.zipCode || ""
       };
 
       const toAddress: USPSAddress = {
         name: order.fullName,
-        address1: order.shippingAddress,
+        address1: order.shippingAddress || "",
         city: order.user.city || "",
         state: order.user.state || "",
-        zip: order.zip
+        zip: order.zip || ""
       };
 
       // Generate USPS label
@@ -681,9 +691,42 @@ export class ShippingFulfillmentService {
     try {
       const shipment = await db.shipment.findFirst({
         where: { trackingNumber },
-        include: {
+        select: {
+          id: true,
+          orderId: true,
+          trackingNumber: true,
+          carrier: true,
+          shippingMethod: true,
+          status: true,
+          labelUrl: true,
+          trackingUrl: true,
+          estimatedDelivery: true,
+          actualDelivery: true,
+          weight: true,
+          dimensions: true,
+          cost: true,
+          notes: true,
+          createdAt: true,
+          updatedAt: true,
           order: {
-            include: {
+            select: {
+              id: true,
+              userId: true,
+              amount: true,
+              status: true,
+              paymentStatus: true,
+              fullName: true,
+              shippingAddress: true,
+              zip: true,
+              phone: true,
+              country: true,
+              trackingNumber: true,
+              carrier: true,
+              shippingCost: true,
+              estimatedDelivery: true,
+              actualDelivery: true,
+              createdAt: true,
+              updatedAt: true,
               user: {
                 select: {
                   id: true,
@@ -691,7 +734,23 @@ export class ShippingFulfillmentService {
                   email: true
                 }
               },
-              items: true
+              items: {
+                select: {
+                  id: true,
+                  orderId: true,
+                  category: true,
+                  productId: true,
+                  vendorId: true,
+                  quantity: true,
+                  price: true,
+                  status: true,
+                  trackingNumber: true,
+                  shippedAt: true,
+                  deliveredAt: true,
+                  createdAt: true,
+                  updatedAt: true
+                }
+              }
             }
           }
         }

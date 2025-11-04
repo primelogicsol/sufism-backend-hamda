@@ -15,12 +15,12 @@ shippingFulfillmentRouter.post(
 );
 shippingFulfillmentRouter.post("/orders/:orderId/shipments", shippingFulfillmentController.createShipment);
 shippingFulfillmentRouter.put("/shipments/:trackingNumber/status", shippingFulfillmentController.updateShipmentStatus);
-shippingFulfillmentRouter.get("/shipments/:trackingNumber/tracking", shippingFulfillmentController.getShipmentTracking);
+shippingFulfillmentRouter.get("/shipments/:trackingNumber/tracking", authMiddleware.checkToken, shippingFulfillmentController.getShipmentTracking);
 
 // USPS-specific routes
-shippingFulfillmentRouter.post("/orders/:orderId/usps/label", shippingFulfillmentController.generateUSPSLabel);
-shippingFulfillmentRouter.post("/usps/validate-address", shippingFulfillmentController.validateUSPSAddress);
-shippingFulfillmentRouter.get("/usps/track/:trackingNumber", shippingFulfillmentController.trackUSPSPackage);
+shippingFulfillmentRouter.post("/orders/:orderId/usps/label", authMiddleware.checkToken, shippingFulfillmentController.generateUSPSLabel);
+shippingFulfillmentRouter.post("/usps/validate-address", authMiddleware.checkToken, shippingFulfillmentController.validateUSPSAddress);
+shippingFulfillmentRouter.get("/usps/track/:trackingNumber", authMiddleware.checkToken, shippingFulfillmentController.trackUSPSPackage);
 
 // Return routes
 shippingFulfillmentRouter.post("/orders/:orderId/returns", shippingFulfillmentController.requestReturn);

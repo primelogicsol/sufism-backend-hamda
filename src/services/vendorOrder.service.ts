@@ -269,9 +269,28 @@ export class VendorOrderService {
           where,
           take: 10,
           orderBy: { createdAt: "desc" },
-          include: {
+          select: {
+            id: true,
+            orderId: true,
+            category: true,
+            productId: true,
+            vendorId: true,
+            quantity: true,
+            price: true,
+            status: true,
+            trackingNumber: true,
+            shippedAt: true,
+            deliveredAt: true,
+            createdAt: true,
+            updatedAt: true,
             order: {
-              include: {
+              select: {
+                id: true,
+                userId: true,
+                amount: true,
+                status: true,
+                paymentStatus: true,
+                createdAt: true,
                 user: {
                   select: {
                     id: true,
