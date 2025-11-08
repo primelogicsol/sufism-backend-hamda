@@ -26,7 +26,8 @@
     "project:deploy": "bun run db:generate && bun run db:push && bun run start:prod",
     "seed:admin": "bun run --env-file .env ./dist/scripts/adminSeeder.js",
     "seed:vendor": "bun run --env-file .env ./dist/scripts/vendorSeeder.js",
-    "seed:content": "bun run --env-file .env ./dist/scripts/contentSeeder.js"
+    "seed:content": "bun run --env-file .env ./dist/scripts/contentSeeder.js",
+    "seed:saints": "bun run --env-file .env ./dist/scripts/sufiSaintSeeder.js"
   },
   "keywords": [],
   "author": "hamda",

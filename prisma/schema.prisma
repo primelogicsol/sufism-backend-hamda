@@ -1605,3 +1605,24 @@ model ContentVersion {
   @@index([contentId])
   @@map("content_versions")
 }
+
+// Sufi Saints Models
+model SufiSaint {
+  id         Int      @id @default(autoincrement())
+  name       String
+  datesRaw   String?  @map("dates_raw")
+  birthYear  Int?     @map("birth_year")
+  deathYear  Int?     @map("death_year")
+  period     String?
+  century    String?
+  summary    String   @db.Text
+  tags       String[]
+  isPublished Boolean @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([period])
+  @@index([century])
+  @@index([isPublished])
+  @@map("sufi_saints")
+}
