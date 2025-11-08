@@ -120,19 +120,16 @@ Based on your vendor config, zones must match:
 ### ✅ Improved Zone Matching Logic
 
 1. **Zone Priority Sorting**
-
    - Zones are now sorted by specificity (most specific first)
    - Priority: `has state + has zip ranges` > `has state` > `has zip ranges` > `country only`
    - Ensures most specific matching zone is used
 
 2. **Better Zip Code Comparison**
-
    - Normalizes zip codes before comparison
    - Handles different formats (removes non-numeric, pads zeros)
    - More accurate range checking
 
 3. **Enhanced Logging**
-
    - Logs why each zone doesn't match
    - Shows normalized values for debugging
    - Detailed zone information when no match found

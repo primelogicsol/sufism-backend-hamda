@@ -1557,3 +1557,51 @@ enum PayoutFrequency {
   BI_WEEKLY
   MONTHLY
 }
+
+// Content Management Models
+enum ContentSection {
+  explorer
+  academy
+  explorer_details
+  academy_details
+}
+
+model Content {
+  id             String           @id @default(cuid())
+  section        ContentSection
+  slug           String
+  category       String? // For nested structure (e.g., academy-details)
+  currentVersion Int              @default(1)
+  isPublished    Boolean          @default(true)
+  versions       ContentVersion[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([section, slug])
+  @@index([section])
+  @@index([slug])
+  @@index([category])
+  @@map("content")
+}
+
+model ContentVersion {
+  id             Int      @id @default(autoincrement())
+  contentId      String
+  content        Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  version        Int
+  title          String
+  subtitle       String?
+  parentPage     String?
+  cardTitle      String?
+  heroImage      String?
+  seoTitle       String?
+  seoDescription String?  @db.Text
+  seoKeywords    String[] // Array of strings for SEO keywords
+  blocks         Json // Stores the blocks array as JSON
+  createdAt      DateTime @default(now())
+  createdBy      String? // Optional: track who created this version
+
+  @@unique([contentId, version])
+  @@index([contentId])
+  @@map("content_versions")
+}

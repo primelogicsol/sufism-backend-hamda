@@ -1,9 +1,9 @@
-import { mkdirSync } from "fs";
-import fs from "fs/promises";
-import path from "path";
 import { z } from "zod";
+import { PrismaClient, ContentSection } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import logger from "../utils/loggerUtils.js";
-import { s3Get, s3Put } from "./storage/s3.storage.js";
+
+const prisma = new PrismaClient();
 
 export const ContentItemSchema = z.object({
   id: z.string(),
@@ -29,353 +29,376 @@ export const ContentItemSchema = z.object({
 
 export type ContentItem = z.infer<typeof ContentItemSchema>;
 
-const DEFAULT_ENV = process.env.CONTENT_ENV || "prod";
-const DEFAULT_BASE = process.env.CONTENT_BASE_PATH || path.resolve(process.cwd(), "content");
-const USE_S3 = Boolean(process.env.S3_BUCKET && process.env.S3_REGION);
-const S3_PREFIX = process.env.S3_PREFIX || DEFAULT_ENV;
+// Helper function to convert section string to enum
+function toSectionEnum(section: string): ContentSection {
+  switch (section) {
+    case "explorer":
+      return ContentSection.explorer;
+    case "academy":
+      return ContentSection.academy;
+    case "explorer-details":
+      return ContentSection.explorer_details;
+    case "academy-details":
+      return ContentSection.academy_details;
+    default:
+      throw new Error(`Invalid section: ${section}`);
+  }
+}
+
+// Helper function to convert section enum to string
+function fromSectionEnum(section: ContentSection): string {
+  switch (section) {
+    case ContentSection.explorer:
+      return "explorer";
+    case ContentSection.academy:
+      return "academy";
+    case ContentSection.explorer_details:
+      return "explorer-details";
+    case ContentSection.academy_details:
+      return "academy-details";
+  }
+}
 
 export class ContentService {
-  static getIndexPath(section: string) {
-    if (USE_S3) return `${S3_PREFIX}/index/${section}.json`;
-    return path.join(DEFAULT_BASE, DEFAULT_ENV, "index", `${section}.json`);
-  }
-
-  static getItemPath(section: string, slug: string, version = 1) {
-    if (USE_S3) return `${S3_PREFIX}/${section}/${slug}/v${version}.json`;
-
-    // Special handling for academy-details section with nested directory structure
-    if (section === "academy-details" && slug.includes("/")) {
-      return path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v${version}.json`);
-    }
-
-    return path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v${version}.json`);
-  }
-
+  /**
+   * Get list of content items for a section
+   */
   static async getList(section: string): Promise<unknown> {
-    const filePath = this.getIndexPath(section);
-    let raw: string;
-    if (USE_S3) {
-      try {
-        raw = await s3Get(filePath);
-      } catch {
-        // Fallback to local content if S3 object missing
-        raw = await fs.readFile(path.join(DEFAULT_BASE, DEFAULT_ENV, "index", `${section}.json`), "utf-8");
-      }
-    } else {
-      raw = await fs.readFile(filePath, "utf-8");
-    }
-    const data: unknown = JSON.parse(raw);
-    return data;
-  }
-
-  static async getItem(section: string, slug: string): Promise<ContentItem> {
-    // Special handling for academy-details section
-    if (section === "academy-details") {
-      // Look up the category from the index file
-      const indexData = (await this.getList(section)) as { items: Array<{ slug: string; category: string; path: string }> };
-      const item = indexData.items.find((item) => item.slug === slug);
-
-      if (!item) {
-        throw new Error(`Academy detail item with slug '${slug}' not found`);
-      }
-
-      // Extract category from the path or use the category field
-      const category = item.category;
-      const fullSlug = `${category}/${slug}`;
-
-      // Use the nested directory structure
-      const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, category, slug);
-      let latestVersion = 1;
-
-      try {
-        const files = await fs.readdir(baseDir);
-        const versionFiles = files
-          .filter((file) => file.startsWith("v") && file.endsWith(".json"))
-          .map((file) => {
-            const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
-            return isNaN(version) ? 0 : version;
-          })
-          .filter((version) => version > 0);
-
-        if (versionFiles.length > 0) {
-          latestVersion = Math.max(...versionFiles);
-        }
-      } catch (error) {
-        // If directory doesn't exist or can't be read, fall back to version 1
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.warn("content.getItem.versionDetection", { section, slug: fullSlug, error: errorMessage });
-      }
-
-      return this.getItemByVersion(section, fullSlug, latestVersion);
-    }
-
-    // Regular handling for other sections
-    const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug);
-    let latestVersion = 1;
-
     try {
-      const files = await fs.readdir(baseDir);
-      const versionFiles = files
-        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
-        .map((file) => {
-          const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
-          return isNaN(version) ? 0 : version;
-        })
-        .filter((version) => version > 0);
+      const sectionEnum = toSectionEnum(section);
+      const items = await prisma.content.findMany({
+        where: {
+          section: sectionEnum,
+          isPublished: true
+        },
+        select: {
+          slug: true,
+          category: true,
+          currentVersion: true,
+          updatedAt: true,
+          versions: {
+            select: {
+              version: true,
+              title: true,
+              subtitle: true,
+              heroImage: true
+            }
+          }
+        }
+      });
 
-      if (versionFiles.length > 0) {
-        latestVersion = Math.max(...versionFiles);
-      }
+      // Transform to match old index format
+      return {
+        items: items
+          .map((item) => {
+            // Get the current version's data
+            const currentVersionData = item.versions.find((v) => v.version === item.currentVersion) || item.versions[0];
+            return {
+              slug: item.slug,
+              title: currentVersionData?.title || "",
+              category: item.category,
+              path: `prod/${section}/${item.category ? `${item.category}/` : ""}${item.slug}/v1.json` // Legacy path for compatibility
+            };
+          })
+          .sort((a, b) => a.title.localeCompare(b.title))
+      };
     } catch (error) {
-      // If directory doesn't exist or can't be read, fall back to version 1
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn("content.getItem.versionDetection", { section, slug, error: errorMessage });
+      logger.error("content.getList", { section, error: String(error) });
+      throw new Error(`Failed to get content list for section: ${section}`);
     }
-
-    return this.getItemByVersion(section, slug, latestVersion);
   }
 
-  static async getItemByVersion(section: string, slug: string, version: number): Promise<ContentItem> {
-    const filePath = this.getItemPath(section, slug, version);
-    let raw: string;
-    if (USE_S3) {
-      try {
-        raw = await s3Get(filePath);
-      } catch {
-        // Fallback to local content if S3 object missing
-        raw = await fs.readFile(path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v${version}.json`), "utf-8");
+  /**
+   * Get latest version of a content item
+   */
+  static async getItem(section: string, slug: string): Promise<ContentItem> {
+    try {
+      const sectionEnum = toSectionEnum(section);
+
+      const content = await prisma.content.findUnique({
+        where: {
+          // eslint-disable-next-line camelcase
+          section_slug: {
+            section: sectionEnum,
+            slug: slug
+          }
+        },
+        include: {
+          versions: true
+        }
+      });
+
+      if (!content || content.versions.length === 0) {
+        throw new Error(`Content not found: ${section}/${slug}`);
       }
-    } else {
-      raw = await fs.readFile(filePath, "utf-8");
+
+      // Get the current version explicitly
+      const latestVersion = content.versions.find((v) => v.version === content.currentVersion);
+
+      if (!latestVersion) {
+        // Fallback: get the highest version number if currentVersion is inconsistent
+        const sortedVersions = content.versions.sort((a, b) => b.version - a.version);
+        const fallbackVersion = sortedVersions[0];
+        logger.warn("content.getItem", {
+          section,
+          slug,
+          currentVersion: content.currentVersion,
+          fallbackVersion: fallbackVersion.version,
+          message: "currentVersion mismatch, using highest version"
+        });
+        return this.buildContentItem(content, fallbackVersion);
+      }
+
+      return this.buildContentItem(content, latestVersion);
+    } catch (error) {
+      logger.error("content.getItem", { section, slug, error: String(error) });
+      throw error;
     }
-    const parsed: unknown = JSON.parse(raw);
-    return ContentItemSchema.parse(parsed);
   }
 
+  /**
+   * Helper method to build ContentItem response
+   */
+  private static buildContentItem(
+    content: {
+      id: string;
+      section: ContentSection;
+      slug: string;
+      category: string | null;
+      updatedAt: Date;
+    },
+    version: {
+      title: string;
+      subtitle: string | null;
+      parentPage: string | null;
+      cardTitle: string | null;
+      heroImage: string | null;
+      seoTitle: string | null;
+      seoDescription: string | null;
+      seoKeywords: string[];
+      blocks: Prisma.JsonValue;
+      version: number;
+    }
+  ): ContentItem {
+    const sectionString = fromSectionEnum(content.section) as "explorer" | "academy" | "explorer-details" | "academy-details";
+    return {
+      id: content.id,
+      section: sectionString,
+      slug: content.slug,
+      title: version.title,
+      subtitle: version.subtitle || undefined,
+      parentPage: version.parentPage || undefined,
+      cardTitle: version.cardTitle || undefined,
+      heroImage: version.heroImage || undefined,
+      category: content.category || undefined,
+      seo:
+        version.seoTitle || version.seoDescription || version.seoKeywords.length > 0
+          ? {
+              title: version.seoTitle || undefined,
+              description: version.seoDescription || undefined,
+              keywords: version.seoKeywords.length > 0 ? version.seoKeywords : undefined
+            }
+          : undefined,
+      blocks: version.blocks as Prisma.JsonArray,
+      version: version.version,
+      updatedAt: content.updatedAt.toISOString()
+    };
+  }
+
+  /**
+   * Get a specific version of a content item
+   */
+  static async getItemByVersion(section: string, slug: string, version: number): Promise<ContentItem> {
+    try {
+      const sectionEnum = toSectionEnum(section);
+
+      const content = await prisma.content.findUnique({
+        where: {
+          // eslint-disable-next-line camelcase
+          section_slug: {
+            section: sectionEnum,
+            slug: slug
+          }
+        },
+        include: {
+          versions: {
+            where: {
+              version: version
+            }
+          }
+        }
+      });
+
+      if (!content || content.versions.length === 0) {
+        throw new Error(`Content version not found: ${section}/${slug}/v${version}`);
+      }
+
+      const contentVersion = content.versions[0];
+      return this.buildContentItem(content, contentVersion);
+    } catch (error) {
+      logger.error("content.getItemByVersion", { section, slug, version, error: String(error) });
+      throw error;
+    }
+  }
+
+  /**
+   * Get available versions for a content item
+   */
   static async getAvailableVersions(section: string, slug: string): Promise<number[]> {
-    let baseDir: string;
+    try {
+      const sectionEnum = toSectionEnum(section);
 
-    // Special handling for academy-details section
-    if (section === "academy-details") {
-      // Look up the category from the index file
-      const indexData = (await this.getList(section)) as { items: Array<{ slug: string; category: string; path: string }> };
-      const item = indexData.items.find((item) => item.slug === slug);
+      const content = await prisma.content.findUnique({
+        where: {
+          // eslint-disable-next-line camelcase
+          section_slug: {
+            section: sectionEnum,
+            slug: slug
+          }
+        },
+        include: {
+          versions: {
+            select: {
+              version: true
+            },
+            orderBy: {
+              version: "asc"
+            }
+          }
+        }
+      });
 
-      if (!item) {
-        logger.warn("content.getAvailableVersions", { section, slug, error: "Item not found in index" });
+      if (!content) {
+        logger.warn("content.getAvailableVersions", { section, slug, error: "Content not found" });
         return [];
       }
 
-      const category = item.category;
-      baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, category, slug);
-    } else {
-      baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug);
-    }
-
-    try {
-      const files = await fs.readdir(baseDir);
-      const versionFiles = files
-        .filter((file) => file.startsWith("v") && file.endsWith(".json"))
-        .map((file) => {
-          const version = parseInt(file.slice(1, -5)); // Remove 'v' and '.json'
-          return isNaN(version) ? 0 : version;
-        })
-        .filter((version) => version > 0)
-        .sort((a, b) => a - b); // Sort versions in ascending order
-
-      return versionFiles;
+      return content.versions.map((v) => v.version);
     } catch (error) {
       logger.warn("content.getAvailableVersions", { section, slug, error: String(error) });
       return [];
     }
   }
 
+  /**
+   * Create or update a content item (creates new version)
+   */
   static async upsertItem(section: string, slug: string, payload: unknown): Promise<ContentItem> {
-    const parsed = ContentItemSchema.parse(payload);
-    if (parsed.section !== section || parsed.slug !== slug) {
-      throw new Error("section/slug mismatch between URL and body");
-    }
-    const version = parsed.version ?? 1;
-    const toWrite: ContentItem = { ...parsed, updatedAt: new Date().toISOString() };
-
-    // Determine the actual file path based on section
-    let actualSlug = slug;
-    let localFilePath: string;
-    let s3Key: string;
-
-    if (section === "academy-details") {
-      // For academy-details, we need to get the category from the payload or index
-      const category = parsed.category;
-      if (!category) {
-        throw new Error("Category is required for academy-details items");
-      }
-      actualSlug = `${category}/${slug}`;
-      localFilePath = path.join(DEFAULT_BASE, DEFAULT_ENV, section, category, slug, `v${version}.json`);
-      s3Key = `${S3_PREFIX}/${section}/${actualSlug}/v${version}.json`;
-    } else {
-      localFilePath = path.join(DEFAULT_BASE, DEFAULT_ENV, section, slug, `v${version}.json`);
-      s3Key = `${S3_PREFIX}/${section}/${slug}/v${version}.json`;
-    }
-
-    const body = JSON.stringify(toWrite, null, 2);
-    // Always attempt to write to S3 when configured
-    if (USE_S3) {
-      await s3Put(s3Key, body);
-      logger.info("content.upsert.s3", { key: s3Key });
-    }
-    // Always write to local as source-of-truth fallback
-    const dir = path.dirname(localFilePath);
-    mkdirSync(dir, { recursive: true });
-    await fs.writeFile(localFilePath, body, "utf-8");
-    logger.info("content.upsert.local", { path: localFilePath });
-    // Ensure index entry exists/updated so lists reflect new content
-    await this.ensureIndexEntry(section, slug, toWrite.title, version, parsed.category);
-    return toWrite;
-  }
-
-  private static async readIndex(section: string): Promise<{ items: { slug: string; title?: string; path: string; category?: string }[] }> {
-    const indexPath = this.getIndexPath(section);
-    let raw: string | null = null;
-    if (USE_S3) {
-      try {
-        raw = await s3Get(indexPath);
-      } catch {
-        // ignore and fall back to local
-      }
-    }
-    if (!raw) {
-      try {
-        raw = await fs.readFile(indexPath, "utf-8");
-      } catch {
-        // Initialize empty index if not found locally
-        return { items: [] };
-      }
-    }
     try {
-      const IndexSchema = z.object({
-        items: z.array(z.object({ slug: z.string(), title: z.string().optional(), path: z.string(), category: z.string().optional() })).default([])
+      const parsed = ContentItemSchema.parse(payload);
+
+      if (parsed.section !== section || parsed.slug !== slug) {
+        throw new Error("section/slug mismatch between URL and body");
+      }
+
+      const sectionEnum = toSectionEnum(section);
+      const now = new Date();
+
+      // Check if content already exists
+      const existing = await prisma.content.findUnique({
+        where: {
+          // eslint-disable-next-line camelcase
+          section_slug: {
+            section: sectionEnum,
+            slug: slug
+          }
+        },
+        include: {
+          versions: {
+            orderBy: {
+              version: "desc"
+            },
+            take: 1
+          }
+        }
       });
-      const json: unknown = JSON.parse(raw);
-      const parsed = IndexSchema.safeParse(json);
-      if (parsed.success) {
-        return { items: parsed.data.items };
-      }
-      return { items: [] };
-    } catch {
-      return { items: [] };
-    }
-  }
 
-  private static async writeIndex(section: string, index: { items: { slug: string; title?: string; path: string; category?: string }[] }) {
-    const body = JSON.stringify(index, null, 2);
-    const indexLocalPath = this.getIndexPath(section);
-    // Write to S3 if configured
-    if (USE_S3) {
-      const indexS3Key = `${S3_PREFIX}/index/${section}.json`;
-      await s3Put(indexS3Key, body);
-      logger.info("index.write.s3", { key: indexS3Key });
-    }
-    // Always write locally
-    const localDir = path.dirname(indexLocalPath);
-    mkdirSync(localDir, { recursive: true });
-    await fs.writeFile(indexLocalPath, body, "utf-8");
-    logger.info("index.write.local", { path: indexLocalPath });
-  }
+      let content;
+      let newVersion: number;
 
-  private static async ensureIndexEntry(section: string, slug: string, title: string, version: number, category?: string) {
-    logger.info("index.ensure.start", { section, slug, title, version, category });
-    const index = await this.readIndex(section);
+      if (existing) {
+        // Update existing content and create new version
+        newVersion = existing.currentVersion + 1;
 
-    let relPath: string;
-    let entry: { slug: string; title: string; path: string; category?: string };
-
-    if (section === "academy-details") {
-      // For academy-details, we need the category from the payload
-      if (!category) {
-        throw new Error("Category is required for academy-details index entries");
-      }
-      relPath = `${DEFAULT_ENV}/${section}/${category}/${slug}/v${version}.json`;
-      entry = { slug, title, path: relPath, category };
-    } else {
-      relPath = `${DEFAULT_ENV}/${section}/${slug}/v${version}.json`;
-      entry = { slug, title, path: relPath };
-    }
-
-    const existingIdx = index.items.findIndex((it) => it.slug === slug);
-    if (existingIdx >= 0) {
-      index.items[existingIdx] = entry;
-    } else {
-      index.items.push(entry);
-    }
-    await this.writeIndex(section, index);
-    logger.info("index.ensure.done", { section, count: index.items.length });
-  }
-
-  static async reindex(section?: "explorer" | "academy" | "academy-details"): Promise<void> {
-    const sections: ("explorer" | "academy" | "academy-details")[] = section ? [section] : ["explorer", "academy", "academy-details"];
-    for (const sec of sections) {
-      if (sec === "academy-details") {
-        // Special handling for academy-details with nested directory structure
-        const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, sec);
-        const items: { slug: string; title?: string; path: string; category: string }[] = [];
-
-        try {
-          const categoryDirs = await fs.readdir(baseDir, { withFileTypes: true });
-          const categories = categoryDirs.filter((e) => e.isDirectory()).map((e) => e.name);
-
-          for (const category of categories) {
-            const categoryDir = path.join(baseDir, category);
-            try {
-              const itemDirs = await fs.readdir(categoryDir, { withFileTypes: true });
-              const itemsInCategory = itemDirs.filter((e) => e.isDirectory()).map((e) => e.name);
-
-              for (const itemSlug of itemsInCategory) {
-                const p = path.join(categoryDir, itemSlug, `v1.json`);
-                try {
-                  const raw = await fs.readFile(p, "utf-8");
-                  const parsed = ContentItemSchema.safeParse(JSON.parse(raw));
-                  items.push({
-                    slug: itemSlug,
-                    title: parsed.success ? parsed.data.title : itemSlug,
-                    path: `${DEFAULT_ENV}/${sec}/${category}/${itemSlug}/v1.json`,
-                    category: category
-                  });
-                } catch {
-                  // skip
-                }
+        content = await prisma.content.update({
+          where: { id: existing.id },
+          data: {
+            category: parsed.category,
+            currentVersion: newVersion,
+            updatedAt: now,
+            versions: {
+              create: {
+                version: newVersion,
+                title: parsed.title,
+                subtitle: parsed.subtitle,
+                parentPage: parsed.parentPage,
+                cardTitle: parsed.cardTitle,
+                heroImage: parsed.heroImage,
+                seoTitle: parsed.seo?.title,
+                seoDescription: parsed.seo?.description,
+                seoKeywords: parsed.seo?.keywords || [],
+                blocks: parsed.blocks as Prisma.JsonArray,
+                createdAt: now
               }
-            } catch {
-              // skip category
+            }
+          },
+          include: {
+            versions: {
+              where: {
+                version: newVersion
+              }
             }
           }
-        } catch {
-          // skip if base directory doesn't exist
-        }
-
-        await this.writeIndex(sec, { items });
+        });
       } else {
-        // Regular handling for other sections
-        const baseDir = path.join(DEFAULT_BASE, DEFAULT_ENV, sec);
-        let slugs: string[] = [];
-        try {
-          const entries = await fs.readdir(baseDir, { withFileTypes: true });
-          slugs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-        } catch {
-          slugs = [];
-        }
-        const items: { slug: string; title?: string; path: string }[] = [];
-        for (const s of slugs) {
-          const p = path.join(baseDir, s, `v1.json`);
-          try {
-            const raw = await fs.readFile(p, "utf-8");
-            const parsed = ContentItemSchema.safeParse(JSON.parse(raw));
-            items.push({ slug: s, title: parsed.success ? parsed.data.title : s, path: `${DEFAULT_ENV}/${sec}/${s}/v1.json` });
-          } catch {
-            // skip
+        // Create new content with initial version
+        newVersion = 1;
+
+        content = await prisma.content.create({
+          data: {
+            section: sectionEnum,
+            slug: slug,
+            category: parsed.category,
+            currentVersion: 1,
+            isPublished: true,
+            versions: {
+              create: {
+                version: 1,
+                title: parsed.title,
+                subtitle: parsed.subtitle,
+                parentPage: parsed.parentPage,
+                cardTitle: parsed.cardTitle,
+                heroImage: parsed.heroImage,
+                seoTitle: parsed.seo?.title,
+                seoDescription: parsed.seo?.description,
+                seoKeywords: parsed.seo?.keywords || [],
+                blocks: parsed.blocks as Prisma.JsonArray,
+                createdAt: now
+              }
+            }
+          },
+          include: {
+            versions: {
+              where: {
+                version: 1
+              }
+            }
           }
-        }
-        await this.writeIndex(sec, { items });
+        });
       }
+
+      logger.info("content.upsert", {
+        section,
+        slug,
+        version: newVersion,
+        contentId: content.id
+      });
+
+      // Return the content item using the helper
+      return this.buildContentItem(content, content.versions[0]);
+    } catch (error) {
+      logger.error("content.upsertItem", { section, slug, error: String(error) });
+      throw error;
     }
   }
 }
