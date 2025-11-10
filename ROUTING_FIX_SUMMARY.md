@@ -13,7 +13,6 @@ Since Express matches routes in order and the vendorOrderRouter was mounted at `
 ### Changes Made
 
 1. **`src/routers/defaultRouter.ts`** (Line 36):
-
    - **Before**: `defaultRouter.use("/", vendorOrderRouter);`
    - **After**: `defaultRouter.use("/vendor/orders", vendorOrderRouter);`
    - Now the router is mounted at a specific path instead of root, preventing it from catching login requests

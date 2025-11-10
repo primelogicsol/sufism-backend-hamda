@@ -111,7 +111,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
 ### **1. Product CRUD Operations (All Categories)**
 
 - **Decoration Products:**
-
   - `POST /v1/decoration` - Create decoration product
   - `GET /v1/decoration` - Get all decorations
   - `GET /v1/decoration/:id` - Get decoration by ID
@@ -119,7 +118,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
   - `DELETE /v1/decoration/:id` - Delete decoration
 
 - **Fashion Products:**
-
   - `POST /v1/fashion` - Create fashion product
   - `GET /v1/fashion` - Get all fashion items
   - `GET /v1/fashion/:id` - Get fashion by ID
@@ -127,7 +125,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
   - `DELETE /v1/fashion/:id` - Delete fashion
 
 - **Meditation Products:**
-
   - `POST /v1/meditation` - Create meditation product
   - `GET /v1/meditation` - Get all meditation items
   - `GET /v1/meditation/:id` - Get meditation by ID
@@ -135,7 +132,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
   - `DELETE /v1/meditation/:id` - Delete meditation
 
 - **Accessories:**
-
   - `POST /v1/accessories` - Create accessory
   - `GET /v1/accessories` - Get all accessories
   - `GET /v1/accessories/:id` - Get accessory by ID
@@ -143,7 +139,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
   - `DELETE /v1/accessories/:id` - Delete accessory
 
 - **Digital Books:**
-
   - `POST /v1/digital-books` - Create digital book
   - `GET /v1/digital-books` - Get all digital books
   - `GET /v1/digital-books/:id` - Get digital book by ID
@@ -151,7 +146,6 @@ Based on thorough analysis of the codebase, here's the complete categorization o
   - `DELETE /v1/digital-books/:id` - Delete digital book
 
 - **Home & Living:**
-
   - `POST /v1/living` - Create home & living product
   - `GET /v1/living` - Get all home & living items
   - `GET /v1/living/:id` - Get home & living by ID

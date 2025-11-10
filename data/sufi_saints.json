@@ -1,0 +1,927 @@
+{
+  "collection": "Kashmir Sufi Legacy",
+  "count": 92,
+  "fields": ["name", "dates_raw", "birth_year", "death_year", "period", "century", "summary", "tags"],
+  "data": [
+    {
+      "name": "Lal Ded",
+      "dates_raw": "c. 1320-1392",
+      "birth_year": 1320,
+      "death_year": 1392,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Female mystic poet whose \"Vakhs\" established foundational principles for Kashmiri Sufism, bridging Hindu Shaivite traditions with Islamic mysticism.",
+      "tags": ["Cross-Traditional Spirituality", "Female Leadership", "Mysticism", "Poetry"]
+    },
+    {
+      "name": "Mir Sayyid Ali Hamadani",
+      "dates_raw": "1314-1384",
+      "birth_year": 1314,
+      "death_year": 1384,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Persian Sufi master known as \"Shah-e-Hamadan\" who introduced formal Kubrawi Sufi practices to Kashmir and established an extensive network of khanqahs.",
+      "tags": ["Institutional Development", "Kubrawi Order"]
+    },
+    {
+      "name": "Nund Rishi",
+      "dates_raw": "1377-1440",
+      "birth_year": 1377,
+      "death_year": 1440,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Indigenous Kashmiri mystic who founded the distinctive Rishi order, emphasizing asceticism, vegetarianism, and environmental consciousness.",
+      "tags": ["Asceticism", "Environmental Spirituality", "Mysticism", "Rishi Tradition"]
+    },
+    {
+      "name": "Sheikh Ahmad Renzu",
+      "dates_raw": "c. 1360-1430",
+      "birth_year": 1360,
+      "death_year": 1430,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Early spiritual reformer in Srinagar who emphasized humility and remembrance (zikr) as central spiritual practices.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Mir Mohammad Hamadani",
+      "dates_raw": "1372-1450",
+      "birth_year": 1372,
+      "death_year": 1450,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Son of Shah-e-Hamadan who reinforced Persian Sufi practices while adapting them to local Kashmiri contexts.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Zain-ud-Din Wali",
+      "dates_raw": "c. 1350-1420",
+      "birth_year": 1350,
+      "death_year": 1420,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Prominent disciple of Nund Rishi who established the Rishi-Sufi ethos in Ashmuqam region, developing practices that harmonized Islamic principles with indigenous spiritual techniques.",
+      "tags": ["Rishi Tradition"]
+    },
+    {
+      "name": "Baba Bamuddin Reshi",
+      "dates_raw": "c. 1340-1410",
+      "birth_year": 1340,
+      "death_year": 1410,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Mystical practitioner in the Baramulla-Gulmarg region known for promoting harmony and simplicity as spiritual virtues.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Sayyida Bibi",
+      "dates_raw": "c. 1335-1405",
+      "birth_year": 1335,
+      "death_year": 1405,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Female disciple of Mir Sayyid Ali Hamadani who established women's mystical circles in Srinagar, creating spaces for female spiritual development.",
+      "tags": ["Female Leadership", "Mysticism"]
+    },
+    {
+      "name": "Khwaja Hassan Qalandar",
+      "dates_raw": "c. 1325-1395",
+      "birth_year": 1325,
+      "death_year": 1395,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Wandering dervish who introduced ecstatic Qalandari practices to Kashmir, representing an alternative to more structured Sufi approaches.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Bam Rishi",
+      "dates_raw": "c. 1330-1400",
+      "birth_year": 1330,
+      "death_year": 1400,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Ascetic who established a hermitage in the mountains of north Kashmir, emphasizing solitary contemplation and communion with nature.",
+      "tags": ["Asceticism"]
+    },
+    {
+      "name": "Sheikh Bahauddin Ganjbaksh",
+      "dates_raw": "c. 1345-1415",
+      "birth_year": 1345,
+      "death_year": 1415,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Introduced spiritual practices focused on generosity and charitable giving as paths to divine realization.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Sayyid Mahmud Balkhi",
+      "dates_raw": "c. 1335-1410",
+      "birth_year": 1335,
+      "death_year": 1410,
+      "period": "The Formative Period",
+      "century": "14th Century",
+      "summary": "Persian scholar-mystic who settled in Kashmir, bringing substantial collections of Sufi texts that formed the basis for early Kashmiri Sufi libraries.",
+      "tags": ["Mysticism", "Scholarship"]
+    },
+    {
+      "name": "Sheikh Hamza Makhdoom",
+      "dates_raw": "1420-1490",
+      "birth_year": 1420,
+      "death_year": 1490,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Known as \"Sultan-ul-Arifeen,\" he systematized Sufi practices in Kashmir and established formal initiation procedures.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Dawood Khaki",
+      "dates_raw": "1430-1500",
+      "birth_year": 1430,
+      "death_year": 1500,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Principal disciple of Hamza Makhdoom and author of \"Vird-ul-Muridin,\" which codified daily spiritual practices for disciples.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Nasib-ud-Din Ghazi",
+      "dates_raw": "1440-1510",
+      "birth_year": 1440,
+      "death_year": 1510,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Renowned for articulating the doctrine of interior illumination through spiritual practice.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Sheikh Ali Balkhi",
+      "dates_raw": "1470-1540",
+      "birth_year": 1470,
+      "death_year": 1540,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Established contemplative practices in Ganderbal region, emphasizing service to the poor as spiritual discipline.",
+      "tags": ["Service & Charity"]
+    },
+    {
+      "name": "Baba Shukur-ud-Din",
+      "dates_raw": "c. 1425-1495",
+      "birth_year": 1425,
+      "death_year": 1495,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Practiced austere spirituality in Watlab, Sopore, developing rigorous methodologies for self-discipline.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Saha Reshi",
+      "dates_raw": "c. 1450-1520",
+      "birth_year": 1450,
+      "death_year": 1520,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Rishi-Sufi practitioner in Anantnag who synthesized elements of yogic retreat with Islamic contemplative practices.",
+      "tags": ["Rishi Tradition"]
+    },
+    {
+      "name": "Ahmad Batwari",
+      "dates_raw": "c. 1460-1530",
+      "birth_year": 1460,
+      "death_year": 1530,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Mystic from Batwara, Srinagar who developed accessible teachings that spread Islam through Sufi values rather than doctrinal instruction.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Sayyida Daya Bibi",
+      "dates_raw": "c. 1435-1505",
+      "birth_year": 1435,
+      "death_year": 1505,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Female mystic who established hospices for spiritual seekers, emphasizing compassionate service as mystical practice.",
+      "tags": ["Female Leadership", "Mysticism", "Service & Charity"]
+    },
+    {
+      "name": "Khwaja Ishaq Khatlani",
+      "dates_raw": "c. 1440-1515",
+      "birth_year": 1440,
+      "death_year": 1515,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Introduced Central Asian Sufi practices to Kashmir, creating cultural bridges between different regional expressions of Sufism.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Mir Shamsuddin Iraqi",
+      "dates_raw": "c. 1440-1505",
+      "birth_year": 1440,
+      "death_year": 1505,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Promoted Nurbakhshi Sufi order in Kashmir, introducing alternative lineages and practices that enriched the region's spiritual diversity.",
+      "tags": ["Nurbakhshi Order"]
+    },
+    {
+      "name": "Baba Hyder Tulmuli",
+      "dates_raw": "c. 1445-1515",
+      "birth_year": 1445,
+      "death_year": 1515,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Developed distinctive dream interpretation methodologies as tools for spiritual guidance and psychological insight.",
+      "tags": ["Oneirology", "Spiritual Psychology"]
+    },
+    {
+      "name": "Sheikh Bahauddin Gunj Ilm",
+      "dates_raw": "c. 1450-1525",
+      "birth_year": 1450,
+      "death_year": 1525,
+      "period": "Institutional Consolidation",
+      "century": "15th Century",
+      "summary": "Scholar-mystic who harmonized intellectual knowledge with spiritual practice, advocating education as prerequisite for higher mystical states.",
+      "tags": ["Education", "Mysticism", "Scholarship"]
+    },
+    {
+      "name": "Syed Yaqoob Sarfi",
+      "dates_raw": "1520-1590",
+      "birth_year": 1520,
+      "death_year": 1590,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Scholar-poet who integrated juridical Islamic principles with mystical practice.",
+      "tags": ["Mysticism", "Poetry", "Scholarship"]
+    },
+    {
+      "name": "Baba Hyder Reshi",
+      "dates_raw": "1510-1580",
+      "birth_year": 1510,
+      "death_year": 1580,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Known as \"Sultan-ul-Mashaikh,\" he developed spiritual healing practices that integrated physical and spiritual well-being.",
+      "tags": ["Healing"]
+    },
+    {
+      "name": "Haji Baqa",
+      "dates_raw": "1530-1600",
+      "birth_year": 1530,
+      "death_year": 1600,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Preserved and transmitted the teachings of Shah Hamadan's lineage, maintaining continuity with Persian Sufi traditions.",
+      "tags": ["Sufi Orders"]
+    },
+    {
+      "name": "Khwaja Habibullah Nowshehri",
+      "dates_raw": "1570-1640",
+      "birth_year": 1570,
+      "death_year": 1640,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Poet-mystic from Nowshera, Srinagar, who synthesized Arabic, Persian, and Kashmiri literary traditions.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Fatehullah Khan",
+      "dates_raw": "c. 1540-1610",
+      "birth_year": 1540,
+      "death_year": 1610,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Downtown Srinagar mystic renowned for social reform initiatives grounded in spiritual principles.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Baba Muhammad Usman",
+      "dates_raw": "c. 1550-1620",
+      "birth_year": 1550,
+      "death_year": 1620,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Developed approaches to communal service in Bandipora region, emphasizing mystical compassion in action.",
+      "tags": ["Mysticism", "Service & Charity"]
+    },
+    {
+      "name": "Baba Nematullah",
+      "dates_raw": "c. 1560-1630",
+      "birth_year": 1560,
+      "death_year": 1630,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Preacher of peaceful coexistence who developed methodologies for harmonizing different religious communities.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Sayyid Mubarak Andrabi",
+      "dates_raw": "c. 1525-1595",
+      "birth_year": 1525,
+      "death_year": 1595,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Established influential khanqah in Andrab area that became a center for both scholarly and experiential approaches to Sufism.",
+      "tags": ["Institutional Development", "Scholarship"]
+    },
+    {
+      "name": "Sheikh Abdul Qadir Sopori",
+      "dates_raw": "c. 1535-1605",
+      "birth_year": 1535,
+      "death_year": 1605,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Integrated meditative techniques with scriptural study, developing comprehensive spiritual pedagogies.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Mir Sayyid Ibrahim Samnani",
+      "dates_raw": "c. 1515-1585",
+      "birth_year": 1515,
+      "death_year": 1585,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Introduced refined approaches to spiritual psychology, mapping interior states and their relationship to ethical conduct.",
+      "tags": ["Spiritual Psychology"]
+    },
+    {
+      "name": "Khwaja Hassan Qari",
+      "dates_raw": "c. 1540-1610",
+      "birth_year": 1540,
+      "death_year": 1610,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Developed distinctive approaches to Quranic recitation as contemplative practice, emphasizing phonetic resonance as spiritual technology.",
+      "tags": ["Quranic Recitation"]
+    },
+    {
+      "name": "Baba Ali Najar",
+      "dates_raw": "c. 1555-1625",
+      "birth_year": 1555,
+      "death_year": 1625,
+      "period": "Period of Reform and Integration",
+      "century": "16th Century",
+      "summary": "Craftsman-mystic who articulated spiritual principles through metaphors of woodworking, developing accessible teachings for artisanal communities.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Rupa Bhawani",
+      "dates_raw": "1620-1690",
+      "birth_year": 1620,
+      "death_year": 1690,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Female mystic who articulated a sophisticated non-dualistic philosophy combining Shaiva metaphysics with Sufi concepts of divine love.",
+      "tags": ["Cross-Traditional Spirituality", "Female Leadership", "Mysticism", "Non-dual Philosophy", "Philosophy"]
+    },
+    {
+      "name": "Swami Kashkak",
+      "dates_raw": "1610-1680",
+      "birth_year": 1610,
+      "death_year": 1680,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Baramulla-born contemplative who developed silent mystical practices that minimized ritual in favor of interior spiritual states.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Baba Naseeb-ud-Din Ghazi",
+      "dates_raw": "1630-1700",
+      "birth_year": 1630,
+      "death_year": 1700,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Integrated scriptural study with intuitive mystical insight, balancing intellectual and experiential dimensions of spirituality.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Qazi Habibullah Khanyarvi",
+      "dates_raw": "1660-1730",
+      "birth_year": 1660,
+      "death_year": 1730,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Introduced Naqshbandi contemplative techniques to Kashmir, emphasizing silent dhikr and conscious breathing practices.",
+      "tags": ["Naqshbandi Order"]
+    },
+    {
+      "name": "Makhdoom Zain-ud-Din",
+      "dates_raw": "c. 1640-1710",
+      "birth_year": 1640,
+      "death_year": 1710,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "South Kashmir preacher who simplified zikr practices for wider accessibility while maintaining their transformative essence.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Syed Mohammad Madni",
+      "dates_raw": "c. 1650-1720",
+      "birth_year": 1650,
+      "death_year": 1720,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Scholar-mystic in Zadibal, Kashmir who developed intricate hermeneutical approaches to mystical texts.",
+      "tags": ["Mysticism", "Scholarship"]
+    },
+    {
+      "name": "Sheikh Ahmad Tarabali",
+      "dates_raw": "c. 1670-1740",
+      "birth_year": 1670,
+      "death_year": 1740,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Khanyar area practitioner known for quiet piety and innovative community service methodologies.",
+      "tags": ["Service & Charity"]
+    },
+    {
+      "name": "Khwaja Abdul Razaq Qadiri",
+      "dates_raw": "c. 1625-1695",
+      "birth_year": 1625,
+      "death_year": 1695,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Introduced refined approaches to the Qadiri Sufi order, emphasizing its distinctive spiritual techniques.",
+      "tags": ["Qadiri Order"]
+    },
+    {
+      "name": "Bibi Jamal Sahiba",
+      "dates_raw": "c. 1630-1700",
+      "birth_year": 1630,
+      "death_year": 1700,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Female spiritual guide who established methodologies for women's spiritual development outside formal institutional structures.",
+      "tags": ["Female Leadership", "Institutional Development"]
+    },
+    {
+      "name": "Mulla Mohsin Fani",
+      "dates_raw": "c. 1615-1670",
+      "birth_year": 1615,
+      "death_year": 1670,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Intellectual mystic who authored comparative studies of different spiritual traditions within and beyond Islam.",
+      "tags": ["Cross-Traditional Spirituality", "Mysticism"]
+    },
+    {
+      "name": "Sheikh Payam-ud-Din Reshi",
+      "dates_raw": "c. 1635-1705",
+      "birth_year": 1635,
+      "death_year": 1705,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Developed ecological spiritual practices emphasizing reverence for natural world as path to divine realization.",
+      "tags": ["Environmental Spirituality"]
+    },
+    {
+      "name": "Sayyid Mirak Andrabi",
+      "dates_raw": "c. 1640-1710",
+      "birth_year": 1640,
+      "death_year": 1710,
+      "period": "Cross-Cultural Synthesis",
+      "century": "17th Century",
+      "summary": "Established integrative approaches to different Sufi lineages, seeking commonalities between diverse methodologies.",
+      "tags": ["Poetry"]
+    },
+    {
+      "name": "Khawaja Azam Dedmari",
+      "dates_raw": "1720-1790",
+      "birth_year": 1720,
+      "death_year": 1790,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Historian-mystic who authored \"Waqiat-e-Kashmir,\" documenting the historical development of Sufism in Kashmir.",
+      "tags": ["Mysticism"]
+    },
+    {
+      "name": "Shah Waliullah Kashmiri",
+      "dates_raw": "1760-1830",
+      "birth_year": 1760,
+      "death_year": 1830,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Integrated complex philosophical concepts into Kashmiri Sufism, establishing intellectual foundations for mystical experience.",
+      "tags": ["Mysticism", "Philosophy"]
+    },
+    {
+      "name": "Shah Anayat Renzu",
+      "dates_raw": "1740-1810",
+      "birth_year": 1740,
+      "death_year": 1810,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Combined scholarly erudition with mystical insight, bridging intellectual and experiential dimensions of spirituality.",
+      "tags": ["Mysticism", "Scholarship"]
+    },
+    {
+      "name": "Khawaja Abdullah Naqshbandi",
+      "dates_raw": "1730-1800",
+      "birth_year": 1730,
+      "death_year": 1800,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Refined Naqshbandi practices for educated elite disciples, articulating sophisticated contemplative methodologies.",
+      "tags": ["Naqshbandi Order"]
+    },
+    {
+      "name": "Sheikh Mohammad Murad Naqshbandi",
+      "dates_raw": "c. 1710-1780",
+      "birth_year": 1710,
+      "death_year": 1780,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Spread Naqshbandi thought throughout Kashmir, establishing networks of practitioners devoted to its methodical approach.",
+      "tags": ["Naqshbandi Order"]
+    },
+    {
+      "name": "Mohammad Yasin Shah Qadiri",
+      "dates_raw": "c. 1750-1820",
+      "birth_year": 1750,
+      "death_year": 1820,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Organized distinctive zikr gatherings in Zaldagar, Srinagar that harmonized vocal and silent elements of remembrance practice.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Abdul Rashid",
+      "dates_raw": "c. 1770-1840",
+      "birth_year": 1770,
+      "death_year": 1840,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Influenced South Kashmiri rural culture through accessible teachings that harmonized agricultural cycles with spiritual practice.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Bibi Sahrazad Sahiba",
+      "dates_raw": "c. 1730-1800",
+      "birth_year": 1730,
+      "death_year": 1800,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Female mystic who developed distinctive approaches to dream analysis as spiritual guidance methodology.",
+      "tags": ["Female Leadership", "Mysticism", "Oneirology"]
+    },
+    {
+      "name": "Mulla Talib Ghani",
+      "dates_raw": "c. 1725-1795",
+      "birth_year": 1725,
+      "death_year": 1795,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Poet-mystic who articulated complex theological concepts through sophisticated Persian verse compositions.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Sheikh Ahmad Sirhindi Mazhar",
+      "dates_raw": "c. 1745-1815",
+      "birth_year": 1745,
+      "death_year": 1815,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Integrated reformist approaches of the Mujaddidi Naqshbandi lineage with traditional Kashmiri spiritual practices.",
+      "tags": ["Naqshbandi Order"]
+    },
+    {
+      "name": "Khwaja Muhammad Amin Sufi",
+      "dates_raw": "c. 1755-1825",
+      "birth_year": 1755,
+      "death_year": 1825,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Developed systematic approaches to Sufi terminology, creating lexicons of spiritual states and stations.",
+      "tags": ["Terminology & Lexicons"]
+    },
+    {
+      "name": "Baba Nasir-ud-Din Ghazi",
+      "dates_raw": "c. 1765-1835",
+      "birth_year": 1765,
+      "death_year": 1835,
+      "period": "Intellectual Refinement",
+      "century": "18th Century",
+      "summary": "Established retreat methodologies that structured periods of seclusion (khalwat) for intense spiritual development.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Shamas Faqir",
+      "dates_raw": "1820-1890",
+      "birth_year": 1820,
+      "death_year": 1890,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Mystic poet from Srinagar whose verses explored divine union through intricate metaphorical systems.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Wahab Khar",
+      "dates_raw": "1830-1900",
+      "birth_year": 1830,
+      "death_year": 1900,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Pampore-born poet who developed sophisticated symbolic language for mystical states using imagery from everyday Kashmiri life.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Soch Kral",
+      "dates_raw": "1840-1910",
+      "birth_year": 1840,
+      "death_year": 1910,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Pulwama-born poet who emphasized ethical purification as prerequisite for mystical realization.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Rasul Mir",
+      "dates_raw": "1870-1940",
+      "birth_year": 1870,
+      "death_year": 1940,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Romantic poet from Dooru, Anantnag, whose love poetry employed mystical symbolic structures.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Ahad Bazaz",
+      "dates_raw": "c. 1850-1920",
+      "birth_year": 1850,
+      "death_year": 1920,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Downtown Srinagar healer-poet who integrated spiritual and physical healing methodologies through poetic expression.",
+      "tags": ["Healing", "Poetry"]
+    },
+    {
+      "name": "Swami Nand Lal Ji",
+      "dates_raw": "c. 1860-1930",
+      "birth_year": 1860,
+      "death_year": 1930,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Developed non-dual spiritual teachings that blended bhakti and mystical approaches through accessible vernacular poetry.",
+      "tags": ["Mysticism", "Non-dual Philosophy", "Poetry"]
+    },
+    {
+      "name": "Rahim Sahib Anz",
+      "dates_raw": "c. 1880-1950",
+      "birth_year": 1880,
+      "death_year": 1950,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Anantnag-based Rishi-Sufi saint who promoted inner silence through distinctive poetic forms.",
+      "tags": ["Inner Silence", "Poetry", "Rishi Tradition"]
+    },
+    {
+      "name": "Parand Shah",
+      "dates_raw": "c. 1835-1905",
+      "birth_year": 1835,
+      "death_year": 1905,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Developed metaphorical systems based on avian imagery, using birds as symbols for spiritual states and transformations.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Rahman Dar",
+      "dates_raw": "c. 1845-1915",
+      "birth_year": 1845,
+      "death_year": 1915,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Craftsman-poet who articulated spiritual principles through metaphors of weaving and textile production.",
+      "tags": ["Poetry"]
+    },
+    {
+      "name": "Nyama Saeb",
+      "dates_raw": "c. 1855-1925",
+      "birth_year": 1855,
+      "death_year": 1925,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Female poet who developed distinctive feminine imagery for spiritual states, creating alternative symbolic systems.",
+      "tags": ["Female Leadership", "Poetry"]
+    },
+    {
+      "name": "Khwaja Qalandar Shahmiri",
+      "dates_raw": "c. 1830-1900",
+      "birth_year": 1830,
+      "death_year": 1900,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Introduced ecstatic elements into Kashmiri mystical poetry, emphasizing divine intoxication (sukr) over sobriety (sahw).",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Lassa Kak",
+      "dates_raw": "c. 1865-1935",
+      "birth_year": 1865,
+      "death_year": 1935,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Developed poetic expressions of spiritual practice specifically related to agricultural communities and seasonal cycles.",
+      "tags": ["Poetry"]
+    },
+    {
+      "name": "Ahad Zargar",
+      "dates_raw": "1920-1990",
+      "birth_year": 1920,
+      "death_year": 1990,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Mystic poet from Nawakadal, Srinagar, who articulated traditional spiritual insights in forms responsive to modern conditions.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Samad Mir",
+      "dates_raw": "1930-2000",
+      "birth_year": 1930,
+      "death_year": 2000,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Narwara-born poet whose verses explored themes of divine love and existential longing in modern contexts.",
+      "tags": ["Poetry"]
+    },
+    {
+      "name": "Swami Lakshman Joo",
+      "dates_raw": "1907-1991",
+      "birth_year": 1907,
+      "death_year": 1991,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Though primarily associated with Kashmir Shaivism, his comparative approach established intellectual connections between Shaivite and Sufi metaphysical systems.",
+      "tags": ["Cross-Traditional Spirituality"]
+    },
+    {
+      "name": "Mian Bashir Ahmed Larvi",
+      "dates_raw": "1935-2021",
+      "birth_year": 1935,
+      "death_year": 2021,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Spiritual-social leader from Wangat, Ganderbal, who combined traditional Sufi teachings with engaged social activism.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Swami Govind Kaul",
+      "dates_raw": "c. 1940-2010",
+      "birth_year": 1940,
+      "death_year": 2010,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Mystic and Sanskrit scholar from Rainawari, Srinagar who developed comparative approaches to different mystical traditions.",
+      "tags": ["Cross-Traditional Spirituality", "Mysticism", "Scholarship"]
+    },
+    {
+      "name": "Reshi Peer",
+      "dates_raw": "c. 1950-2023",
+      "birth_year": 1950,
+      "death_year": 2023,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "North Kashmir contemporary saint with significant influence in rural communities through accessible spiritual teachings.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Baba Qasim Shah",
+      "dates_raw": "b. 1960",
+      "birth_year": 1960,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Contemporary practitioner from Budgam actively preserving oral Sufi traditions through documentation and educational initiatives.",
+      "tags": ["Education"]
+    },
+    {
+      "name": "Nyima Akhtar",
+      "dates_raw": "1931-2004",
+      "birth_year": 1931,
+      "death_year": 2004,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Female mystic poet who articulated women's spiritual experiences through distinctive poetic forms and imagery.",
+      "tags": ["Female Leadership", "Mysticism", "Poetry"]
+    },
+    {
+      "name": "Abdul Ahad Nazim",
+      "dates_raw": "1922-2005",
+      "birth_year": 1922,
+      "death_year": 2005,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Developed modernized approaches to traditional Sufi practices, adapting them to contemporary educational contexts.",
+      "tags": ["Education"]
+    },
+    {
+      "name": "Sheikh Ghulam Rasool Kanai",
+      "dates_raw": "1925-2015",
+      "birth_year": 1925,
+      "death_year": 2015,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Harmonized intellectual and experiential dimensions of Sufism through educational methodologies appropriate for modern contexts.",
+      "tags": ["Education"]
+    },
+    {
+      "name": "Master Habibullah",
+      "dates_raw": "1915-2002",
+      "birth_year": 1915,
+      "death_year": 2002,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Integrated Sufi principles into contemporary pedagogical approaches, developing spiritual education methodologies for youth.",
+      "tags": ["Education"]
+    },
+    {
+      "name": "Khwaja Hassan Khuihami",
+      "dates_raw": "1920-2003",
+      "birth_year": 1920,
+      "death_year": 2003,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Documented and preserved traditional Sufi practices, creating archives of oral traditions that might otherwise have been lost.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Rishi-Sufi Synthesis",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "The indigenous tradition established by Nund Rishi, with its emphasis on asceticism, vegetarianism, and environmental consciousness, created a uniquely Kashmiri expression of Islamic mysticism that persisted across centuries.",
+      "tags": ["Asceticism", "Environmental Spirituality", "Mysticism", "Rishi Tradition"]
+    },
+    {
+      "name": "Female Mystical Leadership",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "Despite patriarchal social structures, women like Lal Ded, Rupa Bhawani, and others maintained continuous mystical leadership, often pioneering cross-traditional approaches and developing distinctive methodologies for spiritual practice.",
+      "tags": ["Female Leadership", "Mysticism"]
+    },
+    {
+      "name": "Urban-Rural Dialectic",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "A consistent pattern of interaction between urban intellectual Sufism centered in Srinagar and more experiential, nature-oriented practices in rural Kashmir created dynamic exchanges that enriched both expressions.",
+      "tags": ["Sufism"]
+    },
+    {
+      "name": "Terminological Evolution",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "The gradual shift from indigenous terminology (like \"Rishi\") toward standardized Islamic vocabulary while maintaining distinctive regional practices demonstrates Kashmir's integration into broader Islamic intellectual frameworks while preserving its unique character.",
+      "tags": ["Rishi Tradition"]
+    },
+    {
+      "name": "Poetic Primacy",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "The consistent emphasis on poetic expression as primary vehicle for mystical articulation, with each century developing distinctive metaphorical systems, established poetry as Kashmir's characteristic mode of spiritual communication.",
+      "tags": ["Mysticism", "Poetry"]
+    },
+    {
+      "name": "Cross-Cultural Synthesis",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "From earliest Persian-Kashmiri exchanges through modern comparative approaches, Kashmiri Sufism continuously integrated diverse cultural and religious elements while maintaining coherent spiritual methodologies.",
+      "tags": ["Cross-Traditional Spirituality"]
+    },
+    {
+      "name": "Institutional Adaptation",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "The evolution from informal spiritual circles to established khanqahs to modern educational initiatives demonstrates continuous adaptation of institutional structures to changing social conditions.",
+      "tags": ["Education", "Institutional Development"]
+    },
+    {
+      "name": "Healing Traditions",
+      "dates_raw": null,
+      "birth_year": null,
+      "death_year": null,
+      "period": "Poetic Efflorescence",
+      "century": "19th Century",
+      "summary": "The persistent integration of spiritual and physical healing methodologies created distinctive therapeutic approaches that connected bodily and spiritual well-being.",
+      "tags": ["Healing"]
+    }
+  ]
+}

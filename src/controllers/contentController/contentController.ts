@@ -65,8 +65,6 @@ const bulkSave = asyncHandler(async (req: Request, res: Response) => {
     const result = await ContentService.upsertItem(parsed.section, parsed.slug, parsed);
     saved.push(result);
   }
-  // Ensure indexes contain entries for uploaded items
-  await ContentService.reindex();
   return httpResponse(req, res, 200, "saved", { count: saved.length });
 });
 
