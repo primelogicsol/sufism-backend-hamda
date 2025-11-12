@@ -11,16 +11,19 @@ The shipping labeling system provides end-to-end functionality for generating sh
 ### Components
 
 1. **USPS Service** (`src/services/usps.service.ts`)
+
    - Handles direct USPS API communication
    - Generates labels, calculates rates, validates addresses, tracks packages
    - Supports both production and test modes
 
 2. **Shipping Fulfillment Service** (`src/services/shippingFulfillment.service.ts`)
+
    - High-level orchestration layer
    - Manages shipment lifecycle
    - Coordinates between orders, vendors, and carriers
 
 3. **Shipping Fulfillment Controller** (`src/controllers/shippingFulfillmentController/shippingFulfillmentController.ts`)
+
    - HTTP endpoint handlers
    - Request validation and response formatting
 
@@ -73,16 +76,19 @@ When a customer places an order:
 **Process Flow:**
 
 1. **Order Validation**
+
    - Fetches order with user and items
    - Verifies order exists
    - Checks order status is ready for shipping
 
 2. **Vendor Identification**
+
    - Extracts `vendorId` from order items
    - Fetches vendor profile with shipping address
    - Validates vendor address is complete (address, city, state, zipCode)
 
 3. **Address Preparation**
+
    - **From Address** (Vendor):
      ```typescript
      {
@@ -105,6 +111,7 @@ When a customer places an order:
      ```
 
 4. **USPS Label Generation**
+
    - Calls `USPSService.generateLabel()` with:
      - From/to addresses
      - Weight (in ounces)
@@ -523,22 +530,27 @@ enum ShippingStatus {
 ## Best Practices
 
 1. **Always Validate Addresses**
+
    - Use address validation API before generating labels
    - Reduces failed deliveries and returns
 
 2. **Track Package Weight Accurately**
+
    - Accurate weight ensures correct shipping costs
    - Prevents carrier surcharges
 
 3. **Handle Label URLs Securely**
+
    - Label URLs contain sensitive shipping information
    - Implement proper access control (vendor can only access their orders)
 
 4. **Monitor Shipment Status**
+
    - Set up webhooks or polling for status updates
    - Update order status automatically when package is delivered
 
 5. **Error Recovery**
+
    - Log all label generation failures
    - Provide fallback options (manual label creation)
    - Notify vendors of generation failures
@@ -553,18 +565,22 @@ enum ShippingStatus {
 ## Future Enhancements
 
 1. **Multi-Carrier Support**
+
    - Currently USPS-focused, architecture supports multiple carriers
    - Add UPS, FedEx, DHL integrations
 
 2. **Automated Label Printing**
+
    - Integrate with thermal printers
    - Bulk label generation
 
 3. **Return Labels**
+
    - Generate return shipping labels automatically
    - Pre-printed return labels in shipments
 
 4. **Webhook Integration**
+
    - Real-time status updates from carriers
    - Automatic order status synchronization
 

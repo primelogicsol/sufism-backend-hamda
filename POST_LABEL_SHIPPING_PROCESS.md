@@ -551,11 +551,13 @@ After label generation, each status update creates an order history entry:
 ### Common Issues
 
 1. **Label Generated but Package Not Picked Up**
+
    - Check if label was printed correctly
    - Verify package was dropped off at USPS location
    - Contact USPS if tracking doesn't update within 24 hours
 
 2. **Status Not Updating**
+
    - Check if webhook is configured correctly
    - Manually update status using API endpoint
    - Verify tracking number is correct

@@ -99,6 +99,7 @@ Grouped by Vendor:
    ```
 
 2. **Find Matching Zone:**
+
    - Destination: US, CA, 90210
    - Zone matches: ✅ (country=US, state=CA, zipCode 90210 is in range 90000-96162)
 
@@ -144,6 +145,7 @@ Grouped by Vendor:
    ```
 
 2. **Find Matching Zone:**
+
    - Destination: US, CA, 90210
    - Zone matches: ✅ (country=US, state=CA, zipCode 90210 is in range 90001-96162)
 
@@ -347,18 +349,22 @@ Example:
 ## ✅ Current Implementation Strengths
 
 1. **✅ Automatic Vendor Detection**
+
    - System automatically groups products by vendor
    - Customer doesn't need to know vendor information
 
 2. **✅ Per-Vendor Zone Matching**
+
    - Each vendor's zones are checked independently
    - Supports different zone configurations per vendor
 
 3. **✅ Rate Aggregation**
+
    - Sums up shipping costs from all vendors
    - Takes maximum estimated delivery days
 
 4. **✅ Error Handling**
+
    - Clear errors if vendor lacks configuration
    - Identifies which vendors have issues
 
@@ -505,10 +511,12 @@ if (overlappingZones.length > 0) {
 ### High Priority 🔴
 
 1. **Fix Zone Matching Priority**
+
    - Sort zones by specificity (most specific first)
    - Prevents broad zones from matching before specific ones
 
 2. **Fix Free Shipping Threshold Logic**
+
    - Distinguish between weight-based and value-based thresholds
    - Implement proper ORDER_VALUE_BASED calculation
 
@@ -519,6 +527,7 @@ if (overlappingZones.length > 0) {
 ### Medium Priority 🟡
 
 4. **Add Vendor Breakdown to Response**
+
    - Show per-vendor shipping costs
    - Help customers understand shipping breakdown
 
@@ -529,6 +538,7 @@ if (overlappingZones.length > 0) {
 ### Low Priority 🟢
 
 6. **Cache Shipping Calculations**
+
    - Cache zone matches for same destination
    - Improve performance for repeat calculations
 
