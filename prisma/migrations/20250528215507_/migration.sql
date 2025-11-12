@@ -90,36 +90,101 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- AlterTable
-ALTER TABLE "donations" DROP COLUMN "donorType",
-ADD COLUMN     "donorType" "DONATION_TYPE" NOT NULL DEFAULT 'ONE_TIME';
+-- AlterTable (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'donations') THEN
+        -- Check if column exists before dropping
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'donations' AND column_name = 'donorType') THEN
+            ALTER TABLE "donations" DROP COLUMN "donorType";
+        END IF;
+        -- Add column if it doesn't exist
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'donations' AND column_name = 'donorType') THEN
+            ALTER TABLE "donations" ADD COLUMN "donorType" "DONATION_TYPE" NOT NULL DEFAULT 'ONE_TIME';
+        END IF;
+    END IF;
+END $$;
 
--- AlterTable
-ALTER TABLE "products" DROP COLUMN "image",
-DROP COLUMN "userId",
-ADD COLUMN     "deliveryTime" TEXT,
-ADD COLUMN     "discount" DOUBLE PRECISION DEFAULT 0,
-ADD COLUMN     "images" TEXT[],
-ADD COLUMN     "note" TEXT NOT NULL DEFAULT '',
-ADD COLUMN     "returnPolicy" TEXT,
-ADD COLUMN     "tags" TEXT[],
-DROP COLUMN "category",
-ADD COLUMN     "category" "CATEGORY_TYPE" NOT NULL DEFAULT 'JWELERY_ACCESSPORIES';
+-- AlterTable for products (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products') THEN
+        -- Drop columns if they exist
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'image') THEN
+            ALTER TABLE "products" DROP COLUMN "image";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'userId') THEN
+            ALTER TABLE "products" DROP COLUMN "userId";
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'category') THEN
+            ALTER TABLE "products" DROP COLUMN "category";
+        END IF;
+        
+        -- Add columns if they don't exist
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'deliveryTime') THEN
+            ALTER TABLE "products" ADD COLUMN "deliveryTime" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'discount') THEN
+            ALTER TABLE "products" ADD COLUMN "discount" DOUBLE PRECISION DEFAULT 0;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'images') THEN
+            ALTER TABLE "products" ADD COLUMN "images" TEXT[];
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'note') THEN
+            ALTER TABLE "products" ADD COLUMN "note" TEXT NOT NULL DEFAULT '';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'returnPolicy') THEN
+            ALTER TABLE "products" ADD COLUMN "returnPolicy" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'tags') THEN
+            ALTER TABLE "products" ADD COLUMN "tags" TEXT[];
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'category') THEN
+            ALTER TABLE "products" ADD COLUMN "category" "CATEGORY_TYPE" NOT NULL DEFAULT 'JWELERY_ACCESSPORIES';
+        END IF;
+    END IF;
+END $$;
 
--- AlterTable
-ALTER TABLE "reviews" DROP COLUMN "comment",
-ADD COLUMN     "review" TEXT NOT NULL,
-ADD COLUMN     "status" "STATUS_TYPE" NOT NULL DEFAULT 'PENDING';
+-- AlterTable for reviews (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'reviews') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reviews' AND column_name = 'comment') THEN
+            ALTER TABLE "reviews" DROP COLUMN "comment";
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reviews' AND column_name = 'review') THEN
+            ALTER TABLE "reviews" ADD COLUMN "review" TEXT NOT NULL DEFAULT '';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'reviews' AND column_name = 'status') THEN
+            ALTER TABLE "reviews" ADD COLUMN "status" "STATUS_TYPE" NOT NULL DEFAULT 'PENDING';
+        END IF;
+    END IF;
+END $$;
 
--- AlterTable
-ALTER TABLE "users" ADD COLUMN     "address" TEXT,
-ADD COLUMN     "city" TEXT,
-ADD COLUMN     "country" TEXT,
-ADD COLUMN     "lastName" TEXT NOT NULL DEFAULT '',
-ADD COLUMN     "phone" TEXT,
-ADD COLUMN     "state" TEXT,
-ADD COLUMN     "zipCode" TEXT,
-ALTER COLUMN "fullName" SET DEFAULT '';
+-- AlterTable for users (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'address') THEN
+            ALTER TABLE "users" ADD COLUMN "address" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'city') THEN
+            ALTER TABLE "users" ADD COLUMN "city" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'country') THEN
+            ALTER TABLE "users" ADD COLUMN "country" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'lastName') THEN
+            ALTER TABLE "users" ADD COLUMN "lastName" TEXT NOT NULL DEFAULT '';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'phone') THEN
+            ALTER TABLE "users" ADD COLUMN "phone" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'state') THEN
+            ALTER TABLE "users" ADD COLUMN "state" TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'zipCode') THEN
+            ALTER TABLE "users" ADD COLUMN "zipCode" TEXT;
+        END IF;
+        ALTER TABLE "users" ALTER COLUMN "fullName" SET DEFAULT '';
+    END IF;
+END $$;
 
 -- DropEnum (with existence check)
 DO $$ BEGIN
@@ -128,118 +193,215 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- CreateTable
-CREATE TABLE "conferences" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "institution" TEXT,
-    "abstract" TEXT,
-    "presentationType" "PRESENTATION_TYPE"[],
-    "topic" "CONFERENCE_TYPE",
-    "status" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- CreateTable (with existence checks)
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'conferences') THEN
+        CREATE TABLE "conferences" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "institution" TEXT,
+            "abstract" TEXT,
+            "presentationType" "PRESENTATION_TYPE"[],
+            "topic" "CONFERENCE_TYPE",
+            "status" INTEGER NOT NULL DEFAULT 0,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT "conferences_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
-    CONSTRAINT "conferences_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'carts') THEN
+        CREATE TABLE "carts" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "productId" INTEGER NOT NULL,
+            "qty" INTEGER NOT NULL DEFAULT 1,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
--- CreateTable
-CREATE TABLE "carts" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "productId" INTEGER NOT NULL,
-    "qty" INTEGER NOT NULL DEFAULT 1,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'wishlists') THEN
+        CREATE TABLE "wishlists" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "productId" INTEGER NOT NULL,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT "wishlists_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
-    CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookServices') THEN
+        CREATE TABLE "bookServices" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "subject" TEXT NOT NULL,
+            "date" TEXT NOT NULL,
+            "service" "SERVICE_TYPE" NOT NULL DEFAULT 'ASSIST_WITH_SPRITUAL_PROGRAM',
+            "comment" TEXT NOT NULL,
+            "status" INTEGER NOT NULL DEFAULT 0,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            CONSTRAINT "bookServices_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
--- CreateTable
-CREATE TABLE "wishlists" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "productId" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'interviews') THEN
+        CREATE TABLE "interviews" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "profession" TEXT NOT NULL,
+            "institution" TEXT NOT NULL,
+            "website" TEXT,
+            "areasOfImpact" "IMPACT_TYPE"[] DEFAULT ARRAY['SPRITUAL_LEADERSHIP']::"IMPACT_TYPE"[],
+            "spiritualOrientation" "SPRITUAL_TYPE",
+            "publicVoice" BOOLEAN NOT NULL,
+            "interviewIntent" "INTERVIEW_INTENT_TYPE"[],
+            "status" INTEGER NOT NULL DEFAULT 0,
+            "interviewTimeZone" "INTERVIEW_TIME_ZONE",
+            "scheduledAt" TIMESTAMP(3) NOT NULL,
+            "additionalNotes" TEXT,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            CONSTRAINT "interviews_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
-    CONSTRAINT "wishlists_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'contactUs') THEN
+        CREATE TABLE "contactUs" (
+            "id" SERIAL NOT NULL,
+            "userId" TEXT NOT NULL,
+            "message" TEXT NOT NULL,
+            "subject" TEXT NOT NULL,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            CONSTRAINT "contactUs_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
--- CreateTable
-CREATE TABLE "bookServices" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "subject" TEXT NOT NULL,
-    "date" TEXT NOT NULL,
-    "service" "SERVICE_TYPE" NOT NULL DEFAULT 'ASSIST_WITH_SPRITUAL_PROGRAM',
-    "comment" TEXT NOT NULL,
-    "status" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+-- CreateIndex (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'conferences') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'conferences' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'conferences_userId_key') THEN
+                CREATE UNIQUE INDEX "conferences_userId_key" ON "conferences"("userId");
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
-    CONSTRAINT "bookServices_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'wishlists') THEN
+        -- Check if both columns exist before creating the index
+        IF EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'wishlists' 
+            AND column_name = 'userId'
+        ) AND EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'wishlists' 
+            AND column_name = 'productId'
+        ) THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'wishlists_userId_productId_key') THEN
+                CREATE UNIQUE INDEX "wishlists_userId_productId_key" ON "wishlists"("userId", "productId");
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
--- CreateTable
-CREATE TABLE "interviews" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "profession" TEXT NOT NULL,
-    "institution" TEXT NOT NULL,
-    "website" TEXT,
-    "areasOfImpact" "IMPACT_TYPE"[] DEFAULT ARRAY['SPRITUAL_LEADERSHIP']::"IMPACT_TYPE"[],
-    "spiritualOrientation" "SPRITUAL_TYPE",
-    "publicVoice" BOOLEAN NOT NULL,
-    "interviewIntent" "INTERVIEW_INTENT_TYPE"[],
-    "status" INTEGER NOT NULL DEFAULT 0,
-    "interviewTimeZone" "INTERVIEW_TIME_ZONE",
-    "scheduledAt" TIMESTAMP(3) NOT NULL,
-    "additionalNotes" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookServices') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bookServices' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'bookServices_userId_key') THEN
+                CREATE UNIQUE INDEX "bookServices_userId_key" ON "bookServices"("userId");
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
-    CONSTRAINT "interviews_pkey" PRIMARY KEY ("id")
-);
+-- AddForeignKey (with existence checks)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'conferences') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'conferences' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'conferences_userId_fkey') THEN
+                ALTER TABLE "conferences" ADD CONSTRAINT "conferences_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
--- CreateTable
-CREATE TABLE "contactUs" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-    "subject" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'carts') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'carts' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'carts_userId_fkey') THEN
+                ALTER TABLE "carts" ADD CONSTRAINT "carts_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products') THEN
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'carts' AND column_name = 'productId') THEN
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'carts_productId_fkey') THEN
+                    ALTER TABLE "carts" ADD CONSTRAINT "carts_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+                END IF;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
-    CONSTRAINT "contactUs_pkey" PRIMARY KEY ("id")
-);
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'wishlists') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'wishlists' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wishlists_userId_fkey') THEN
+                ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'products') THEN
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'wishlists' AND column_name = 'productId') THEN
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'wishlists_productId_fkey') THEN
+                    ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+                END IF;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
--- CreateIndex
-CREATE UNIQUE INDEX "conferences_userId_key" ON "conferences"("userId");
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookServices') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'bookServices' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookServices_userId_fkey') THEN
+                ALTER TABLE "bookServices" ADD CONSTRAINT "bookServices_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
--- CreateIndex
-CREATE UNIQUE INDEX "wishlists_userId_productId_key" ON "wishlists"("userId", "productId");
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'interviews') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'interviews' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'interviews_userId_fkey') THEN
+                ALTER TABLE "interviews" ADD CONSTRAINT "interviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+    END IF;
+END $$;
 
--- CreateIndex
-CREATE UNIQUE INDEX "bookServices_userId_key" ON "bookServices"("userId");
-
--- AddForeignKey
-ALTER TABLE "conferences" ADD CONSTRAINT "conferences_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "carts" ADD CONSTRAINT "carts_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "carts" ADD CONSTRAINT "carts_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "wishlists" ADD CONSTRAINT "wishlists_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "bookServices" ADD CONSTRAINT "bookServices_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "interviews" ADD CONSTRAINT "interviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "contactUs" ADD CONSTRAINT "contactUs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'contactUs') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'contactUs' AND column_name = 'userId') THEN
+            IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'contactUs_userId_fkey') THEN
+                ALTER TABLE "contactUs" ADD CONSTRAINT "contactUs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+            END IF;
+        END IF;
+    END IF;
+END $$;
