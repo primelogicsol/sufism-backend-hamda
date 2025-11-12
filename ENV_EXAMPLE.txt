@@ -38,10 +38,32 @@ AWS_REGION=us-east-1
 AWS_BUCKET_NAME=your-s3-bucket-name
 
 # USPS Configuration
+# LabelV4 API (Domestic Shipping Only) - Uses USER_ID and PASSWORD
 USPS_USER_ID=your-usps-user-id
 USPS_PASSWORD=your-usps-password
 USPS_API_URL=https://secure.shippingapis.com/ShippingAPI.dll
 USPS_TRACKING_URL=https://secure.shippingapis.com/ShippingAPI.dll
 USPS_TEST_MODE=true
 USPS_ORIGIN_ZIP=10001
+
+# USPS Labels API v3 (OAuth 2.0) - For Both Domestic and International Shipping
+# Get credentials from: https://developers.usps.com/
+# 1. Create USPS Business Account at https://gateway.usps.com
+# 2. Register your app at https://developers.usps.com/
+# 3. Get Consumer Key (client_id) and Consumer Secret (client_secret)
+# 4. Requires eVS (Electronic Verification System) account for international labels
+# References:
+# - Domestic Labels: https://developers.usps.com/domesticlabelsv3
+# - International Labels: https://developers.usps.com/internationallabelsv3
+USPS_OAUTH_CLIENT_ID=your-consumer-key-from-developer-portal
+USPS_OAUTH_CLIENT_SECRET=your-consumer-secret-from-developer-portal
+# OAuth scope - Required for Labels API v3 access
+# Common scopes: 
+#   - "labels/v3" (for both domestic and international)
+#   - "labels/v3/domestic" (for domestic only)
+#   - "labels/v3/international" (for international only)
+# Check your app's API product scope in the Developer Portal
+USPS_OAUTH_SCOPE=labels/v3
+# Optional: Override API base URL (defaults to apis.usps.com or apis-tem.usps.com for testing)
+# USPS_API_BASE=https://apis.usps.com
 

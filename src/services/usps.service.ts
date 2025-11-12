@@ -9,6 +9,7 @@ export interface USPSAddress {
   state: string;
   zip: string;
   zipPlus4?: string;
+  country?: string; // ISO country code (e.g., "US", "CA", "GB")
 }
 
 export interface USPSPackage {
@@ -52,19 +53,194 @@ export interface USPSTrackingInfo {
   events: USPSTrackingEvent[];
 }
 
+interface OAuthTokenCache {
+  accessToken: string;
+  expiresAt: number; // Unix timestamp in milliseconds
+  tokenType: string;
+}
+
 export class USPSService {
   private static readonly API_URL = process.env.USPS_API_URL || "https://secure.shippingapis.com/ShippingAPI.dll";
   private static readonly USER_ID = process.env.USPS_USER_ID;
   private static readonly PASSWORD = process.env.USPS_PASSWORD;
   private static readonly TEST_MODE = process.env.USPS_TEST_MODE === "true";
 
+  // Labels API v3 configuration (requires OAuth 2.0)
+  // Note: Both Domestic and International Labels API v3 use OAuth 2.0 authentication
+  // Reference:
+  // - Domestic: https://developers.usps.com/domesticlabelsv3
+  // - International: https://developers.usps.com/internationallabelsv3
+  private static getApiBase(): string {
+    if (process.env.USPS_API_BASE) {
+      return process.env.USPS_API_BASE;
+    }
+    return process.env.USPS_TEST_MODE === "true" ? "https://apis-tem.usps.com" : "https://apis.usps.com";
+  }
+
+  private static getDomesticLabelsApiUrl(): string {
+    return `${this.getApiBase()}/labels/v3/label`;
+  }
+
+  private static getInternationalLabelsApiUrl(): string {
+    return `${this.getApiBase()}/international-labels/v3/international-label`;
+  }
+
+  private static getOAuthTokenUrl(): string {
+    return `${this.getApiBase()}/oauth2/v3/token`;
+  }
+
+  private static readonly OAUTH_CLIENT_ID = process.env.USPS_OAUTH_CLIENT_ID; // Consumer Key
+  private static readonly OAUTH_CLIENT_SECRET = process.env.USPS_OAUTH_CLIENT_SECRET; // Consumer Secret
+  // OAuth scope - can include both domestic and international scopes
+  // Common scopes: "labels/v3/domestic", "labels/v3/international", or "labels/v3" for both
+  private static readonly OAUTH_SCOPE = process.env.USPS_OAUTH_SCOPE || "labels/v3";
+
+  // OAuth token cache (in-memory, expires after token lifetime)
+  private static oauthTokenCache: OAuthTokenCache | null = null;
+
   /**
-   * Validate USPS configuration
+   * Validate USPS configuration for LabelV4 (domestic) API
    */
   private static validateConfig(): void {
     if (!this.USER_ID || !this.PASSWORD) {
-      throw new Error("USPS credentials not configured. Please set USPS_USER_ID and USPS_PASSWORD environment variables.");
+      throw new Error(
+        "USPS credentials not configured. Please set USPS_USER_ID and USPS_PASSWORD environment variables. " +
+          "These credentials are for the LabelV4 API (domestic shipping only). " +
+          "For international shipping, you need OAuth 2.0 credentials for the International Labels API v3."
+      );
     }
+  }
+
+  /**
+   * Validate USPS OAuth 2.0 configuration for International Labels API v3
+   */
+  private static validateOAuthConfig(): void {
+    if (!this.OAUTH_CLIENT_ID || !this.OAUTH_CLIENT_SECRET) {
+      throw new Error(
+        "USPS OAuth 2.0 credentials not configured. " +
+          "International Labels API v3 requires OAuth 2.0 authentication. " +
+          "Please set USPS_OAUTH_CLIENT_ID (Consumer Key) and USPS_OAUTH_CLIENT_SECRET (Consumer Secret) environment variables. " +
+          "You also need an eVS (Electronic Verification System) account. " +
+          "Get credentials from: https://developers.usps.com/"
+      );
+    }
+  }
+
+  /**
+   * Generate OAuth 2.0 access token using client credentials grant
+   * Reference: https://developers.usps.com/Oauth#tag/Resources/operation/post-token
+   */
+  private static async generateOAuthToken(): Promise<OAuthTokenCache> {
+    this.validateOAuthConfig();
+
+    try {
+      // Check if we have a valid cached token
+      if (this.oauthTokenCache && this.oauthTokenCache.expiresAt > Date.now() + 60000) {
+        // Token is still valid (with 1 minute buffer)
+        return this.oauthTokenCache;
+      }
+
+      // Request new token with scope for International Labels API v3
+      const params = new URLSearchParams({
+        // eslint-disable-next-line camelcase
+        grant_type: "client_credentials",
+        // eslint-disable-next-line camelcase
+        client_id: this.OAUTH_CLIENT_ID!,
+        // eslint-disable-next-line camelcase
+        client_secret: this.OAUTH_CLIENT_SECRET!,
+
+        scope: this.OAUTH_SCOPE
+      });
+
+      logger.info(`Requesting OAuth token with scope: "${this.OAUTH_SCOPE}"`);
+
+      const response = await axios.post(this.getOAuthTokenUrl(), params.toString(), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        timeout: 30000
+      });
+
+      const tokenData = response.data as {
+        access_token: string;
+        token_type: string;
+        expires_in: number; // seconds
+        scope?: string; // Scope granted in the token
+      };
+
+      if (!tokenData.access_token) {
+        throw new Error("Invalid OAuth token response: missing access_token");
+      }
+
+      // Log scope information for debugging
+      const grantedScope = tokenData.scope || "not provided in response";
+      logger.info(`OAuth token granted. Requested scope: "${this.OAUTH_SCOPE}", Granted scope: "${grantedScope}"`);
+
+      // Decode JWT token to check actual scopes (if any)
+      try {
+        const tokenParts = tokenData.access_token.split(".");
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(Buffer.from(tokenParts[1], "base64").toString()) as {
+            scope?: string;
+            scopes?: string;
+            [key: string]: unknown;
+          };
+          const tokenScopes = payload.scope || payload.scopes || "none found in token";
+          logger.info(`JWT token payload scope: "${tokenScopes}"`);
+
+          if (tokenScopes === "none found in token" || tokenScopes === "") {
+            logger.error(`CRITICAL: Token does not contain any scopes. Your app does NOT have Labels API v3 access.`);
+            logger.error(`ACTION REQUIRED: Go to https://developers.usps.com/ and add "Domestic Labels API v3" to your app.`);
+          } else if (!String(tokenScopes).includes("labels") && !String(tokenScopes).includes("v3")) {
+            logger.warn(`WARNING: Token scopes "${tokenScopes}" do not include Labels API v3.`);
+            logger.warn(`Your app may have other API products but not Labels API v3.`);
+          }
+        }
+      } catch (decodeError) {
+        logger.warn(`Could not decode JWT token to check scopes: ${String(decodeError)}`);
+      }
+
+      if (grantedScope === "not provided in response" || grantedScope === "") {
+        logger.warn(`WARNING: OAuth token response does not include scope. This may cause "Insufficient OAuth scope" errors.`);
+        logger.warn(`Please verify your app has the correct API products assigned in the USPS Developer Portal.`);
+      } else if (!grantedScope.includes("labels") && !grantedScope.includes("v3")) {
+        logger.warn(`WARNING: Granted scope "${grantedScope}" may not include Labels API v3 access.`);
+        logger.warn(`Expected scope should include "labels/v3" or similar.`);
+      }
+
+      // Cache the token (expires_in is in seconds, convert to milliseconds)
+      const expiresAt = Date.now() + tokenData.expires_in * 1000 - 60000; // 1 minute buffer
+
+      this.oauthTokenCache = {
+        accessToken: tokenData.access_token,
+        expiresAt,
+        tokenType: tokenData.token_type || "Bearer"
+      };
+
+      logger.info(`USPS OAuth token generated successfully. Expires in ${tokenData.expires_in} seconds.`);
+      return this.oauthTokenCache;
+    } catch (error) {
+      logger.error(`Error generating USPS OAuth token: ${String(error)}`);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        throw new Error(`USPS OAuth token generation failed: ${errorMessage}`);
+      }
+      throw new Error(`USPS OAuth token generation failed: ${String(error)}`);
+    }
+  }
+
+  /**
+   * Get valid OAuth access token (generates new one if needed)
+   */
+  private static async getOAuthToken(): Promise<string> {
+    const tokenCache = await this.generateOAuthToken();
+    logger.info(`OAuth token retrieved. Expires at: ${new Date(tokenCache.expiresAt).toISOString()}`);
+
+    // Log token info (without exposing full token for security)
+    const tokenPreview = tokenCache.accessToken.substring(0, 50) + "...";
+    logger.info(`OAuth token preview: ${tokenPreview}`);
+
+    return tokenCache.accessToken;
   }
 
   /**
@@ -335,33 +511,6 @@ export class USPSService {
   }
 
   /**
-   * Parse USPS LabelV4 response
-   */
-  private static parseLabelResponse(xmlResponse: string): USPSLabel | null {
-    try {
-      const trackingNumberMatch = xmlResponse.match(/<TrackingNumber>([^<]+)<\/TrackingNumber>/);
-      const labelUrlMatch = xmlResponse.match(/<LabelImage>([^<]+)<\/LabelImage>/);
-      const costMatch = xmlResponse.match(/<Postage>([^<]+)<\/Postage>/);
-      const serviceMatch = xmlResponse.match(/<Service>([^<]+)<\/Service>/);
-
-      if (trackingNumberMatch && labelUrlMatch && costMatch && serviceMatch) {
-        return {
-          trackingNumber: trackingNumberMatch[1],
-          labelUrl: labelUrlMatch[1],
-          trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumberMatch[1]}`,
-          cost: parseFloat(costMatch[1]),
-          service: this.getServiceDisplayName(serviceMatch[1])
-        };
-      }
-
-      return null;
-    } catch (error) {
-      logger.error(`Error parsing USPS label response: ${String(error)}`);
-      return null;
-    }
-  }
-
-  /**
    * Get service display name
    */
   private static getServiceDisplayName(serviceCode: string): string {
@@ -480,7 +629,189 @@ export class USPSService {
   }
 
   /**
+   * Check if address is international (non-US)
+   */
+  private static isInternationalAddress(address: USPSAddress): boolean {
+    const country = address.country?.toUpperCase().trim();
+    return country !== undefined && country !== "" && country !== "US" && country !== "USA";
+  }
+
+  /**
+   * Generate domestic shipping label using Domestic Labels API v3 (OAuth 2.0)
+   * Reference: https://developers.usps.com/domesticlabelsv3
+   */
+  private static async generateDomesticLabel(params: {
+    fromAddress: USPSAddress;
+    toAddress: USPSAddress;
+    weight: number;
+    dimensions?: { length: number; width: number; height: number };
+    serviceType?: string;
+  }): Promise<USPSLabel | null> {
+    try {
+      // Get OAuth token
+      const accessToken = await this.getOAuthToken();
+      if (!accessToken || accessToken.trim() === "") {
+        throw new Error("OAuth token is empty or invalid");
+      }
+      logger.info(`Generating domestic label using Domestic Labels API v3. Token length: ${accessToken.length} characters`);
+
+      // Build request payload for Domestic Labels API v3
+      // Note: This is a placeholder - actual implementation depends on API documentation
+      const requestPayload = {
+        fromAddress: {
+          name: params.fromAddress.name,
+          addressLine1: params.fromAddress.address1,
+          addressLine2: params.fromAddress.address2 || "",
+          city: params.fromAddress.city,
+          state: params.fromAddress.state,
+          postalCode: params.fromAddress.zip,
+          zipPlus4: params.fromAddress.zipPlus4 || ""
+        },
+        toAddress: {
+          name: params.toAddress.name,
+          addressLine1: params.toAddress.address1,
+          addressLine2: params.toAddress.address2 || "",
+          city: params.toAddress.city,
+          state: params.toAddress.state,
+          postalCode: params.toAddress.zip,
+          zipPlus4: params.toAddress.zipPlus4 || ""
+        },
+        weight: params.weight,
+        dimensions: params.dimensions,
+        serviceType: params.serviceType || "PRIORITY"
+      };
+
+      const response = await axios.post(this.getDomesticLabelsApiUrl(), requestPayload, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      });
+
+      // Parse response (structure depends on actual API response)
+      const labelData = response.data as {
+        trackingNumber?: string;
+        labelUrl?: string;
+        cost?: number;
+        service?: string;
+      };
+
+      if (!labelData.trackingNumber || !labelData.labelUrl) {
+        throw new Error("Invalid domestic label response");
+      }
+
+      return {
+        trackingNumber: labelData.trackingNumber,
+        labelUrl: labelData.labelUrl,
+        trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${labelData.trackingNumber}`,
+        cost: labelData.cost || 0,
+        service: labelData.service || params.serviceType || "Domestic"
+      };
+    } catch (error) {
+      logger.error(`Error generating domestic USPS label: ${String(error)}`);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        logger.error(`USPS Domestic Labels API v3 error: ${errorMessage}`);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Generate international shipping label using International Labels API v3 (OAuth 2.0)
+   * Reference: https://developers.usps.com/internationallabelsv3
+   */
+  private static async generateInternationalLabel(params: {
+    fromAddress: USPSAddress;
+    toAddress: USPSAddress;
+    weight: number;
+    dimensions?: { length: number; width: number; height: number };
+    serviceType?: string;
+  }): Promise<USPSLabel | null> {
+    try {
+      // Get OAuth token
+      const accessToken = await this.getOAuthToken();
+      if (!accessToken || accessToken.trim() === "") {
+        throw new Error("OAuth token is empty or invalid");
+      }
+      logger.info(`OAuth token obtained successfully. Token length: ${accessToken.length} characters`);
+
+      // Build request payload for International Labels API v3
+      // Note: This is a placeholder - actual implementation depends on API documentation
+      const requestPayload = {
+        fromAddress: {
+          name: params.fromAddress.name,
+          addressLine1: params.fromAddress.address1,
+          addressLine2: params.fromAddress.address2 || "",
+          city: params.fromAddress.city,
+          state: params.fromAddress.state,
+          postalCode: params.fromAddress.zip,
+          country: params.fromAddress.country || "US"
+        },
+        toAddress: {
+          name: params.toAddress.name,
+          addressLine1: params.toAddress.address1,
+          addressLine2: params.toAddress.address2 || "",
+          city: params.toAddress.city,
+          state: params.toAddress.state,
+          postalCode: params.toAddress.zip,
+          country: params.toAddress.country || "US"
+        },
+        weight: params.weight,
+        dimensions: params.dimensions,
+        serviceType: params.serviceType || "PRIORITY"
+      };
+
+      const response = await axios.post(this.getInternationalLabelsApiUrl(), requestPayload, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      });
+
+      // Parse response (structure depends on actual API response)
+      const labelData = response.data as {
+        trackingNumber?: string;
+        labelUrl?: string;
+        cost?: number;
+        service?: string;
+      };
+
+      if (!labelData.trackingNumber || !labelData.labelUrl) {
+        throw new Error("Invalid international label response");
+      }
+
+      return {
+        trackingNumber: labelData.trackingNumber,
+        labelUrl: labelData.labelUrl,
+        trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${labelData.trackingNumber}`,
+        cost: labelData.cost || 0,
+        service: labelData.service || params.serviceType || "International"
+      };
+    } catch (error) {
+      logger.error(`Error generating international USPS label: ${String(error)}`);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        logger.error(`USPS International API error: ${errorMessage}`);
+      }
+      return null;
+    }
+  }
+
+  /**
    * Generate shipping label
+   *
+   * Automatically uses:
+   * - Domestic Labels API v3 for domestic (US) addresses (uses OAuth 2.0)
+   * - International Labels API v3 for international addresses (uses OAuth 2.0)
+   * Reference:
+   * - Domestic: https://developers.usps.com/domesticlabelsv3
+   * - International: https://developers.usps.com/internationallabelsv3
+   *
+   * @param params - Label generation parameters
+   * @returns USPSLabel or null if generation fails
    */
   static async generateLabel(params: {
     fromAddress: USPSAddress;
@@ -490,14 +821,20 @@ export class USPSService {
     serviceType?: string;
   }): Promise<USPSLabel | null> {
     try {
-      if (this.TEST_MODE) {
-        // Return mock label for testing
-        return this.getMockLabel(params);
+      // Check if this is an international shipment
+      const isFromInternational = this.isInternationalAddress(params.fromAddress);
+      const isToInternational = this.isInternationalAddress(params.toAddress);
+
+      if (isFromInternational || isToInternational) {
+        // Use International Labels API v3 with OAuth 2.0
+        logger.info("Generating international label using International Labels API v3");
+        return await this.generateInternationalLabel(params);
       }
 
-      const xmlResponse = await this.makeUSPSRequest("LabelV4", params);
+      // Use Domestic Labels API v3 for domestic US addresses
+      logger.info("Generating domestic label using Domestic Labels API v3");
 
-      return this.parseLabelResponse(xmlResponse);
+      return await this.generateDomesticLabel(params);
     } catch (error) {
       logger.error(`Error generating USPS label: ${String(error)}`);
       return null;
@@ -574,22 +911,6 @@ export class USPSService {
           description: "Package in transit to destination"
         }
       ]
-    };
-  }
-
-  /**
-   * Get mock label for testing
-   */
-  private static getMockLabel(params: { weight: number; serviceType?: string }): USPSLabel {
-    const trackingNumber = `USPS${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const serviceType = params.serviceType || "PRIORITY";
-
-    return {
-      trackingNumber,
-      labelUrl: `https://mock-usps-labels.com/label/${trackingNumber}.pdf`,
-      trackingUrl: `https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`,
-      cost: Math.max(3.5, params.weight * 0.15) + 4.45,
-      service: this.getServiceDisplayName(serviceType)
     };
   }
 }

@@ -518,7 +518,8 @@ export class ShippingFulfillmentService {
             address1: vendor.address || "",
             city: vendor.city || "",
             state: vendor.state || "",
-            zip: vendor.zipCode || ""
+            zip: vendor.zipCode || "",
+            country: vendor.country || "US" // Default to US if not specified
           };
 
           const toAddress: USPSAddress = {
@@ -526,7 +527,8 @@ export class ShippingFulfillmentService {
             address1: order.shippingAddress || "",
             city: order.user.city || "",
             state: order.user.state || "",
-            zip: order.zip || ""
+            zip: order.zip || "",
+            country: order.user.country || "US" // Default to US if not specified
           };
 
           // Generate USPS label
